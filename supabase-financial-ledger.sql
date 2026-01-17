@@ -12,6 +12,179 @@
 -- ============================================================================
 
 -- ============================================================================
+-- 0. CLEANUP - Drop existing tables if they have wrong structure
+-- ============================================================================
+-- Run this section ONLY if you get foreign key errors
+-- Comment out after first successful run
+
+DROP TABLE IF EXISTS financial_ledger CASCADE;
+DROP TABLE IF EXISTS payout_item_commissions CASCADE;
+DROP TABLE IF EXISTS payment_locks CASCADE;
+DROP TABLE IF EXISTS payment_state_transitions CASCADE;
+DROP TABLE IF EXISTS idempotency_keys CASCADE;
+DROP TABLE IF EXISTS wise_transfers CASCADE;
+DROP TABLE IF EXISTS payout_items CASCADE;
+DROP TABLE IF EXISTS payout_batches CASCADE;
+DROP TABLE IF EXISTS commissions CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS creator_bank_accounts CASCADE;
+DROP TABLE IF EXISTS creators CASCADE;
+
+-- ============================================================================
+-- 0. BASE TABLES - Required for foreign key references
+-- ============================================================================
+
+-- Creators table
+CREATE TABLE IF NOT EXISTS creators (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  discount_code TEXT UNIQUE NOT NULL,
+  commission_rate DECIMAL(5, 4) DEFAULT 0.15,
+  status TEXT DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+  lock_days INT DEFAULT 30,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_creators_email ON creators(email);
+CREATE INDEX IF NOT EXISTS idx_creators_code ON creators(discount_code);
+CREATE INDEX IF NOT EXISTS idx_creators_status ON creators(status);
+
+-- Creator bank accounts
+CREATE TABLE IF NOT EXISTS creator_bank_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  creator_id UUID NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
+  account_type TEXT DEFAULT 'iban' CHECK (account_type IN ('iban', 'wise', 'paypal')),
+  iban TEXT,
+  account_holder_name TEXT,
+  bank_name TEXT,
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_bank_accounts_creator ON creator_bank_accounts(creator_id);
+
+-- Orders table (from Shopify)
+CREATE TABLE IF NOT EXISTS orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  shopify_order_id TEXT UNIQUE NOT NULL,
+  order_number TEXT,
+  customer_email TEXT,
+  total_amount DECIMAL(12, 4) NOT NULL,
+  discount_code TEXT,
+  creator_id UUID REFERENCES creators(id),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'refunded', 'canceled')),
+  order_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_shopify ON orders(shopify_order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_creator ON orders(creator_id);
+CREATE INDEX IF NOT EXISTS idx_orders_code ON orders(discount_code);
+
+-- Commissions table
+CREATE TABLE IF NOT EXISTS commissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  creator_id UUID NOT NULL REFERENCES creators(id),
+  order_id UUID REFERENCES orders(id),
+  order_total DECIMAL(12, 4) NOT NULL,
+  commission_rate DECIMAL(5, 4) NOT NULL,
+  commission_amount DECIMAL(12, 4) NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'locked', 'payable', 'paid', 'canceled')),
+  lock_until TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_commissions_creator ON commissions(creator_id);
+CREATE INDEX IF NOT EXISTS idx_commissions_status ON commissions(status);
+CREATE INDEX IF NOT EXISTS idx_commissions_order ON commissions(order_id);
+
+-- Payout batches table
+CREATE TABLE IF NOT EXISTS payout_batches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT,
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'approved', 'executing', 'sent', 'paid', 'canceled')),
+  total_amount DECIMAL(12, 4) DEFAULT 0,
+  total_fees DECIMAL(12, 4) DEFAULT 0,
+  item_count INT DEFAULT 0,
+  approved_at TIMESTAMPTZ,
+  approved_by UUID REFERENCES auth.users(id),
+  canceled_at TIMESTAMPTZ,
+  cancel_reason TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_batches_status ON payout_batches(status);
+
+-- Payout items table
+CREATE TABLE IF NOT EXISTS payout_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  payout_batch_id UUID REFERENCES payout_batches(id) ON DELETE CASCADE,
+  creator_id UUID NOT NULL REFERENCES creators(id),
+  amount DECIMAL(12, 4) NOT NULL,
+  wise_fee DECIMAL(12, 4) DEFAULT 0,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'sent', 'paid', 'failed')),
+  sent_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payout_items_batch ON payout_items(payout_batch_id);
+CREATE INDEX IF NOT EXISTS idx_payout_items_creator ON payout_items(creator_id);
+CREATE INDEX IF NOT EXISTS idx_payout_items_status ON payout_items(status);
+
+-- Wise transfers table
+CREATE TABLE IF NOT EXISTS wise_transfers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  payout_item_id UUID REFERENCES payout_items(id),
+  creator_id UUID REFERENCES creators(id),
+  wise_transfer_id TEXT UNIQUE,
+  wise_quote_id TEXT,
+  amount DECIMAL(12, 4) NOT NULL,
+  fee DECIMAL(12, 4) DEFAULT 0,
+  currency TEXT DEFAULT 'EUR',
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed', 'canceled')),
+  recipient_name TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_wise_transfers_item ON wise_transfers(payout_item_id);
+CREATE INDEX IF NOT EXISTS idx_wise_transfers_creator ON wise_transfers(creator_id);
+CREATE INDEX IF NOT EXISTS idx_wise_transfers_status ON wise_transfers(status);
+
+-- Enable RLS on base tables
+ALTER TABLE creators ENABLE ROW LEVEL SECURITY;
+ALTER TABLE creator_bank_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE commissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payout_batches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payout_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wise_transfers ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for base tables (authenticated users can read/write)
+CREATE POLICY "Creators accessible by authenticated" ON creators FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Bank accounts accessible by authenticated" ON creator_bank_accounts FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Orders accessible by authenticated" ON orders FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Commissions accessible by authenticated" ON commissions FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Batches accessible by authenticated" ON payout_batches FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Payout items accessible by authenticated" ON payout_items FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Wise transfers accessible by authenticated" ON wise_transfers FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Enable realtime for base tables
+ALTER PUBLICATION supabase_realtime ADD TABLE creators;
+ALTER PUBLICATION supabase_realtime ADD TABLE creator_bank_accounts;
+ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE commissions;
+ALTER PUBLICATION supabase_realtime ADD TABLE payout_batches;
+ALTER PUBLICATION supabase_realtime ADD TABLE payout_items;
+ALTER PUBLICATION supabase_realtime ADD TABLE wise_transfers;
+
+-- ============================================================================
 -- 1. IDEMPOTENCY KEYS TABLE - Prevent duplicate operations
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS idempotency_keys (

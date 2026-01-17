@@ -156,8 +156,8 @@ CREATE INDEX IF NOT EXISTS idx_login_attempts_email ON login_attempts(email);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_ip ON login_attempts(ip_address);
 CREATE INDEX IF NOT EXISTS idx_login_attempts_created ON login_attempts(created_at DESC);
 
--- Cleanup automatique des anciennes tentatives (> 24h)
-CREATE INDEX IF NOT EXISTS idx_login_attempts_cleanup ON login_attempts(created_at) WHERE created_at < NOW() - INTERVAL '24 hours';
+-- Index pour faciliter le cleanup des anciennes tentatives
+-- Note: Le cleanup est géré par la fonction cleanup_old_logs()
 
 -- RLS
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
