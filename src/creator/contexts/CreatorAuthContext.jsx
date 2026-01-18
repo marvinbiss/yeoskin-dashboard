@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const CreatorAuthContext = createContext(null)
@@ -16,154 +16,113 @@ export const CreatorAuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [creator, setCreator] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [initialized, setInitialized] = useState(false)
-  const initRef = useRef(false)
 
-  // Fetch creator profile by user_id or email (non-blocking)
+  // Fetch creator profile - simple query
   const fetchCreatorProfile = useCallback(async (authUser) => {
-    if (!authUser) {
-      setCreator(null)
+    if (!authUser?.id || !authUser?.email) {
       return null
     }
 
     try {
-      // Query all creators and filter client-side (bypasses RLS issues)
-      const { data: allCreators, error } = await supabase
+      // Simple query: find by user_id OR email
+      const { data, error } = await supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
+        .or(`user_id.eq.${authUser.id},email.ilike.${authUser.email}`)
+        .limit(1)
+        .single()
 
       if (error) {
-        console.warn('Error fetching creators:', error.message)
-        setCreator(null)
+        console.log('Creator query error:', error.message)
         return null
       }
 
-      // Find creator by user_id or email (case-insensitive)
-      const userEmail = authUser.email?.toLowerCase()
-      const userId = authUser.id
-
-      const foundCreator = allCreators?.find(c =>
-        c.user_id === userId ||
-        c.email?.toLowerCase() === userEmail
-      )
-
-      if (foundCreator) {
-        const creatorData = { ...foundCreator, found: true }
-        setCreator(creatorData)
-        console.log('Creator found:', creatorData.email)
-        return creatorData
-      }
-
-      console.warn('No creator found for:', userEmail)
-      setCreator(null)
-      return null
+      return data ? { ...data, found: true } : null
     } catch (err) {
-      console.warn('Creator fetch failed:', err.message)
-      setCreator(null)
+      console.log('Creator fetch error:', err.message)
       return null
     }
   }, [])
 
-  // Initialize session - runs once
+  // Initialize on mount
   useEffect(() => {
-    // Prevent double initialization in strict mode
-    if (initRef.current) return
-    initRef.current = true
+    let isMounted = true
 
-    let mounted = true
-
-    const initSession = async () => {
-      // Set a hard timeout to ensure loading stops
-      const loadingTimeout = setTimeout(() => {
-        if (mounted) {
-          console.warn('Auth init timeout - forcing loading to false')
-          setLoading(false)
-          setInitialized(true)
-        }
-      }, 3000)
-
+    const init = async () => {
       try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+        // Get current session
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
 
-        if (!mounted) return
+        if (!isMounted) return
 
-        if (error) {
-          console.error('Session error:', error)
-        } else {
+        if (currentSession?.user) {
           setSession(currentSession)
-          setUser(currentSession?.user ?? null)
+          setUser(currentSession.user)
 
-          // Fetch creator profile in background (don't await)
-          if (currentSession?.user) {
-            fetchCreatorProfile(currentSession.user)
+          // Fetch creator profile
+          const creatorData = await fetchCreatorProfile(currentSession.user)
+          if (isMounted) {
+            setCreator(creatorData)
           }
         }
-      } catch (error) {
-        console.error('Init error:', error)
+      } catch (err) {
+        console.error('Init error:', err)
       } finally {
-        clearTimeout(loadingTimeout)
-        if (mounted) {
+        if (isMounted) {
           setLoading(false)
-          setInitialized(true)
         }
       }
     }
 
-    initSession()
+    // Hard timeout - ensure loading stops after 5 seconds
+    const timeout = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false)
+      }
+    }, 5000)
+
+    init()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        if (!mounted) return
+        if (!isMounted) return
 
-        setSession(newSession)
-        setUser(newSession?.user ?? null)
+        console.log('Auth event:', event)
 
         if (event === 'SIGNED_IN' && newSession?.user) {
-          // Fetch in background, don't block
-          fetchCreatorProfile(newSession.user)
+          setSession(newSession)
+          setUser(newSession.user)
+
+          // Fetch creator and update state
+          const creatorData = await fetchCreatorProfile(newSession.user)
+          if (isMounted) {
+            setCreator(creatorData)
+          }
         }
 
         if (event === 'SIGNED_OUT') {
+          setSession(null)
+          setUser(null)
           setCreator(null)
         }
       }
     )
 
     return () => {
-      mounted = false
+      isMounted = false
+      clearTimeout(timeout)
       subscription.unsubscribe()
     }
-  }, []) // Empty deps - only run once
-
-  // Sign in
-  const signIn = useCallback(async (email, password) => {
-    try {
-      setLoading(true)
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
-        password,
-      })
-
-      if (error) throw error
-      return { data, error: null }
-    } catch (error) {
-      return { data: null, error }
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  }, [fetchCreatorProfile])
 
   // Sign out
   const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) throw error
-
+      await supabase.auth.signOut()
       setUser(null)
       setSession(null)
       setCreator(null)
-
       return { error: null }
     } catch (error) {
       return { error }
@@ -173,7 +132,9 @@ export const CreatorAuthProvider = ({ children }) => {
   // Refresh creator profile
   const refreshProfile = useCallback(async () => {
     if (user) {
-      return await fetchCreatorProfile(user)
+      const creatorData = await fetchCreatorProfile(user)
+      setCreator(creatorData)
+      return creatorData
     }
     return null
   }, [fetchCreatorProfile, user])
@@ -183,8 +144,6 @@ export const CreatorAuthProvider = ({ children }) => {
     session,
     creator,
     loading,
-    initialized,
-    signIn,
     signOut,
     refreshProfile,
     isAuthenticated: !!session,

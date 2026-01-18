@@ -57,7 +57,7 @@ const NotLinkedScreen = ({ onLogout, userEmail }) => (
  * Requires authenticated user with linked creator profile
  */
 export const CreatorProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isCreator, loading, initialized, signOut, user } = useCreatorAuth()
+  const { isAuthenticated, isCreator, loading, signOut, user } = useCreatorAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -67,7 +67,7 @@ export const CreatorProtectedRoute = ({ children }) => {
   }
 
   // Show loading while checking auth
-  if (loading || !initialized) {
+  if (loading) {
     return <LoadingScreen />
   }
 
