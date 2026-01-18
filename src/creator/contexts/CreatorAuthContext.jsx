@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 
+// Debug: Log Supabase connection info
+console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL)
+console.log('Supabase Key set:', !!import.meta.env.VITE_SUPABASE_ANON_KEY)
+
 const CreatorAuthContext = createContext(null)
 
 export const useCreatorAuth = () => {
