@@ -217,7 +217,7 @@ export const AdminPayoutsPage = () => {
     const config = configs[status] || configs.pending
     const Icon = config.icon
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      <span key={status} className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
         <Icon className={`w-3 h-3 ${status === 'processing' ? 'animate-spin' : ''}`} />
         {status}
       </span>

@@ -268,13 +268,13 @@ export const RecentActivity = ({ transfers, loading }) => {
     switch (status) {
       case 'completed':
       case 'sent':
-        return <CheckCircle className="w-5 h-5 text-success-500" />
+        return <CheckCircle key="check" className="w-5 h-5 text-success-500" />
       case 'failed':
-        return <XCircle className="w-5 h-5 text-danger-500" />
+        return <XCircle key="x" className="w-5 h-5 text-danger-500" />
       case 'processing':
-        return <RefreshCw className="w-5 h-5 text-warning-500 animate-spin" />
+        return <RefreshCw key="refresh" className="w-5 h-5 text-warning-500 animate-spin" />
       default:
-        return <Clock className="w-5 h-5 text-gray-400" />
+        return <Clock key="clock" className="w-5 h-5 text-gray-400" />
     }
   }
 

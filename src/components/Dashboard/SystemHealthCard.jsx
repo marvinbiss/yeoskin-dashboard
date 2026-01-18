@@ -17,13 +17,13 @@ import { useSystemHealth } from '../../hooks/useSystemHealth'
 const StatusIcon = ({ status }) => {
   switch (status) {
     case 'HEALTHY':
-      return <CheckCircle className="w-5 h-5 text-green-500" />
+      return <CheckCircle key="healthy" className="w-5 h-5 text-green-500" />
     case 'WARNING':
-      return <AlertTriangle className="w-5 h-5 text-yellow-500" />
+      return <AlertTriangle key="warning" className="w-5 h-5 text-yellow-500" />
     case 'CRITICAL':
-      return <XCircle className="w-5 h-5 text-red-500" />
+      return <XCircle key="critical" className="w-5 h-5 text-red-500" />
     default:
-      return <Activity className="w-5 h-5 text-gray-500" />
+      return <Activity key="default" className="w-5 h-5 text-gray-500" />
   }
 }
 

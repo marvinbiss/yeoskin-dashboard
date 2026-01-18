@@ -165,19 +165,19 @@ const OperationLog = ({ logs, isExpanded, onToggle }) => {
   const getLogIcon = (type) => {
     switch (type) {
       case 'FETCH':
-        return <RefreshCw className="w-3 h-3" />
+        return <RefreshCw key="fetch" className="w-3 h-3" />
       case 'VALIDATE':
-        return <Shield className="w-3 h-3" />
+        return <Shield key="validate" className="w-3 h-3" />
       case 'APPROVE':
-        return <CheckCircle className="w-3 h-3 text-primary-500" />
+        return <CheckCircle key="approve" className="w-3 h-3 text-primary-500" />
       case 'EXECUTE':
-        return <Play className="w-3 h-3 text-success-500" />
+        return <Play key="execute" className="w-3 h-3 text-success-500" />
       case 'ERROR':
-        return <XCircle className="w-3 h-3 text-danger-500" />
+        return <XCircle key="error" className="w-3 h-3 text-danger-500" />
       case 'REALTIME':
-        return <Clock className="w-3 h-3 text-primary-500" />
+        return <Clock key="realtime" className="w-3 h-3 text-primary-500" />
       default:
-        return <FileText className="w-3 h-3" />
+        return <FileText key="default" className="w-3 h-3" />
     }
   }
 
