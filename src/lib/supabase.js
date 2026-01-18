@@ -65,6 +65,10 @@ export const TABLES = {
   LOGIN_ATTEMPTS: 'login_attempts',
   NOTIFICATIONS: 'notifications',
   SYSTEM_SETTINGS: 'system_settings',
+
+  // Creator Portal
+  CREATOR_NOTIFICATIONS: 'creator_notifications',
+  CREATOR_TIMELINE_EVENTS: 'creator_timeline_events',
 }
 
 // ============================================================================
@@ -191,6 +195,22 @@ export const AUDIT_ACTIONS = {
   ROLE_CHANGE: 'ROLE_CHANGE',
   APPROVE: 'APPROVE',
   EXECUTE: 'EXECUTE',
+}
+
+// ============================================================================
+// CREATOR NOTIFICATION TYPES
+// ============================================================================
+
+export const CREATOR_NOTIFICATION_TYPES = {
+  COMMISSION_EARNED: 'commission_earned',
+  COMMISSION_LOCKED: 'commission_locked',
+  COMMISSION_PAYABLE: 'commission_payable',
+  PAYOUT_SCHEDULED: 'payout_scheduled',
+  PAYOUT_SENT: 'payout_sent',
+  PAYOUT_COMPLETED: 'payout_completed',
+  PAYOUT_FAILED: 'payout_failed',
+  WELCOME: 'welcome',
+  INFO: 'info',
 }
 
 // ============================================================================

@@ -18,6 +18,15 @@ import {
 } from './pages'
 import { ProfilePage } from './pages/ProfilePage'
 
+// Creator Portal imports
+import {
+  CreatorAuthProvider,
+  CreatorProtectedRoute,
+  CreatorDashboard,
+  CreatorHistory,
+  CreatorLogin,
+} from './creator'
+
 // Session manager component
 const SessionManager = ({ children }) => {
   const { user, signOut } = useAuth()
@@ -112,6 +121,27 @@ function App() {
                   <ProtectedRoute>
                     <ProfilePage />
                   </ProtectedRoute>
+                } />
+
+                {/* Creator Portal Routes */}
+                <Route path="/creator/login" element={
+                  <CreatorAuthProvider>
+                    <CreatorLogin />
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorDashboard />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/history" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorHistory />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
                 } />
               </Routes>
             </SessionManager>
