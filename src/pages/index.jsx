@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { UserPlus, FileText, Settings, Database, Bell, Shield, Key, Download, RefreshCw } from 'lucide-react'
+import { UserPlus, FileText, Settings, Database, Bell, Shield, Key, Download, RefreshCw, AlertTriangle, Package } from 'lucide-react'
+import { supabase } from '../lib/supabase'
 import { exportCreators, exportCommissions, exportBatches, exportAdmins, exportAuditLogs } from '../lib/exportUtils'
 import { useAuditLog, AUDIT_ACTIONS, RESOURCE_TYPES } from '../hooks/useAuditLog'
 import { Layout } from '../components/Layout'
@@ -61,6 +62,80 @@ export { AnalyticsPage } from './AnalyticsPage'
 // DASHBOARD PAGE (Home)
 // ============================================================================
 
+// Low Stock Alert Component
+const LowStockAlert = () => {
+  const [lowStockProducts, setLowStockProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchLowStock()
+  }, [])
+
+  const fetchLowStock = async () => {
+    const { data } = await supabase
+      .from('products')
+      .select('id, name, sku, stock_quantity, low_stock_threshold, image_url')
+      .eq('is_active', true)
+      .or('stock_quantity.eq.0,stock_quantity.lt.low_stock_threshold')
+      .order('stock_quantity')
+      .limit(5)
+
+    setLowStockProducts(data || [])
+    setLoading(false)
+  }
+
+  if (loading) return null
+  if (lowStockProducts.length === 0) return null
+
+  return (
+    <Card className="border-orange-200 bg-orange-50/50">
+      <Card.Header>
+        <div className="flex items-center gap-2 text-orange-700">
+          <AlertTriangle className="w-5 h-5" />
+          <h3 className="font-semibold">Alertes Stock</h3>
+          <span className="ml-auto text-sm bg-orange-200 px-2 py-0.5 rounded-full">
+            {lowStockProducts.length}
+          </span>
+        </div>
+      </Card.Header>
+      <Card.Body>
+        <div className="space-y-2">
+          {lowStockProducts.map(product => (
+            <div key={product.id} className="flex items-center gap-3 p-2 bg-white rounded-lg">
+              <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
+                {product.image_url ? (
+                  <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Package className="w-5 h-5 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                <p className="text-xs text-gray-500">{product.sku}</p>
+              </div>
+              <div className={`text-sm font-bold px-2 py-1 rounded ${
+                product.stock_quantity === 0
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-orange-100 text-orange-700'
+              }`}>
+                {product.stock_quantity === 0 ? 'Rupture' : `${product.stock_quantity} unites`}
+              </div>
+            </div>
+          ))}
+        </div>
+        <Link
+          to="/products?stock=low"
+          className="block mt-3 text-center text-sm text-orange-600 hover:text-orange-700 font-medium"
+        >
+          Voir tous les produits en alerte →
+        </Link>
+      </Card.Body>
+    </Card>
+  )
+}
+
 export const DashboardPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
@@ -96,13 +171,14 @@ export const DashboardPage = () => {
           <StatusDistribution />
         </div>
 
-        {/* Quick Actions, System Health & Recent Activity */}
+        {/* Quick Actions, System Health, Low Stock & Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
             <QuickActions
               onTriggerDaily={handleTriggerDaily}
               onViewBatches={() => navigate('/payouts')}
             />
+            <LowStockAlert />
             <SystemHealthCard />
           </div>
           <div className="lg:col-span-2">

@@ -20,6 +20,7 @@ import {
 } from './pages'
 import { ProfilePage } from './pages/ProfilePage'
 import { CreatorDetailPage } from './pages/CreatorDetailPage'
+import CreatorPage from './pages/CreatorPage'
 
 // Creator Portal imports
 import {
@@ -32,7 +33,13 @@ import {
   CreatorBankAccount,
   CreatorSettings,
   CreatorAnalytics,
+  CreatorProducts,
+  CreatorAnalyticsDashboard,
 } from './creator'
+import ProductsPage from './pages/ProductsPage'
+import CategoriesPage from './pages/CategoriesPage'
+import OrdersPage from './pages/OrdersPage'
+import CreatorProfileSettings from './creator/pages/CreatorProfileSettings'
 
 // Session manager component
 const SessionManager = ({ children }) => {
@@ -77,6 +84,9 @@ function App() {
               <Routes>
                 {/* Route publique - Login */}
                 <Route path="/login" element={<LoginPage />} />
+
+                {/* Route publique - Page creatrice */}
+                <Route path="/c/:slug" element={<CreatorPage />} />
 
                 {/* Routes protegees */}
                 <Route path="/" element={
@@ -144,6 +154,21 @@ function App() {
                     <AnalyticsPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/products" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <ProductsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/categories" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <CategoriesPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/orders" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <OrdersPage />
+                  </ProtectedRoute>
+                } />
 
                 {/* Creator Portal Routes */}
                 <Route path="/creator/login" element={
@@ -190,6 +215,27 @@ function App() {
                   <CreatorAuthProvider>
                     <CreatorProtectedRoute>
                       <CreatorAnalytics />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/my-page" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorProfileSettings />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/products" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorProducts />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/analytics-dashboard" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorAnalyticsDashboard />
                     </CreatorProtectedRoute>
                   </CreatorAuthProvider>
                 } />

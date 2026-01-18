@@ -34,4 +34,6 @@ export {
   CreatorBankAccount,
   CreatorSettings,
   CreatorAnalytics,
+  CreatorProducts,
+  CreatorAnalyticsDashboard,
 } from './pages'

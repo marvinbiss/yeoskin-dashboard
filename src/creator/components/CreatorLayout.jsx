@@ -11,14 +11,20 @@ import {
   ChevronDown,
   Settings,
   CreditCard,
-  BarChart3
+  BarChart3,
+  Globe,
+  ShoppingBag,
+  TrendingUp
 } from 'lucide-react'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { NotificationBell } from './NotificationBell'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/creator', icon: LayoutDashboard },
+  { name: 'Ma Page', href: '/creator/my-page', icon: Globe },
+  { name: 'Ma Sélection', href: '/creator/products', icon: ShoppingBag },
   { name: 'Mes Analytics', href: '/creator/analytics', icon: BarChart3 },
+  { name: 'Analytics Avancés', href: '/creator/analytics-dashboard', icon: TrendingUp },
   { name: 'Historique', href: '/creator/history', icon: History },
   { name: 'Mon profil', href: '/creator/profile', icon: User },
   { name: 'Coordonnees bancaires', href: '/creator/bank', icon: CreditCard },

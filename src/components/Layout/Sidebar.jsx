@@ -13,7 +13,10 @@ import {
   ClipboardList,
   Landmark,
   BarChart3,
-  CreditCard
+  CreditCard,
+  ShoppingBag,
+  FolderTree,
+  ShoppingCart
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
@@ -22,6 +25,9 @@ import { useToast } from '../Common'
 const navigation = [
   { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Produits', href: '/products', icon: ShoppingBag, adminOnly: true },
+  { name: 'Categories', href: '/categories', icon: FolderTree, adminOnly: true },
+  { name: 'Commandes', href: '/orders', icon: ShoppingCart, adminOnly: true },
   { name: 'Paiements', href: '/payouts', icon: Wallet },
   { name: 'Exec Paiements', href: '/admin-payouts', icon: CreditCard, adminOnly: true },
   { name: 'Créateurs', href: '/creators', icon: Users },
