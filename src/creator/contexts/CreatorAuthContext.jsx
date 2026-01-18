@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const CreatorAuthContext = createContext(null)
@@ -17,51 +17,34 @@ export const CreatorAuthProvider = ({ children }) => {
   const [creator, setCreator] = useState(null)
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
+  const initRef = useRef(false)
 
-  // Fetch creator profile by user_id or email
+  // Fetch creator profile by user_id or email (non-blocking, with timeout)
   const fetchCreatorProfile = useCallback(async (authUser) => {
     if (!authUser) {
       setCreator(null)
       return null
     }
 
+    // Create a timeout promise
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout')), 5000)
+    )
+
     try {
-      // First try to find by user_id
-      let { data, error } = await supabase
+      // Race between the actual query and timeout
+      const queryPromise = supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
-        .eq('user_id', authUser.id)
+        .or(`user_id.eq.${authUser.id},email.eq.${authUser.email.toLowerCase()}`)
         .maybeSingle()
 
+      const { data, error } = await Promise.race([queryPromise, timeoutPromise])
+
       if (error) {
-        console.warn('Error fetching creator by user_id:', error.message)
-      }
-
-      // If not found by user_id, try by email and link
-      if (!data) {
-        const { data: emailData, error: emailError } = await supabase
-          .from('creators')
-          .select('id, email, discount_code, commission_rate, status, user_id')
-          .eq('email', authUser.email.toLowerCase())
-          .maybeSingle()
-
-        if (emailError) {
-          console.warn('Error fetching creator by email:', emailError.message)
-        }
-
-        if (emailData && !emailData.user_id) {
-          // Link the creator to this auth user
-          const { error: updateError } = await supabase
-            .from('creators')
-            .update({ user_id: authUser.id })
-            .eq('id', emailData.id)
-
-          if (!updateError) {
-            data = { ...emailData, user_id: authUser.id }
-          }
-        } else {
-          data = emailData
-        }
+        console.warn('Error fetching creator:', error.message)
+        setCreator(null)
+        return null
       }
 
       if (data) {
@@ -73,17 +56,30 @@ export const CreatorAuthProvider = ({ children }) => {
       setCreator(null)
       return null
     } catch (err) {
-      console.error('Error in fetchCreatorProfile:', err)
+      console.warn('Creator fetch failed or timed out:', err.message)
       setCreator(null)
       return null
     }
   }, [])
 
-  // Initialize session
+  // Initialize session - runs once
   useEffect(() => {
+    // Prevent double initialization in strict mode
+    if (initRef.current) return
+    initRef.current = true
+
     let mounted = true
 
     const initSession = async () => {
+      // Set a hard timeout to ensure loading stops
+      const loadingTimeout = setTimeout(() => {
+        if (mounted) {
+          console.warn('Auth init timeout - forcing loading to false')
+          setLoading(false)
+          setInitialized(true)
+        }
+      }, 3000)
+
       try {
         const { data: { session: currentSession }, error } = await supabase.auth.getSession()
 
@@ -91,21 +87,19 @@ export const CreatorAuthProvider = ({ children }) => {
 
         if (error) {
           console.error('Session error:', error)
-          setLoading(false)
-          setInitialized(true)
-          return
-        }
+        } else {
+          setSession(currentSession)
+          setUser(currentSession?.user ?? null)
 
-        setSession(currentSession)
-        setUser(currentSession?.user ?? null)
-
-        if (currentSession?.user) {
-          // Fetch creator profile (will auto-link by email if needed)
-          await fetchCreatorProfile(currentSession.user)
+          // Fetch creator profile in background (don't await)
+          if (currentSession?.user) {
+            fetchCreatorProfile(currentSession.user)
+          }
         }
       } catch (error) {
         console.error('Init error:', error)
       } finally {
+        clearTimeout(loadingTimeout)
         if (mounted) {
           setLoading(false)
           setInitialized(true)
@@ -124,14 +118,13 @@ export const CreatorAuthProvider = ({ children }) => {
         setUser(newSession?.user ?? null)
 
         if (event === 'SIGNED_IN' && newSession?.user) {
-          await fetchCreatorProfile(newSession.user)
+          // Fetch in background, don't block
+          fetchCreatorProfile(newSession.user)
         }
 
         if (event === 'SIGNED_OUT') {
           setCreator(null)
         }
-
-        setLoading(false)
       }
     )
 
@@ -139,7 +132,7 @@ export const CreatorAuthProvider = ({ children }) => {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [fetchCreatorProfile])
+  }, []) // Empty deps - only run once
 
   // Sign in
   const signIn = useCallback(async (email, password) => {
