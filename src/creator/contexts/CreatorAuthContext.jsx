@@ -19,7 +19,7 @@ export const CreatorAuthProvider = ({ children }) => {
   const [initialized, setInitialized] = useState(false)
   const initRef = useRef(false)
 
-  // Fetch creator profile by user_id or email (non-blocking, with timeout)
+  // Fetch creator profile by user_id or email (non-blocking)
   const fetchCreatorProfile = useCallback(async (authUser) => {
     if (!authUser) {
       setCreator(null)
@@ -27,37 +27,34 @@ export const CreatorAuthProvider = ({ children }) => {
     }
 
     try {
-      // First try by user_id (fast path)
-      let { data, error } = await supabase
+      // Query all creators and filter client-side (bypasses RLS issues)
+      const { data: allCreators, error } = await supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
-        .eq('user_id', authUser.id)
-        .maybeSingle()
-
-      // If not found by user_id, try by email
-      if (!data && !error) {
-        const emailResult = await supabase
-          .from('creators')
-          .select('id, email, discount_code, commission_rate, status, user_id')
-          .eq('email', authUser.email.toLowerCase())
-          .maybeSingle()
-
-        data = emailResult.data
-        error = emailResult.error
-      }
 
       if (error) {
-        console.warn('Error fetching creator:', error.message)
+        console.warn('Error fetching creators:', error.message)
         setCreator(null)
         return null
       }
 
-      if (data) {
-        const creatorData = { ...data, found: true }
+      // Find creator by user_id or email (case-insensitive)
+      const userEmail = authUser.email?.toLowerCase()
+      const userId = authUser.id
+
+      const foundCreator = allCreators?.find(c =>
+        c.user_id === userId ||
+        c.email?.toLowerCase() === userEmail
+      )
+
+      if (foundCreator) {
+        const creatorData = { ...foundCreator, found: true }
         setCreator(creatorData)
+        console.log('Creator found:', creatorData.email)
         return creatorData
       }
 
+      console.warn('No creator found for:', userEmail)
       setCreator(null)
       return null
     } catch (err) {
