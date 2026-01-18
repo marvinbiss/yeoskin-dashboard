@@ -26,20 +26,25 @@ export const CreatorAuthProvider = ({ children }) => {
       return null
     }
 
-    // Create a timeout promise
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), 5000)
-    )
-
     try {
-      // Race between the actual query and timeout
-      const queryPromise = supabase
+      // First try by user_id (fast path)
+      let { data, error } = await supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
-        .or(`user_id.eq.${authUser.id},email.eq.${authUser.email.toLowerCase()}`)
+        .eq('user_id', authUser.id)
         .maybeSingle()
 
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise])
+      // If not found by user_id, try by email
+      if (!data && !error) {
+        const emailResult = await supabase
+          .from('creators')
+          .select('id, email, discount_code, commission_rate, status, user_id')
+          .eq('email', authUser.email.toLowerCase())
+          .maybeSingle()
+
+        data = emailResult.data
+        error = emailResult.error
+      }
 
       if (error) {
         console.warn('Error fetching creator:', error.message)
@@ -56,7 +61,7 @@ export const CreatorAuthProvider = ({ children }) => {
       setCreator(null)
       return null
     } catch (err) {
-      console.warn('Creator fetch failed or timed out:', err.message)
+      console.warn('Creator fetch failed:', err.message)
       setCreator(null)
       return null
     }

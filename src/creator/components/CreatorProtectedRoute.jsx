@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { Loader2, UserX } from 'lucide-react'
 
@@ -19,7 +19,7 @@ const LoadingScreen = () => (
 /**
  * Screen shown when user is authenticated but not linked to a creator profile
  */
-const NotLinkedScreen = ({ onLogout }) => (
+const NotLinkedScreen = ({ onLogout, userEmail }) => (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
     <div className="text-center max-w-md">
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-50 dark:bg-yellow-900/20 mb-4">
@@ -28,8 +28,11 @@ const NotLinkedScreen = ({ onLogout }) => (
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
         Compte non associe
       </h1>
+      <p className="text-gray-500 dark:text-gray-400 mb-2">
+        Votre compte ({userEmail}) n'est pas associe a un profil createur.
+      </p>
       <p className="text-gray-500 dark:text-gray-400 mb-6">
-        Votre compte n'est pas associe a un profil createur. Veuillez contacter le support pour activer votre acces.
+        Veuillez contacter le support pour activer votre acces.
       </p>
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <a
@@ -54,8 +57,14 @@ const NotLinkedScreen = ({ onLogout }) => (
  * Requires authenticated user with linked creator profile
  */
 export const CreatorProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isCreator, loading, initialized, signOut } = useCreatorAuth()
+  const { isAuthenticated, isCreator, loading, initialized, signOut, user } = useCreatorAuth()
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/creator/login', { replace: true })
+  }
 
   // Show loading while checking auth
   if (loading || !initialized) {
@@ -69,7 +78,7 @@ export const CreatorProtectedRoute = ({ children }) => {
 
   // Show not linked screen if authenticated but no creator profile
   if (!isCreator) {
-    return <NotLinkedScreen onLogout={signOut} />
+    return <NotLinkedScreen onLogout={handleLogout} userEmail={user?.email} />
   }
 
   return children
