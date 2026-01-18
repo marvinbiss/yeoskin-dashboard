@@ -19,25 +19,41 @@ export const CreatorAuthProvider = ({ children }) => {
 
   // Fetch creator profile - simple query
   const fetchCreatorProfile = useCallback(async (authUser) => {
+    console.log('fetchCreatorProfile called with:', authUser?.id, authUser?.email)
+
     if (!authUser?.id || !authUser?.email) {
+      console.log('No authUser, returning null')
       return null
     }
 
     try {
-      // Simple query: find by user_id OR email
-      const { data, error } = await supabase
+      // Try simple query first - just get all and filter
+      console.log('Fetching all creators...')
+      const { data: allCreators, error: allError } = await supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
-        .or(`user_id.eq.${authUser.id},email.ilike.${authUser.email}`)
-        .limit(1)
-        .single()
 
-      if (error) {
-        console.log('Creator query error:', error.message)
+      console.log('All creators result:', allCreators?.length, 'error:', allError?.message)
+
+      if (allError) {
+        console.log('Error fetching creators:', allError.message)
         return null
       }
 
-      return data ? { ...data, found: true } : null
+      // Find matching creator
+      const userEmail = authUser.email.toLowerCase()
+      const userId = authUser.id
+
+      console.log('Looking for creator with user_id:', userId, 'or email:', userEmail)
+
+      const found = allCreators?.find(c =>
+        c.user_id === userId ||
+        c.email?.toLowerCase() === userEmail
+      )
+
+      console.log('Found creator:', found)
+
+      return found ? { ...found, found: true } : null
     } catch (err) {
       console.log('Creator fetch error:', err.message)
       return null
