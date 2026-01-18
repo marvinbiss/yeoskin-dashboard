@@ -117,9 +117,9 @@ export const CreatorLogin = () => {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 >
                   {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
+                    <EyeOff key="eye-off" className="w-5 h-5" />
                   ) : (
-                    <Eye className="w-5 h-5" />
+                    <Eye key="eye-on" className="w-5 h-5" />
                   )}
                 </button>
               </div>
@@ -130,14 +130,10 @@ export const CreatorLogin = () => {
               disabled={loading || !email || !password}
               className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Connexion...
-                </>
-              ) : (
-                'Se connecter'
+              {loading && (
+                <Loader2 key="loader" className="w-5 h-5 animate-spin" />
               )}
+              <span key="text">{loading ? 'Connexion...' : 'Se connecter'}</span>
             </button>
           </form>
 

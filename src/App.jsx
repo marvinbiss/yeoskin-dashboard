@@ -14,9 +14,12 @@ import {
   LoginPage,
   AdminsPage,
   AuditLogsPage,
-  FinancialPage
+  FinancialPage,
+  AdminPayoutsPage,
+  AnalyticsPage,
 } from './pages'
 import { ProfilePage } from './pages/ProfilePage'
+import { CreatorDetailPage } from './pages/CreatorDetailPage'
 
 // Creator Portal imports
 import {
@@ -25,6 +28,10 @@ import {
   CreatorDashboard,
   CreatorHistory,
   CreatorLogin,
+  CreatorProfile,
+  CreatorBankAccount,
+  CreatorSettings,
+  CreatorAnalytics,
 } from './creator'
 
 // Session manager component
@@ -87,6 +94,11 @@ function App() {
                     <CreatorsPage />
                   </ProtectedRoute>
                 } />
+                <Route path="/creators/:id" element={
+                  <ProtectedRoute>
+                    <CreatorDetailPage />
+                  </ProtectedRoute>
+                } />
                 <Route path="/commissions" element={
                   <ProtectedRoute>
                     <CommissionsPage />
@@ -122,6 +134,16 @@ function App() {
                     <ProfilePage />
                   </ProtectedRoute>
                 } />
+                <Route path="/admin-payouts" element={
+                  <ProtectedRoute requiredRole="admin">
+                    <AdminPayoutsPage />
+                  </ProtectedRoute>
+                } />
+                <Route path="/analytics" element={
+                  <ProtectedRoute>
+                    <AnalyticsPage />
+                  </ProtectedRoute>
+                } />
 
                 {/* Creator Portal Routes */}
                 <Route path="/creator/login" element={
@@ -140,6 +162,34 @@ function App() {
                   <CreatorAuthProvider>
                     <CreatorProtectedRoute>
                       <CreatorHistory />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/profile" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorProfile />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/bank" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorBankAccount />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/settings" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorSettings />
+                    </CreatorProtectedRoute>
+                  </CreatorAuthProvider>
+                } />
+                <Route path="/creator/analytics" element={
+                  <CreatorAuthProvider>
+                    <CreatorProtectedRoute>
+                      <CreatorAnalytics />
                     </CreatorProtectedRoute>
                   </CreatorAuthProvider>
                 } />

@@ -30,4 +30,8 @@ export {
   CreatorDashboard,
   CreatorHistory,
   CreatorLogin,
+  CreatorProfile,
+  CreatorBankAccount,
+  CreatorSettings,
+  CreatorAnalytics,
 } from './pages'

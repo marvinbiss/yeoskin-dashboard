@@ -17,9 +17,8 @@ export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null)
   const [adminProfile, setAdminProfile] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [initialized, setInitialized] = useState(false)
 
-  // Charger le profil admin depuis la base de données
+  // Charger le profil admin
   const fetchAdminProfile = useCallback(async (userId) => {
     if (!userId) {
       setAdminProfile(null)
@@ -31,83 +30,74 @@ export const AuthProvider = ({ children }) => {
         .from('admin_profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle() // Utiliser maybeSingle au lieu de single pour éviter l'erreur 406
+        .maybeSingle()
 
       if (error) {
-        console.warn('Erreur profil admin:', error.message)
+        console.warn('[Auth] Erreur profil admin:', error.message)
         setAdminProfile(null)
         return null
       }
 
-      if (data) {
-        setAdminProfile(data)
-        return data
-      }
-
-      // Pas de profil trouvé - créer un profil par défaut super_admin pour le premier utilisateur
-      setAdminProfile(null)
-      return null
+      setAdminProfile(data)
+      return data
     } catch (error) {
-      console.error('Erreur fetchAdminProfile:', error)
+      console.error('[Auth] Erreur fetchAdminProfile:', error)
       setAdminProfile(null)
       return null
     }
   }, [])
 
-  // Initialiser la session au chargement
+  // Initialiser la session
   useEffect(() => {
     let mounted = true
 
-    const initSession = async () => {
-      try {
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession()
-
-        if (!mounted) return
-
-        if (error) {
-          console.error('Erreur session:', error)
-          setLoading(false)
-          setInitialized(true)
-          return
-        }
-
-        setSession(currentSession)
-        setUser(currentSession?.user ?? null)
-
-        if (currentSession?.user) {
-          await fetchAdminProfile(currentSession.user.id)
-        }
-      } catch (error) {
-        console.error('Erreur initialisation:', error)
-      } finally {
-        if (mounted) {
-          setLoading(false)
-          setInitialized(true)
-        }
-      }
-    }
-
-    initSession()
+    console.log('[Auth] Initialisation...')
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
+        console.log('[Auth] Event:', event, 'Session:', !!newSession)
+
         if (!mounted) return
 
-        setSession(newSession)
-        setUser(newSession?.user ?? null)
-
-        if (event === 'SIGNED_IN' && newSession?.user) {
-          await fetchAdminProfile(newSession.user.id)
-        }
-
-        if (event === 'SIGNED_OUT') {
+        if (newSession) {
+          setSession(newSession)
+          setUser(newSession.user)
+          // Fetch profile in background, don't block
+          fetchAdminProfile(newSession.user.id)
+        } else {
+          setSession(null)
+          setUser(null)
           setAdminProfile(null)
         }
 
         setLoading(false)
       }
     )
+
+    // Récupérer la session initiale
+    supabase.auth.getSession().then(({ data: { session: currentSession }, error }) => {
+      console.log('[Auth] getSession:', !!currentSession, 'Error:', error?.message)
+
+      if (!mounted) return
+
+      if (error) {
+        console.error('[Auth] Erreur getSession:', error)
+        setLoading(false)
+        return
+      }
+
+      if (currentSession) {
+        setSession(currentSession)
+        setUser(currentSession.user)
+        fetchAdminProfile(currentSession.user.id)
+      }
+
+      setLoading(false)
+    }).catch(err => {
+      console.error('[Auth] Catch getSession:', err)
+      if (mounted) setLoading(false)
+    })
 
     return () => {
       mounted = false
@@ -118,18 +108,17 @@ export const AuthProvider = ({ children }) => {
   // Connexion
   const signIn = useCallback(async (email, password) => {
     try {
-      setLoading(true)
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       })
 
       if (error) throw error
+
+      // La mise à jour se fera via onAuthStateChange
       return { data, error: null }
     } catch (error) {
       return { data: null, error }
-    } finally {
-      setLoading(false)
     }
   }, [])
 
@@ -138,26 +127,19 @@ export const AuthProvider = ({ children }) => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) throw error
-
-      setUser(null)
-      setSession(null)
-      setAdminProfile(null)
-
       return { error: null }
     } catch (error) {
       return { error }
     }
   }, [])
 
-  // Helpers utilisateur
+  // Helpers
   const getUserDisplayName = useCallback(() => {
     if (!user) return null
     return adminProfile?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'Utilisateur'
   }, [user, adminProfile])
 
-  const getUserEmail = useCallback(() => {
-    return user?.email || null
-  }, [user])
+  const getUserEmail = useCallback(() => user?.email || null, [user])
 
   const getUserInitials = useCallback(() => {
     const name = getUserDisplayName()
@@ -169,36 +151,20 @@ export const AuthProvider = ({ children }) => {
     return name.charAt(0).toUpperCase()
   }, [getUserDisplayName])
 
-  // Gestion des rôles - SUPER_ADMIN par défaut si pas de profil (mode développement)
   const getUserRole = useCallback(() => {
-    if (adminProfile?.role) {
-      return adminProfile.role
-    }
-    // Mode dev: donner super_admin à tout utilisateur connecté sans profil
-    if (user) {
-      return ADMIN_ROLES.SUPER_ADMIN
-    }
+    if (adminProfile?.role) return adminProfile.role
+    if (user) return ADMIN_ROLES.SUPER_ADMIN
     return ADMIN_ROLES.VIEWER
   }, [user, adminProfile])
 
   const hasRole = useCallback((requiredRole) => {
-    const userRole = getUserRole()
-    return hasRequiredRole(userRole, requiredRole)
+    return hasRequiredRole(getUserRole(), requiredRole)
   }, [getUserRole])
 
-  const isAdmin = useCallback(() => {
-    return hasRole(ADMIN_ROLES.ADMIN)
-  }, [hasRole])
+  const isAdmin = useCallback(() => hasRole(ADMIN_ROLES.ADMIN), [hasRole])
+  const isSuperAdmin = useCallback(() => getUserRole() === ADMIN_ROLES.SUPER_ADMIN, [getUserRole])
+  const isViewer = useCallback(() => getUserRole() === ADMIN_ROLES.VIEWER, [getUserRole])
 
-  const isSuperAdmin = useCallback(() => {
-    return getUserRole() === ADMIN_ROLES.SUPER_ADMIN
-  }, [getUserRole])
-
-  const isViewer = useCallback(() => {
-    return getUserRole() === ADMIN_ROLES.VIEWER
-  }, [getUserRole])
-
-  // Rafraîchir le profil
   const refreshProfile = useCallback(async () => {
     if (user?.id) {
       await fetchAdminProfile(user.id)
@@ -210,7 +176,6 @@ export const AuthProvider = ({ children }) => {
     session,
     adminProfile,
     loading,
-    initialized,
     signIn,
     signOut,
     getUserDisplayName,

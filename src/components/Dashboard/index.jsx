@@ -329,7 +329,7 @@ export const QuickActions = ({ onTriggerDaily, onViewBatches, loading }) => {
       </Card.Header>
       <Card.Body>
         <div className="grid grid-cols-2 gap-4">
-          <button 
+          <button
             onClick={onTriggerDaily}
             disabled={loading}
             className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all group"
@@ -341,8 +341,8 @@ export const QuickActions = ({ onTriggerDaily, onViewBatches, loading }) => {
               Déclenchement par lots quotidiens
             </span>
           </button>
-          
-          <button 
+
+          <button
             onClick={onViewBatches}
             className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-success-500 hover:bg-success-50 dark:hover:bg-success-900/20 transition-all group"
           >
@@ -358,3 +358,9 @@ export const QuickActions = ({ onTriggerDaily, onViewBatches, loading }) => {
     </Card>
   )
 }
+
+// ============================================================================
+// SYSTEM HEALTH CARD - Re-export
+// ============================================================================
+
+export { SystemHealthCard } from './SystemHealthCard'

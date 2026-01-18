@@ -9,11 +9,12 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
+    detectSessionInUrl: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'yeoskin-auth',
+    flowType: 'implicit',
+    // Désactiver le Web Locks API qui cause des AbortError
+    lock: async (name, acquireTimeout, fn) => fn(),
   },
 })
 

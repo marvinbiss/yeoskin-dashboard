@@ -139,18 +139,9 @@ export const AdminDetailModal = ({
             onClick={() => onToggleStatus(admin.id)}
             disabled={loading}
             className="flex items-center gap-2"
+            icon={admin.is_active ? UserX : UserCheck}
           >
-            {admin.is_active ? (
-              <>
-                <UserX className="w-4 h-4" aria-hidden="true" />
-                Désactiver
-              </>
-            ) : (
-              <>
-                <UserCheck className="w-4 h-4" aria-hidden="true" />
-                Activer
-              </>
-            )}
+            {admin.is_active ? 'Désactiver' : 'Activer'}
           </Button>
 
           <Button

@@ -275,9 +275,9 @@ export const AdminForm = ({ isOpen, onClose, admin, onSubmit, loading }) => {
                 disabled={loading}
               >
                 {showPassword ? (
-                  <EyeOff className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                  <EyeOff key="eye-off" className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 ) : (
-                  <Eye className="w-4 h-4 text-gray-400" aria-hidden="true" />
+                  <Eye key="eye-on" className="w-4 h-4 text-gray-400" aria-hidden="true" />
                 )}
                 <span className="sr-only">{showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}</span>
               </button>
@@ -323,11 +323,11 @@ export const AdminForm = ({ isOpen, onClose, admin, onSubmit, loading }) => {
                     )}
                   >
                     {req.met ? (
-                      <Check className="w-3 h-3" aria-hidden="true" />
+                      <Check key="check" className="w-3 h-3" aria-hidden="true" />
                     ) : (
-                      <X className="w-3 h-3" aria-hidden="true" />
+                      <X key="x" className="w-3 h-3" aria-hidden="true" />
                     )}
-                    {req.message}
+                    <span key="msg">{req.message}</span>
                   </li>
                 ))}
               </ul>

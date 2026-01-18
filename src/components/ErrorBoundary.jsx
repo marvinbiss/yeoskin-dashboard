@@ -168,16 +168,11 @@ User Agent: ${navigator.userAgent}
                     className="mt-3 flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
                   >
                     {this.state.copied ? (
-                      <>
-                        <CheckCircle className="w-4 h-4" />
-                        Copie !
-                      </>
+                      <CheckCircle key="check" className="w-4 h-4" />
                     ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copier l'erreur
-                      </>
+                      <Copy key="copy" className="w-4 h-4" />
                     )}
+                    <span key="text">{this.state.copied ? 'Copie !' : "Copier l'erreur"}</span>
                   </button>
                 </div>
               </details>

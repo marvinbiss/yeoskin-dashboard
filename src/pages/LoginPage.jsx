@@ -126,14 +126,10 @@ export const LoginPage = () => {
               disabled={loading}
               className="btn btn-primary w-full py-3 flex items-center justify-center"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Connexion en cours...
-                </>
-              ) : (
-                'Se connecter'
+              {loading && (
+                <Loader2 key="loader" className="w-4 h-4 mr-2 animate-spin" />
               )}
+              <span key="text">{loading ? 'Connexion en cours...' : 'Se connecter'}</span>
             </button>
           </form>
         </div>

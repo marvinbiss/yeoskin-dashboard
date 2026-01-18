@@ -11,7 +11,8 @@ import {
   PayoutChart,
   StatusDistribution,
   RecentActivity,
-  QuickActions
+  QuickActions,
+  SystemHealthCard
 } from '../components/Dashboard'
 import { BatchesTable } from '../components/Batches'
 import { CreatorsTable, CreatorsStatsHeader, CreatorForm, CreatorDetailModal } from '../components/Creators'
@@ -52,6 +53,10 @@ import {
 // Re-export LoginPage
 export { LoginPage } from './LoginPage'
 
+// Re-export AdminPayoutsPage and AnalyticsPage
+export { AdminPayoutsPage } from './AdminPayoutsPage'
+export { AnalyticsPage } from './AnalyticsPage'
+
 // ============================================================================
 // DASHBOARD PAGE (Home)
 // ============================================================================
@@ -91,12 +96,15 @@ export const DashboardPage = () => {
           <StatusDistribution />
         </div>
 
-        {/* Quick Actions & Recent Activity */}
+        {/* Quick Actions, System Health & Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <QuickActions
-            onTriggerDaily={handleTriggerDaily}
-            onViewBatches={() => navigate('/payouts')}
-          />
+          <div className="space-y-6">
+            <QuickActions
+              onTriggerDaily={handleTriggerDaily}
+              onViewBatches={() => navigate('/payouts')}
+            />
+            <SystemHealthCard />
+          </div>
           <div className="lg:col-span-2">
             <RecentActivity transfers={transfers} loading={transfersLoading} />
           </div>
@@ -705,33 +713,64 @@ export const HelpPage = () => {
             <h3 className="text-lg font-semibold mb-4">Liens rapides</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <a
-                href="#"
+                href="https://docs.yeoskin.com"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <h4 className="font-medium">Documentation</h4>
                 <p className="text-sm text-gray-500 mt-1">Consulter le guide complet</p>
               </a>
               <a
-                href="#"
+                href="https://api.yeoskin.com/docs"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <h4 className="font-medium">Référence API</h4>
+                <h4 className="font-medium">Reference API</h4>
                 <p className="text-sm text-gray-500 mt-1">Points de terminaison webhook</p>
               </a>
               <a
-                href="#"
+                href="mailto:urgence@yeoskin.com?subject=Incident%20Dashboard"
                 className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                <h4 className="font-medium">Réponse aux incidents</h4>
-                <p className="text-sm text-gray-500 mt-1">Procédures d'urgence</p>
+                <h4 className="font-medium">Reponse aux incidents</h4>
+                <p className="text-sm text-gray-500 mt-1">Procedures d'urgence</p>
               </a>
               <a
-                href="#"
+                href="mailto:support@yeoskin.com?subject=Support%20Dashboard"
                 className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <h4 className="font-medium">Support</h4>
-                <p className="text-sm text-gray-500 mt-1">Contacter l'équipe</p>
+                <p className="text-sm text-gray-500 mt-1">Contacter l'equipe</p>
               </a>
+            </div>
+          </Card.Body>
+        </Card>
+
+        {/* FAQ Section */}
+        <Card>
+          <Card.Body>
+            <h3 className="text-lg font-semibold mb-4">Questions frequentes</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Comment creer un nouveau createur ?</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                  Allez dans la section "Createurs" et cliquez sur "Ajouter un createur". Remplissez le formulaire avec l'email et le code promo.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Comment verifier un compte bancaire ?</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                  Dans la fiche d'un createur, cliquez sur "Verifier le compte bancaire" apres avoir confirme l'IBAN.
+                </p>
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">Comment executer un paiement ?</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                  Allez dans "Finance" puis "Execution paiements", selectionnez un batch et cliquez sur "Executer".
+                </p>
+              </div>
             </div>
           </Card.Body>
         </Card>

@@ -209,16 +209,11 @@ export const TimelineView = ({
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 disabled:opacity-50"
           >
             {loading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></span>
-                Chargement...
-              </>
+              <span key="spinner" className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></span>
             ) : (
-              <>
-                <ChevronDown className="w-4 h-4" />
-                Charger plus
-              </>
+              <ChevronDown key="icon" className="w-4 h-4" />
             )}
+            <span key="text">{loading ? 'Chargement...' : 'Charger plus'}</span>
           </button>
         </div>
       )}

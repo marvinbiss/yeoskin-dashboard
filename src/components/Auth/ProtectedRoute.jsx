@@ -11,7 +11,7 @@ const LoadingScreen = () => (
     <div className="text-center">
       <Spinner size="lg" />
       <p className="mt-4 text-gray-500 dark:text-gray-400">
-        Vérification de la session...
+        Chargement...
       </p>
     </div>
   </div>
@@ -49,27 +49,22 @@ const UnauthorizedScreen = ({ requiredRole }) => (
 
 /**
  * Protected Route Component
- * Protects routes by requiring authentication and optionally a specific role
- *
- * @param {object} props
- * @param {React.ReactNode} props.children - Child components to render if authorized
- * @param {string} [props.requiredRole] - Required role to access this route (super_admin, admin, viewer)
  */
 export const ProtectedRoute = ({ children, requiredRole }) => {
-  const { isAuthenticated, loading, hasRole } = useAuth()
+  const { session, loading, hasRole } = useAuth()
   const location = useLocation()
 
-  // Show loading screen while checking session
+  // Montrer le loading uniquement pendant le chargement initial
   if (loading) {
     return <LoadingScreen />
   }
 
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
+  // Pas de session = rediriger vers login
+  if (!session) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // Check role if required
+  // Vérifier le rôle si requis
   if (requiredRole && !hasRole(requiredRole)) {
     return <UnauthorizedScreen requiredRole={requiredRole} />
   }

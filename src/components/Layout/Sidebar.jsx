@@ -11,7 +11,9 @@ import {
   Zap,
   Shield,
   ClipboardList,
-  Landmark
+  Landmark,
+  BarChart3,
+  CreditCard
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
@@ -19,7 +21,9 @@ import { useToast } from '../Common'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Paiements', href: '/payouts', icon: Wallet },
+  { name: 'Exec Paiements', href: '/admin-payouts', icon: CreditCard, adminOnly: true },
   { name: 'Créateurs', href: '/creators', icon: Users },
   { name: 'Commissions', href: '/commissions', icon: FileText },
   { name: 'Finance', href: '/financial', icon: Landmark, adminOnly: true },

@@ -85,9 +85,9 @@ export const Header = ({ title, subtitle }) => {
               : 'bg-danger-50 text-danger-600 dark:bg-danger-500/20'
           )}>
             {connected ? (
-              <Wifi className="w-3.5 h-3.5" />
+              <Wifi key="wifi-on" className="w-3.5 h-3.5" />
             ) : (
-              <WifiOff className="w-3.5 h-3.5" />
+              <WifiOff key="wifi-off" className="w-3.5 h-3.5" />
             )}
             <span>{connected ? `Sync ${getTimeSinceSync()}` : 'Hors ligne'}</span>
           </div>
@@ -111,9 +111,9 @@ export const Header = ({ title, subtitle }) => {
             title={darkMode ? 'Mode clair' : 'Mode sombre'}
           >
             {darkMode ? (
-              <Sun className="w-5 h-5 text-gray-500" />
+              <Sun key="sun" className="w-5 h-5 text-gray-500" />
             ) : (
-              <Moon className="w-5 h-5 text-gray-500" />
+              <Moon key="moon" className="w-5 h-5 text-gray-500" />
             )}
           </button>
         </div>

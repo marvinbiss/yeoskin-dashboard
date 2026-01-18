@@ -6,6 +6,8 @@ import {
   BalanceCard,
   PayoutForecast,
   ActivityFeed,
+  TierCard,
+  PayoutStatusCard,
 } from '../components'
 
 /**
@@ -56,11 +58,17 @@ export const CreatorDashboard = () => {
       )}
 
       <div className="space-y-6">
+        {/* VIP Tier Card */}
+        {creator?.id && <TierCard creatorId={creator.id} />}
+
         {/* Balance and Forecast Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <BalanceCard balance={balance} loading={loading} />
           <PayoutForecast forecast={forecast} loading={loading} />
         </div>
+
+        {/* Payout Status */}
+        {creator?.id && <PayoutStatusCard creatorId={creator.id} />}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -8,14 +8,21 @@ import {
   Menu,
   X,
   User,
-  ChevronDown
+  ChevronDown,
+  Settings,
+  CreditCard,
+  BarChart3
 } from 'lucide-react'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { NotificationBell } from './NotificationBell'
 
 const navigation = [
   { name: 'Tableau de bord', href: '/creator', icon: LayoutDashboard },
+  { name: 'Mes Analytics', href: '/creator/analytics', icon: BarChart3 },
   { name: 'Historique', href: '/creator/history', icon: History },
+  { name: 'Mon profil', href: '/creator/profile', icon: User },
+  { name: 'Coordonnees bancaires', href: '/creator/bank', icon: CreditCard },
+  { name: 'Parametres', href: '/creator/settings', icon: Settings },
 ]
 
 export const CreatorLayout = ({ children, title, subtitle }) => {

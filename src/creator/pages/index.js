@@ -1,3 +1,7 @@
 export { CreatorDashboard } from './CreatorDashboard'
 export { CreatorHistory } from './CreatorHistory'
 export { CreatorLogin } from './CreatorLogin'
+export { CreatorProfile } from './CreatorProfile'
+export { CreatorBankAccount } from './CreatorBankAccount'
+export { CreatorSettings } from './CreatorSettings'
+export { CreatorAnalytics } from './CreatorAnalytics'
