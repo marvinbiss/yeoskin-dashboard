@@ -23,24 +23,32 @@ export const useCreatorAuthActions = () => {
 
       if (authError) {
         setError(authError.message)
+        setLoading(false)
         return { success: false, error: authError.message }
       }
 
-      // Try to link creator profile
+      // Try to link creator profile (non-blocking, with timeout)
       if (data.user) {
-        await supabase.rpc('link_creator_to_user', {
-          p_user_id: data.user.id,
-          p_email: email.trim().toLowerCase()
-        })
+        const linkPromise = supabase
+          .from('creators')
+          .update({ user_id: data.user.id })
+          .eq('email', email.trim().toLowerCase())
+          .is('user_id', null)
+
+        // Don't wait more than 2 seconds for linking
+        Promise.race([
+          linkPromise,
+          new Promise(resolve => setTimeout(resolve, 2000))
+        ]).catch(() => {})
       }
 
+      setLoading(false)
       return { success: true, user: data.user }
     } catch (err) {
       const message = err.message || 'Une erreur est survenue'
       setError(message)
-      return { success: false, error: message }
-    } finally {
       setLoading(false)
+      return { success: false, error: message }
     }
   }, [])
 
