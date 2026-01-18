@@ -18,40 +18,56 @@ export const CreatorAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
   const [initialized, setInitialized] = useState(false)
 
-  // Link creator to user by email
-  const linkCreatorByEmail = useCallback(async (userId, email) => {
-    try {
-      const { data, error } = await supabase.rpc('link_creator_to_user', {
-        p_user_id: userId,
-        p_email: email
-      })
-
-      if (error) {
-        console.warn('Could not link creator:', error.message)
-        return null
-      }
-
-      return data
-    } catch (err) {
-      console.error('Error linking creator:', err)
+  // Fetch creator profile by user_id or email
+  const fetchCreatorProfile = useCallback(async (authUser) => {
+    if (!authUser) {
+      setCreator(null)
       return null
     }
-  }, [])
 
-  // Fetch creator profile
-  const fetchCreatorProfile = useCallback(async () => {
     try {
-      const { data, error } = await supabase.rpc('get_my_creator_profile')
+      // First try to find by user_id
+      let { data, error } = await supabase
+        .from('creators')
+        .select('id, email, discount_code, commission_rate, status, user_id')
+        .eq('user_id', authUser.id)
+        .maybeSingle()
 
       if (error) {
-        console.warn('Error fetching creator profile:', error.message)
-        setCreator(null)
-        return null
+        console.warn('Error fetching creator by user_id:', error.message)
       }
 
-      if (data?.found) {
-        setCreator(data)
-        return data
+      // If not found by user_id, try by email and link
+      if (!data) {
+        const { data: emailData, error: emailError } = await supabase
+          .from('creators')
+          .select('id, email, discount_code, commission_rate, status, user_id')
+          .eq('email', authUser.email.toLowerCase())
+          .maybeSingle()
+
+        if (emailError) {
+          console.warn('Error fetching creator by email:', emailError.message)
+        }
+
+        if (emailData && !emailData.user_id) {
+          // Link the creator to this auth user
+          const { error: updateError } = await supabase
+            .from('creators')
+            .update({ user_id: authUser.id })
+            .eq('id', emailData.id)
+
+          if (!updateError) {
+            data = { ...emailData, user_id: authUser.id }
+          }
+        } else {
+          data = emailData
+        }
+      }
+
+      if (data) {
+        const creatorData = { ...data, found: true }
+        setCreator(creatorData)
+        return creatorData
       }
 
       setCreator(null)
@@ -84,10 +100,8 @@ export const CreatorAuthProvider = ({ children }) => {
         setUser(currentSession?.user ?? null)
 
         if (currentSession?.user) {
-          // Try to link creator if not already linked
-          await linkCreatorByEmail(currentSession.user.id, currentSession.user.email)
-          // Fetch creator profile
-          await fetchCreatorProfile()
+          // Fetch creator profile (will auto-link by email if needed)
+          await fetchCreatorProfile(currentSession.user)
         }
       } catch (error) {
         console.error('Init error:', error)
@@ -110,8 +124,7 @@ export const CreatorAuthProvider = ({ children }) => {
         setUser(newSession?.user ?? null)
 
         if (event === 'SIGNED_IN' && newSession?.user) {
-          await linkCreatorByEmail(newSession.user.id, newSession.user.email)
-          await fetchCreatorProfile()
+          await fetchCreatorProfile(newSession.user)
         }
 
         if (event === 'SIGNED_OUT') {
@@ -126,7 +139,7 @@ export const CreatorAuthProvider = ({ children }) => {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [linkCreatorByEmail, fetchCreatorProfile])
+  }, [fetchCreatorProfile])
 
   // Sign in
   const signIn = useCallback(async (email, password) => {
@@ -164,8 +177,11 @@ export const CreatorAuthProvider = ({ children }) => {
 
   // Refresh creator profile
   const refreshProfile = useCallback(async () => {
-    return await fetchCreatorProfile()
-  }, [fetchCreatorProfile])
+    if (user) {
+      return await fetchCreatorProfile(user)
+    }
+    return null
+  }, [fetchCreatorProfile, user])
 
   const value = {
     user,
