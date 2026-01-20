@@ -1,0 +1,394 @@
+{
+  "name": "Generate Creator Statements v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-creator-statements",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Generate Statements",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "generate-creator-statements"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "auth-check",
+              "leftValue": "={{ $json.headers['x-secret'] }}",
+              "rightValue": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "auth-check",
+      "name": "Authenticate Request",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Unauthorized\", \"code\": 401 }",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "auth-fail",
+      "name": "Auth Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [440, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT fp.id as period_id, fp.name as period_name, fp.start_date, fp.end_date, cr.id as creator_id, cr.email, cr.discount_code FROM financial_periods fp CROSS JOIN creators cr WHERE fp.id = '{{ $json.body.period_id }}'::uuid AND cr.id IN (SELECT DISTINCT creator_id FROM commissions WHERE created_at >= fp.start_date AND created_at < fp.end_date + interval '1 day' AND status = 'paid' UNION SELECT DISTINCT creator_id FROM payout_items WHERE sent_at >= fp.start_date AND sent_at < fp.end_date + interval '1 day' AND status = 'paid')",
+        "options": {}
+      },
+      "id": "fetch-creators",
+      "name": "Fetch Creators with Activity",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [440, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-creators",
+      "name": "Split into Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.id, c.commission_amount as amount, 'EUR' as currency, c.order_id, c.created_at FROM commissions c WHERE c.creator_id = '{{ $json.creator_id }}'::uuid AND c.created_at >= '{{ $json.start_date }}'::date AND c.created_at < '{{ $json.end_date }}'::date + interval '1 day' AND c.status = 'paid' ORDER BY c.created_at",
+        "options": {}
+      },
+      "id": "fetch-commissions",
+      "name": "Fetch Creator Commissions",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [880, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT pi.id, pi.amount, 'EUR' as currency, pi.sent_at as executed_at, pi.wise_transfer_id, 'Wise' as payment_method FROM payout_items pi WHERE pi.creator_id = '{{ $node['Split into Batches'].json.creator_id }}'::uuid AND pi.sent_at >= '{{ $node['Split into Batches'].json.start_date }}'::date AND pi.sent_at < '{{ $node['Split into Batches'].json.end_date }}'::date + interval '1 day' AND pi.status = 'paid' ORDER BY pi.sent_at",
+        "options": {}
+      },
+      "id": "fetch-payouts",
+      "name": "Fetch Creator Payouts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1100, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const creator = $node['Split into Batches'].json;\nconst commissions = $node['Fetch Creator Commissions'].json || [];\nconst payouts = $node['Fetch Creator Payouts'].json || [];\n\nconst totalCommissions = commissions.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);\nconst totalPayouts = payouts.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);\nconst balance = totalCommissions - totalPayouts;\n\nconst displayName = creator.email ? creator.email.split('@')[0] : creator.discount_code || 'Creator';\n\nconst html = `\n<!DOCTYPE html>\n<html lang=\"fr\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Relevé - ${displayName}</title>\n  <style>\n    body { font-family: Arial, sans-serif; margin: 40px; color: #333; }\n    .header { border-bottom: 2px solid #e91e63; padding-bottom: 20px; margin-bottom: 30px; }\n    .logo { font-size: 24px; font-weight: bold; color: #e91e63; }\n    .period { color: #666; margin-top: 10px; }\n    .section { margin: 30px 0; }\n    .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }\n    table { width: 100%; border-collapse: collapse; }\n    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }\n    th { background: #f5f5f5; font-weight: bold; }\n    .amount { text-align: right; font-family: monospace; }\n    .total-row { font-weight: bold; background: #f9f9f9; }\n    .summary { background: #fff3e0; padding: 20px; border-radius: 8px; margin-top: 30px; }\n    .summary-item { display: flex; justify-content: space-between; margin: 10px 0; }\n    .balance { font-size: 20px; color: ${balance >= 0 ? '#4caf50' : '#f44336'}; }\n    .footer { margin-top: 50px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #999; }\n  </style>\n</head>\n<body>\n  <div class=\"header\">\n    <div class=\"logo\">YEOSKIN</div>\n    <div class=\"period\">Relevé pour la période: ${creator.period_name}</div>\n    <div class=\"period\">${creator.start_date} au ${creator.end_date}</div>\n  </div>\n  \n  <div class=\"creator-info\">\n    <strong>${displayName}</strong><br>\n    ${creator.email || ''}\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">Commissions</div>\n    <table>\n      <thead>\n        <tr>\n          <th>Date</th>\n          <th>Commande</th>\n          <th class=\"amount\">Montant</th>\n        </tr>\n      </thead>\n      <tbody>\n        ${commissions.map(c => `\n          <tr>\n            <td>${new Date(c.created_at).toLocaleDateString('fr-FR')}</td>\n            <td>${c.order_id || '-'}</td>\n            <td class=\"amount\">${parseFloat(c.amount).toFixed(2)} ${c.currency}</td>\n          </tr>\n        `).join('')}\n        <tr class=\"total-row\">\n          <td colspan=\"2\">Total Commissions</td>\n          <td class=\"amount\">${totalCommissions.toFixed(2)} EUR</td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n\n  <div class=\"section\">\n    <div class=\"section-title\">Paiements</div>\n    <table>\n      <thead>\n        <tr>\n          <th>Date</th>\n          <th>Référence</th>\n          <th>Méthode</th>\n          <th class=\"amount\">Montant</th>\n        </tr>\n      </thead>\n      <tbody>\n        ${payouts.map(p => `\n          <tr>\n            <td>${new Date(p.executed_at).toLocaleDateString('fr-FR')}</td>\n            <td>${p.wise_transfer_id || '-'}</td>\n            <td>${p.payment_method || 'Wise'}</td>\n            <td class=\"amount\">${parseFloat(p.amount).toFixed(2)} ${p.currency}</td>\n          </tr>\n        `).join('')}\n        <tr class=\"total-row\">\n          <td colspan=\"3\">Total Paiements</td>\n          <td class=\"amount\">${totalPayouts.toFixed(2)} EUR</td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n\n  <div class=\"summary\">\n    <div class=\"summary-item\">\n      <span>Total Commissions:</span>\n      <span>${totalCommissions.toFixed(2)} EUR</span>\n    </div>\n    <div class=\"summary-item\">\n      <span>Total Paiements:</span>\n      <span>-${totalPayouts.toFixed(2)} EUR</span>\n    </div>\n    <div class=\"summary-item balance\">\n      <span>Solde:</span>\n      <span>${balance.toFixed(2)} EUR</span>\n    </div>\n  </div>\n\n  <div class=\"footer\">\n    Document généré automatiquement le ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}<br>\n    Yeoskin - Plateforme K-beauty\n  </div>\n</body>\n</html>\n`;\n\nreturn {\n  ...creator,\n  display_name: displayName,\n  html,\n  total_commissions: totalCommissions,\n  total_payouts: totalPayouts,\n  balance,\n  commissions_count: commissions.length,\n  payouts_count: payouts.length\n};"
+      },
+      "id": "build-html",
+      "name": "Build Statement HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1320, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yeoskin-dashboard.vercel.app/api/finance/pdf/render",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"html\": {{ JSON.stringify($json.html) }},\n  \"options\": {\n    \"format\": \"A4\",\n    \"margin\": {\n      \"top\": \"20mm\",\n      \"bottom\": \"20mm\",\n      \"left\": \"15mm\",\n      \"right\": \"15mm\"\n    }\n  }\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "render-pdf",
+      "name": "Render PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1540, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const creator = $node['Build Statement HTML'].json;\nconst pdfBase64 = $json.pdf_base64;\nconst periodId = $node['Webhook - Generate Statements'].json.body.period_id;\n\nconst pdfPath = `statements/${periodId}/${creator.creator_id}.pdf`;\nconst csvPath = `statements/${periodId}/${creator.creator_id}.csv`;\n\n// Build CSV content\nconst csvLines = [\n  'Date,Type,Reference,Description,Debit,Credit,Currency',\n];\n\nconst commissions = $node['Fetch Creator Commissions'].json || [];\ncommissions.forEach(c => {\n  csvLines.push(`${c.created_at},Commission,${c.order_id || ''},Commission,,${c.amount},${c.currency}`);\n});\n\nconst payouts = $node['Fetch Creator Payouts'].json || [];\npayouts.forEach(p => {\n  csvLines.push(`${p.executed_at},Payout,${p.wise_transfer_id || ''},${p.payment_method || 'Wise'},${p.amount},,${p.currency}`);\n});\n\nreturn {\n  creator_id: creator.creator_id,\n  period_id: periodId,\n  pdf_path: pdfPath,\n  csv_path: csvPath,\n  pdf_base64: pdfBase64,\n  csv_content: csvLines.join('\\n'),\n  total_commissions: creator.total_commissions,\n  total_payouts: creator.total_payouts,\n  balance: creator.balance\n};"
+      },
+      "id": "prepare-upload",
+      "name": "Prepare for Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1760, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO creator_statements (id, creator_id, period_id, total_commissions, total_payouts, balance, pdf_path, csv_path, status, created_at) VALUES (gen_random_uuid(), '{{ $json.creator_id }}'::uuid, '{{ $json.period_id }}'::uuid, {{ $json.total_commissions }}, {{ $json.total_payouts }}, {{ $json.balance }}, '{{ $json.pdf_path }}', '{{ $json.csv_path }}', 'generated', NOW()) ON CONFLICT (creator_id, period_id) DO UPDATE SET total_commissions = EXCLUDED.total_commissions, total_payouts = EXCLUDED.total_payouts, balance = EXCLUDED.balance, pdf_path = EXCLUDED.pdf_path, csv_path = EXCLUDED.csv_path, status = 'generated', updated_at = NOW() RETURNING id",
+        "options": {}
+      },
+      "id": "upsert-statement",
+      "name": "Upsert Statement Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1980, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-more",
+              "leftValue": "={{ $node['Split into Batches'].context.noItemsLeft }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-more",
+      "name": "More Creators?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2200, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"statements_generated\": {{ $node['Fetch Creators with Activity'].json.length }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2420, 0]
+    }
+  ],
+  "connections": {
+    "Webhook - Generate Statements": {
+      "main": [
+        [
+          {
+            "node": "Authenticate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch Creators with Activity",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auth Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Creators with Activity": {
+      "main": [
+        [
+          {
+            "node": "Split into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split into Batches": {
+      "main": [
+        [
+          {
+            "node": "Fetch Creator Commissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Creator Commissions": {
+      "main": [
+        [
+          {
+            "node": "Fetch Creator Payouts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Creator Payouts": {
+      "main": [
+        [
+          {
+            "node": "Build Statement HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Statement HTML": {
+      "main": [
+        [
+          {
+            "node": "Render PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render PDF": {
+      "main": [
+        [
+          {
+            "node": "Prepare for Upload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare for Upload": {
+      "main": [
+        [
+          {
+            "node": "Upsert Statement Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Statement Record": {
+      "main": [
+        [
+          {
+            "node": "More Creators?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "More Creators?": {
+      "main": [
+        [
+          {
+            "node": "Split into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "finance",
+      "name": "finance"
+    },
+    {
+      "id": "statements",
+      "name": "statements"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "versionId": "1.0.1"
+}

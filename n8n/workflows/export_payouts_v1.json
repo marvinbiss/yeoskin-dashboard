@@ -1,0 +1,251 @@
+{
+  "name": "Export Payouts v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "export-payouts",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Export Payouts",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "export-payouts"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "auth-check",
+              "leftValue": "={{ $json.headers['x-secret'] }}",
+              "rightValue": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "auth-check",
+      "name": "Authenticate Request",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Unauthorized\", \"code\": 401 }",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "auth-fail",
+      "name": "Auth Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [440, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT pi.id, pi.creator_id, cr.email as creator_email, pi.amount, pi.wise_fee, pi.status, pi.wise_transfer_id, pi.batch_id, pb.name as batch_name, pb.status as batch_status, pi.created_at, pi.sent_at, pb.executed_at FROM payout_items pi JOIN creators cr ON cr.id = pi.creator_id LEFT JOIN payout_batches pb ON pb.id = pi.batch_id WHERE pi.created_at >= '{{ $json.body.start_date }}'::date AND pi.created_at < '{{ $json.body.end_date }}'::date + interval '1 day' {{ $json.body.status ? \"AND pi.status = '\" + $json.body.status + \"'\" : '' }} ORDER BY pi.created_at DESC",
+        "options": {}
+      },
+      "id": "fetch-payouts",
+      "name": "Fetch Payouts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [440, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payouts = $input.all();\nconst format = $node['Webhook - Export Payouts'].json.body.format || 'csv';\n\nif (format === 'json') {\n  return {\n    format: 'json',\n    data: payouts.map(p => p.json),\n    count: payouts.length\n  };\n}\n\n// CSV format\nconst headers = [\n  'ID',\n  'Creator ID',\n  'Creator Email',\n  'Amount',\n  'Wise Fee',\n  'Status',\n  'Wise Transfer ID',\n  'Batch ID',\n  'Batch Name',\n  'Batch Status',\n  'Created At',\n  'Sent At',\n  'Executed At'\n];\n\nconst rows = payouts.map(p => {\n  const d = p.json;\n  return [\n    d.id,\n    d.creator_id,\n    d.creator_email || '',\n    d.amount,\n    d.wise_fee || '0',\n    d.status,\n    d.wise_transfer_id || '',\n    d.batch_id || '',\n    d.batch_name || '',\n    d.batch_status || '',\n    d.created_at || '',\n    d.sent_at || '',\n    d.executed_at || ''\n  ].join(',');\n});\n\nconst csv = [headers.join(','), ...rows].join('\\n');\n\nreturn {\n  format: 'csv',\n  data: csv,\n  count: payouts.length,\n  filename: `payouts_${$node['Webhook - Export Payouts'].json.body.start_date}_${$node['Webhook - Export Payouts'].json.body.end_date}.csv`\n};"
+      },
+      "id": "format-output",
+      "name": "Format Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "is-csv",
+              "leftValue": "={{ $json.format }}",
+              "rightValue": "csv",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-format",
+      "name": "Check Format",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.data }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/csv"
+              },
+              {
+                "name": "Content-Disposition",
+                "value": "=attachment; filename=\"{{ $json.filename }}\""
+              },
+              {
+                "name": "X-Total-Count",
+                "value": "={{ $json.count }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "csv-response",
+      "name": "CSV Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1100, -100]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"count\": {{ $json.count }},\n  \"data\": {{ JSON.stringify($json.data) }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "json-response",
+      "name": "JSON Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1100, 100]
+    }
+  ],
+  "connections": {
+    "Webhook - Export Payouts": {
+      "main": [
+        [
+          {
+            "node": "Authenticate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch Payouts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auth Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Payouts": {
+      "main": [
+        [
+          {
+            "node": "Format Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Output": {
+      "main": [
+        [
+          {
+            "node": "Check Format",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Format": {
+      "main": [
+        [
+          {
+            "node": "CSV Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "JSON Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "finance",
+      "name": "finance"
+    },
+    {
+      "id": "export",
+      "name": "export"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "versionId": "1.0.1"
+}

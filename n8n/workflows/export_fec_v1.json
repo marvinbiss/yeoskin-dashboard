@@ -1,0 +1,202 @@
+{
+  "name": "Export FEC v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "export-fec",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Export FEC",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "export-fec"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "auth-check",
+              "leftValue": "={{ $json.headers['x-secret'] }}",
+              "rightValue": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "auth-check",
+      "name": "Authenticate Request",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Unauthorized\", \"code\": 401 }",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "auth-fail",
+      "name": "Auth Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [440, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT je.entry_number AS JournalCode, je.entry_number AS JournalLib, LPAD(je.entry_number::text, 10, '0') AS EcritureNum, TO_CHAR(je.entry_date, 'YYYYMMDD') AS EcritureDate, al.account_code AS CompteNum, al.account_name AS CompteLib, '' AS CompAuxNum, '' AS CompAuxLib, je.reference AS PieceRef, TO_CHAR(je.entry_date, 'YYYYMMDD') AS PieceDate, je.description AS EcritureLib, REPLACE(COALESCE(al.debit::text, '0'), '.', ',') AS Debit, REPLACE(COALESCE(al.credit::text, '0'), '.', ',') AS Credit, '' AS EcritureLet, '' AS DateLet, TO_CHAR(je.created_at, 'YYYYMMDD') AS ValidDate, COALESCE(REPLACE((al.debit - al.credit)::text, '.', ','), '') AS Montantdevise, 'EUR' AS Idevise FROM journal_entries je JOIN accounting_lines al ON al.journal_entry_id = je.id WHERE je.period_id = '{{ $json.body.period_id }}'::uuid AND je.status = 'posted' ORDER BY je.entry_number, al.id",
+        "options": {}
+      },
+      "id": "fetch-fec-data",
+      "name": "Fetch FEC Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [440, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\nconst periodId = $node['Webhook - Export FEC'].json.body.period_id;\nconst siren = $node['Webhook - Export FEC'].json.body.siren || '000000000';\nconst fiscalYear = $node['Webhook - Export FEC'].json.body.fiscal_year || new Date().getFullYear();\n\n// FEC Header (required columns per French tax authority)\nconst headers = [\n  'JournalCode',\n  'JournalLib',\n  'EcritureNum',\n  'EcritureDate',\n  'CompteNum',\n  'CompteLib',\n  'CompAuxNum',\n  'CompAuxLib',\n  'PieceRef',\n  'PieceDate',\n  'EcritureLib',\n  'Debit',\n  'Credit',\n  'EcritureLet',\n  'DateLet',\n  'ValidDate',\n  'Montantdevise',\n  'Idevise'\n];\n\nconst dataRows = rows.map(r => {\n  const d = r.json;\n  return [\n    d.journalcode || 'VT',\n    d.journallib || 'Ventes',\n    d.ecriturenum,\n    d.ecrituredate,\n    d.comptenum,\n    `\"${(d.comptelib || '').replace(/\"/g, '\"\"')}\"`,\n    d.compauxnum || '',\n    d.compauxlib || '',\n    d.pieceref || '',\n    d.piecedate,\n    `\"${(d.ecriturelib || '').replace(/\"/g, '\"\"')}\"`,\n    d.debit,\n    d.credit,\n    d.ecriturelet || '',\n    d.datelet || '',\n    d.validdate,\n    d.montantdevise || '',\n    d.idevise || 'EUR'\n  ].join('|');\n});\n\n// FEC uses pipe delimiter and ISO-8859-1 encoding (we'll use UTF-8 with BOM for Excel compatibility)\nconst fecContent = [headers.join('|'), ...dataRows].join('\\r\\n');\n\n// FEC filename format: SIRENFECyyyymmdd.txt\nconst today = new Date().toISOString().slice(0, 10).replace(/-/g, '');\nconst filename = `${siren}FEC${today}.txt`;\n\nreturn {\n  data: fecContent,\n  count: rows.length,\n  filename,\n  siren,\n  fiscal_year: fiscalYear,\n  period_id: periodId\n};"
+      },
+      "id": "format-fec",
+      "name": "Format FEC Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.data }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/plain; charset=utf-8"
+              },
+              {
+                "name": "Content-Disposition",
+                "value": "=attachment; filename=\"{{ $json.filename }}\""
+              },
+              {
+                "name": "X-Total-Count",
+                "value": "={{ $json.count }}"
+              },
+              {
+                "name": "X-FEC-SIREN",
+                "value": "={{ $json.siren }}"
+              },
+              {
+                "name": "X-FEC-Fiscal-Year",
+                "value": "={{ $json.fiscal_year }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "fec-response",
+      "name": "FEC Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [880, 0]
+    }
+  ],
+  "connections": {
+    "Webhook - Export FEC": {
+      "main": [
+        [
+          {
+            "node": "Authenticate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch FEC Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auth Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch FEC Data": {
+      "main": [
+        [
+          {
+            "node": "Format FEC Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format FEC Output": {
+      "main": [
+        [
+          {
+            "node": "FEC Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "finance",
+      "name": "finance"
+    },
+    {
+      "id": "fec",
+      "name": "fec"
+    },
+    {
+      "id": "export",
+      "name": "export"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "versionId": "1.0.1"
+}

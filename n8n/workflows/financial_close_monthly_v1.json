@@ -1,0 +1,791 @@
+{
+  "name": "Financial Close Monthly v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "finance-close",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook - Finance Close",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "webhookId": "finance-close-monthly"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "auth-check",
+              "leftValue": "={{ $json.headers['x-secret'] }}",
+              "rightValue": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "auth-check",
+      "name": "Authenticate Request",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Unauthorized\", \"code\": 401 }",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "auth-fail",
+      "name": "Auth Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [440, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, name, start_date, end_date, status FROM financial_periods WHERE id = '{{ $json.body.period_id }}'::uuid",
+        "options": {}
+      },
+      "id": "fetch-period",
+      "name": "Fetch Period",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [440, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "period-exists",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-period-exists",
+      "name": "Check 1: Period Exists",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "period-open",
+              "leftValue": "={{ $json[0].status }}",
+              "rightValue": "open",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-period-open",
+      "name": "Check 2: Period Open",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as pending_count FROM commissions WHERE created_at >= '{{ $json[0].start_date }}'::date AND created_at < '{{ $json[0].end_date }}'::date + interval '1 day' AND status = 'pending'",
+        "options": {}
+      },
+      "id": "check-pending-commissions",
+      "name": "Check 3: Pending Commissions",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1100, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no-pending",
+              "leftValue": "={{ $json[0].pending_count }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-no-pending",
+      "name": "Check 4: No Pending",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1320, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as processing_count FROM payout_items pi JOIN payout_batches pb ON pb.id = pi.batch_id WHERE pi.created_at >= '{{ $node['Fetch Period'].json[0].start_date }}'::date AND pi.created_at < '{{ $node['Fetch Period'].json[0].end_date }}'::date + interval '1 day' AND pi.status = 'pending'",
+        "options": {}
+      },
+      "id": "check-processing-payouts",
+      "name": "Check 5: Processing Payouts",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [1540, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "no-processing",
+              "leftValue": "={{ $json[0].processing_count }}",
+              "rightValue": "0",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-no-processing",
+      "name": "Check 6: No Processing",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1760, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const periodId = $node['Fetch Period'].json[0].id;\nconst closeRunId = crypto.randomUUID();\n\nreturn {\n  period_id: periodId,\n  close_run_id: closeRunId,\n  period_start: $node['Fetch Period'].json[0].start_date,\n  period_end: $node['Fetch Period'].json[0].end_date\n};"
+      },
+      "id": "generate-close-run",
+      "name": "Generate Close Run ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1980, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO finance_period_locks (period_id, locked_by, close_run_id) VALUES ('{{ $json.period_id }}'::uuid, NULL, '{{ $json.close_run_id }}'::uuid) ON CONFLICT (period_id) DO NOTHING RETURNING *",
+        "options": {}
+      },
+      "id": "acquire-lock",
+      "name": "Acquire Period Lock",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [2200, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "lock-acquired",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-lock",
+      "name": "Check Lock Acquired",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2420, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT finance_close_build_entries('{{ $node['Generate Close Run ID'].json.period_id }}'::uuid, '{{ $node['Generate Close Run ID'].json.period_start }}'::date, '{{ $node['Generate Close Run ID'].json.period_end }}'::date, '{{ $node['Generate Close Run ID'].json.close_run_id }}'::uuid) as result",
+        "options": {}
+      },
+      "id": "build-entries",
+      "name": "Build Journal Entries",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [2640, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT finance_close_post_entries('{{ $node['Generate Close Run ID'].json.close_run_id }}'::uuid, '{{ $node['Generate Close Run ID'].json.period_id }}'::uuid) as result",
+        "options": {}
+      },
+      "id": "post-entries",
+      "name": "Post Journal Entries",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [2860, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://yeoskin.app.n8n.cloud/webhook/generate-creator-statements",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-secret",
+              "value": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "period_id",
+              "value": "={{ $node['Generate Close Run ID'].json.period_id }}"
+            },
+            {
+              "name": "close_run_id",
+              "value": "={{ $node['Generate Close Run ID'].json.close_run_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-statements",
+      "name": "Generate Statements",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [3080, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE financial_periods SET status = 'closed', closed_at = NOW() WHERE id = '{{ $node['Generate Close Run ID'].json.period_id }}'::uuid RETURNING *",
+        "options": {}
+      },
+      "id": "close-period",
+      "name": "Close Period",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [3300, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "DELETE FROM finance_period_locks WHERE period_id = '{{ $node['Generate Close Run ID'].json.period_id }}'::uuid AND close_run_id = '{{ $node['Generate Close Run ID'].json.close_run_id }}'::uuid",
+        "options": {}
+      },
+      "id": "release-lock-success",
+      "name": "Release Lock (Success)",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [3520, 0],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"period_id\": \"{{ $node['Generate Close Run ID'].json.period_id }}\",\n  \"close_run_id\": \"{{ $node['Generate Close Run ID'].json.close_run_id }}\",\n  \"build_result\": {{ JSON.stringify($node['Build Journal Entries'].json[0].result) }},\n  \"post_result\": {{ JSON.stringify($node['Post Journal Entries'].json[0].result) }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [3740, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Period not found\", \"code\": \"PERIOD_NOT_FOUND\" }",
+        "options": {
+          "responseCode": 404
+        }
+      },
+      "id": "error-period-not-found",
+      "name": "Error: Period Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [880, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Period is not open\", \"code\": \"PERIOD_NOT_OPEN\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-period-not-open",
+      "name": "Error: Period Not Open",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Pending commissions exist\", \"code\": \"PENDING_COMMISSIONS\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-pending-commissions",
+      "name": "Error: Pending Commissions",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1540, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Processing payouts exist\", \"code\": \"PROCESSING_PAYOUTS\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-processing-payouts",
+      "name": "Error: Processing Payouts",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1980, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"error\": \"Could not acquire lock - period may be locked by another process\", \"code\": \"LOCK_FAILED\" }",
+        "options": {
+          "responseCode": 409
+        }
+      },
+      "id": "error-lock-failed",
+      "name": "Error: Lock Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2640, 200]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT finance_close_rollback('{{ $node['Generate Close Run ID'].json.close_run_id }}'::uuid, '{{ $node['Generate Close Run ID'].json.period_id }}'::uuid) as result",
+        "options": {},
+        "onError": "continueRegularOutput"
+      },
+      "id": "rollback-on-error",
+      "name": "Rollback on Error",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.3,
+      "position": [3080, 400],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-postgres",
+          "name": "Supabase PostgreSQL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"error\": \"Close process failed - rollback completed\",\n  \"code\": \"CLOSE_FAILED\",\n  \"rollback_result\": {{ JSON.stringify($json[0]?.result || {}) }}\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-close-failed",
+      "name": "Error: Close Failed",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [3300, 400]
+    }
+  ],
+  "connections": {
+    "Webhook - Finance Close": {
+      "main": [
+        [
+          {
+            "node": "Authenticate Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate Request": {
+      "main": [
+        [
+          {
+            "node": "Fetch Period",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Auth Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Period": {
+      "main": [
+        [
+          {
+            "node": "Check 1: Period Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 1: Period Exists": {
+      "main": [
+        [
+          {
+            "node": "Check 2: Period Open",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: Period Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 2: Period Open": {
+      "main": [
+        [
+          {
+            "node": "Check 3: Pending Commissions",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: Period Not Open",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 3: Pending Commissions": {
+      "main": [
+        [
+          {
+            "node": "Check 4: No Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 4: No Pending": {
+      "main": [
+        [
+          {
+            "node": "Check 5: Processing Payouts",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: Pending Commissions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 5: Processing Payouts": {
+      "main": [
+        [
+          {
+            "node": "Check 6: No Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 6: No Processing": {
+      "main": [
+        [
+          {
+            "node": "Generate Close Run ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: Processing Payouts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Close Run ID": {
+      "main": [
+        [
+          {
+            "node": "Acquire Period Lock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Acquire Period Lock": {
+      "main": [
+        [
+          {
+            "node": "Check Lock Acquired",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Lock Acquired": {
+      "main": [
+        [
+          {
+            "node": "Build Journal Entries",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error: Lock Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Journal Entries": {
+      "main": [
+        [
+          {
+            "node": "Post Journal Entries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Rollback on Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Journal Entries": {
+      "main": [
+        [
+          {
+            "node": "Generate Statements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Rollback on Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Statements": {
+      "main": [
+        [
+          {
+            "node": "Close Period",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close Period": {
+      "main": [
+        [
+          {
+            "node": "Release Lock (Success)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Lock (Success)": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rollback on Error": {
+      "main": [
+        [
+          {
+            "node": "Error: Close Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "id": "finance",
+      "name": "finance"
+    },
+    {
+      "id": "close",
+      "name": "close"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "versionId": "1.0.1"
+}
