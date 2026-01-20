@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { logger } from '@/lib/logger'
+import { checkoutRatelimit, getClientIp, rateLimitResponse } from '@/lib/ratelimit'
+import { createCart, validateVariantIds, getShopifyCircuitStats, CircuitOpenError } from '@/lib/shopify'
 
 // Initialize Supabase client with service role for this API route
 const supabase = createClient(
@@ -8,9 +11,72 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET method for testing
-export async function GET() {
-  return NextResponse.json({ status: 'ok', endpoint: '/api/routines/checkout' })
+// GET method for testing and health check
+export async function GET(request: NextRequest) {
+  const circuitStats = getShopifyCircuitStats()
+
+  // Debug mode with ?debug=emma
+  const debugSlug = request.nextUrl.searchParams.get('debug')
+  if (debugSlug) {
+    try {
+      const { data: creator, error: creatorErr } = await supabase
+        .from('creators')
+        .select('id, slug')
+        .eq('slug', debugSlug)
+        .maybeSingle()
+
+      if (creatorErr) {
+        return NextResponse.json({ error: 'creator_error', details: creatorErr.message })
+      }
+      if (!creator) {
+        return NextResponse.json({ error: 'creator_not_found', slug: debugSlug })
+      }
+
+      const { data: creatorRoutine, error: crErr } = await supabase
+        .from('creator_routines')
+        .select('id, routine_id, is_active')
+        .eq('creator_id', creator.id)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (crErr) {
+        return NextResponse.json({ error: 'creator_routine_error', details: crErr.message })
+      }
+      if (!creatorRoutine) {
+        return NextResponse.json({ error: 'no_active_routine', creator_id: creator.id })
+      }
+
+      const { data: routine, error: routineErr } = await supabase
+        .from('routines')
+        .select('id, title, base_shopify_variant_ids')
+        .eq('id', creatorRoutine.routine_id)
+        .maybeSingle()
+
+      if (routineErr) {
+        return NextResponse.json({ error: 'routine_error', details: routineErr.message })
+      }
+
+      return NextResponse.json({
+        status: 'debug_ok',
+        creator,
+        creatorRoutine,
+        routine,
+        variantIds: routine?.base_shopify_variant_ids,
+      })
+    } catch (e) {
+      return NextResponse.json({ error: 'exception', message: String(e) })
+    }
+  }
+
+  return NextResponse.json({
+    status: 'ok',
+    endpoint: '/api/routines/checkout',
+    shopify: {
+      circuit: circuitStats.state,
+      failures: circuitStats.failures,
+      totalRequests: circuitStats.totalRequests,
+    },
+  })
 }
 
 // Valid variants
@@ -24,18 +90,39 @@ const VARIANT_PRODUCT_COUNTS: Record<RoutineVariant, number> = {
   upsell_2: 5,
 }
 
-// Shopify config
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN || 'yeoskin.myshopify.com'
-const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || '2024-01'
-const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_TOKEN
-
 export async function POST(request: NextRequest) {
+  const requestId = crypto.randomUUID()
+  const startTime = Date.now()
+  let debugStep = 'init'
+
   try {
+    // ============================================
+    // 0) RATE LIMITING
+    // ============================================
+    debugStep = 'rate_limit'
+    const clientIp = getClientIp(request)
+    const rateLimitResult = await checkoutRatelimit.limit(clientIp)
+
+    if (!rateLimitResult.success) {
+      logger.warn(
+        { requestId, clientIp, remaining: rateLimitResult.remaining },
+        'Rate limit exceeded'
+      )
+      return rateLimitResponse(rateLimitResult.reset)
+    }
+
     // ============================================
     // 1) VALIDATION INPUT
     // ============================================
+    debugStep = 'parse_body'
     const body = await request.json()
     const { creator_slug, variant } = body
+
+    debugStep = 'log_request'
+    logger.info(
+      { requestId, creator_slug, variant, clientIp },
+      'Checkout request received'
+    )
 
     if (!creator_slug || typeof creator_slug !== 'string' || creator_slug.trim() === '') {
       return NextResponse.json(
@@ -63,7 +150,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (creatorError) {
-      console.error('Creator lookup error:', creatorError.message)
+      logger.error({ requestId, error: creatorError.message }, 'Creator lookup error')
       return NextResponse.json(
         { error: 'Database error' },
         { status: 500 }
@@ -71,6 +158,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!creator) {
+      logger.warn({ requestId, creator_slug }, 'Creator not found')
       return NextResponse.json(
         { error: 'Creator not found' },
         { status: 404 }
@@ -78,91 +166,116 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================
-    // 3) RÉSOLUTION ROUTINE
+    // 3) RÉSOLUTION ROUTINE (two separate queries for reliability)
     // ============================================
-    const { data: creatorRoutine, error: routineError } = await supabase
+    debugStep = 'creator_routine_lookup'
+    const { data: creatorRoutine, error: creatorRoutineError } = await supabase
       .from('creator_routines')
-      .select(`
-        id,
-        routine_id,
-        routines (
-          id,
-          title,
-          slug,
-          base_shopify_variant_ids,
-          upsell_1_shopify_variant_ids,
-          upsell_2_shopify_variant_ids
-        )
-      `)
+      .select('id, routine_id, is_active')
       .eq('creator_id', creator.id)
       .eq('is_active', true)
       .maybeSingle()
 
-    if (routineError) {
-      console.error('Routine lookup error:', routineError.message)
+    if (creatorRoutineError) {
+      logger.error({ requestId, error: creatorRoutineError.message }, 'Creator routine lookup error')
       return NextResponse.json(
         { error: 'Database error' },
         { status: 500 }
       )
     }
 
-    if (!creatorRoutine || !creatorRoutine.routines) {
+    if (!creatorRoutine) {
+      logger.warn({ requestId, creator_id: creator.id }, 'No active routine for creator')
       return NextResponse.json(
         { error: 'No active routine assigned to this creator' },
         { status: 404 }
       )
     }
 
-    // Handle both array and single object from Supabase join
-    const routineData = Array.isArray(creatorRoutine.routines)
-      ? creatorRoutine.routines[0]
-      : creatorRoutine.routines
+    // Fetch the routine details separately
+    debugStep = 'routine_lookup'
+    const { data: routine, error: routineError } = await supabase
+      .from('routines')
+      .select('id, title, base_shopify_variant_ids, upsell_1_shopify_variant_ids, upsell_2_shopify_variant_ids')
+      .eq('id', creatorRoutine.routine_id)
+      .maybeSingle()
 
-    if (!routineData) {
+    if (routineError) {
+      logger.error({ requestId, error: routineError.message }, 'Routine lookup error')
       return NextResponse.json(
-        { error: 'No active routine assigned to this creator' },
+        { error: 'Database error' },
+        { status: 500 }
+      )
+    }
+
+    if (!routine) {
+      logger.warn({ requestId, routine_id: creatorRoutine.routine_id }, 'Routine not found')
+      return NextResponse.json(
+        { error: 'Routine configuration not found' },
         { status: 404 }
       )
     }
 
-    const routine = routineData as {
-      id: string
-      title: string
-      slug: string
-      base_shopify_variant_ids: number[]
-      upsell_1_shopify_variant_ids: number[]
-      upsell_2_shopify_variant_ids: number[]
-    }
-
     // ============================================
-    // 4) SÉLECTION VARIANT IDS
+    // 4) SÉLECTION VARIANT IDs
     // ============================================
-    let variantIds: number[]
+    debugStep = 'variant_selection'
+    let rawVariantIds: (string | number)[]
 
     switch (typedVariant) {
       case 'base':
-        variantIds = routine.base_shopify_variant_ids
+        rawVariantIds = routine.base_shopify_variant_ids
         break
       case 'upsell_1':
-        variantIds = routine.upsell_1_shopify_variant_ids
+        rawVariantIds = routine.upsell_1_shopify_variant_ids
         break
       case 'upsell_2':
-        variantIds = routine.upsell_2_shopify_variant_ids
+        rawVariantIds = routine.upsell_2_shopify_variant_ids
         break
     }
 
-    // Validation
+    // Basic validation - check raw data first
     const expectedCount = VARIANT_PRODUCT_COUNTS[typedVariant]
-    if (!variantIds || variantIds.length !== expectedCount) {
+    if (!rawVariantIds || !Array.isArray(rawVariantIds) || rawVariantIds.length !== expectedCount) {
+      logger.error(
+        { requestId, expected: expectedCount, got: rawVariantIds?.length },
+        'Invalid variant configuration'
+      )
       return NextResponse.json(
-        { error: `Invalid variant configuration: expected ${expectedCount} products, got ${variantIds?.length || 0}` },
+        { error: `Invalid variant configuration: expected ${expectedCount} products, got ${rawVariantIds?.length || 0}` },
         { status: 422 }
       )
     }
 
-    if (!variantIds.every(id => id > 0)) {
+    // Convert string IDs to numbers (Supabase stores them as strings in JSON)
+    const variantIds = rawVariantIds.map(id =>
+      typeof id === 'string' ? parseInt(id, 10) : id
+    )
+
+    if (!variantIds.every(id => id > 0 && !isNaN(id))) {
       return NextResponse.json(
-        { error: 'Invalid variant IDs: all IDs must be positive' },
+        { error: 'Invalid variant IDs: all IDs must be positive numbers' },
+        { status: 422 }
+      )
+    }
+
+    // ============================================
+    // 4.5) PROACTIVE VARIANT VALIDATION
+    // ============================================
+    debugStep = 'shopify_validation'
+    const validation = await validateVariantIds(variantIds, requestId)
+
+    if (!validation.valid) {
+      logger.error(
+        { requestId, invalidIds: validation.invalidIds, errors: validation.errors },
+        'Variant validation failed'
+      )
+      return NextResponse.json(
+        {
+          error: 'Some products are no longer available',
+          details: validation.errors,
+          invalidVariantIds: validation.invalidIds,
+        },
         { status: 422 }
       )
     }
@@ -205,6 +318,7 @@ export async function POST(request: NextRequest) {
 
         if (ageMinutes > 2) {
           // Stale lock - mark as failed
+          logger.warn({ requestId, existingId: existing.id, ageMinutes }, 'Stale lock detected')
           await supabase
             .from('routine_checkouts')
             .update({
@@ -214,6 +328,7 @@ export async function POST(request: NextRequest) {
             .eq('id', existing.id)
           // Continue to create new reservation
         } else {
+          logger.info({ requestId, existingId: existing.id }, 'Checkout creation in progress')
           return NextResponse.json(
             { error: 'Checkout creation in progress, retry in a moment' },
             {
@@ -224,14 +339,17 @@ export async function POST(request: NextRequest) {
         }
       } else if (existing.status === 'completed') {
         if (existing.payload_hash === payloadHash) {
+          logger.info({ requestId, existingId: existing.id }, 'Returning cached checkout')
           return NextResponse.json(
             {
               checkout_url: existing.checkout_url,
-              idempotency_key: idempotencyKey
+              idempotency_key: idempotencyKey,
+              cached: true,
             },
             { status: 200 }
           )
         } else {
+          logger.warn({ requestId }, 'Idempotency key conflict')
           return NextResponse.json(
             { error: 'Idempotency key conflict: different payload' },
             { status: 409 }
@@ -240,6 +358,7 @@ export async function POST(request: NextRequest) {
       } else if (existing.status === 'failed') {
         if (existing.payload_hash === payloadHash) {
           // Retry failed checkout
+          logger.info({ requestId, existingId: existing.id }, 'Retrying failed checkout')
           const { data: retryRow } = await supabase
             .from('routine_checkouts')
             .update({
@@ -289,6 +408,7 @@ export async function POST(request: NextRequest) {
       if (reservationError) {
         if (reservationError.code === '23505') {
           // Unique constraint violation - race condition
+          logger.info({ requestId }, 'Race condition on reservation')
           const { data: retry } = await supabase
             .from('routine_checkouts')
             .select('checkout_url, status, payload_hash, idempotency_key')
@@ -299,7 +419,8 @@ export async function POST(request: NextRequest) {
             if (retry.payload_hash === payloadHash) {
               return NextResponse.json({
                 checkout_url: retry.checkout_url,
-                idempotency_key: retry.idempotency_key
+                idempotency_key: retry.idempotency_key,
+                cached: true,
               })
             } else {
               return NextResponse.json(
@@ -330,99 +451,48 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 7) APPEL SHOPIFY STOREFRONT API
     // ============================================
-    if (!SHOPIFY_STOREFRONT_TOKEN) {
-      await supabase
-        .from('routine_checkouts')
-        .update({
-          status: 'failed',
-          last_error: 'SHOPIFY_STOREFRONT_TOKEN not configured'
-        })
-        .eq('id', rowId)
-
-      return NextResponse.json(
-        { error: 'Shopify not configured' },
-        { status: 500 }
-      )
-    }
-
-    const shopifyEndpoint = `https://${SHOPIFY_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`
-
-    const query = `
-      mutation cartCreate($input: CartInput!) {
-        cartCreate(input: $input) {
-          cart {
-            id
-            checkoutUrl
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `
-
-    const variables = {
-      input: {
-        lines: variantIds.map(id => ({
-          merchandiseId: `gid://shopify/ProductVariant/${id}`,
-          quantity: 1
-        })),
-        attributes: [
-          { key: 'creator_id', value: creator.id },
-          { key: 'creator_slug', value: creator_slug },
-          { key: 'routine_id', value: routine.id },
-          { key: 'routine_variant', value: typedVariant },
-          { key: 'source', value: 'yeoskin_platform' },
-          { key: 'idempotency_key', value: idempotencyKey }
-        ],
-        note: `Routine ${routine.title} via ${creator_slug}`
-      }
-    }
-
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000)
-
     let cart: { id: string; checkoutUrl: string }
 
     try {
-      const response = await fetch(shopifyEndpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Shopify-Storefront-Access-Token': SHOPIFY_STOREFRONT_TOKEN
-        },
-        body: JSON.stringify({ query, variables }),
-        signal: controller.signal
-      })
+      const attributes = [
+        { key: 'creator_id', value: creator.id },
+        { key: 'creator_slug', value: creator_slug },
+        { key: 'routine_id', value: routine.id },
+        { key: 'routine_variant', value: typedVariant },
+        { key: 'source', value: 'yeoskin_platform' },
+        { key: 'idempotency_key', value: idempotencyKey }
+      ]
 
-      if (!response.ok) {
-        throw new Error(`Shopify API error: ${response.status}`)
+      const note = `Routine ${routine.title} via ${creator_slug}`
+
+      const result = await createCart(variantIds, attributes, note, requestId)
+
+      if (result.userErrors?.length > 0) {
+        throw new Error(result.userErrors[0].message)
       }
 
-      const result = await response.json()
-
-      if (result.data?.cartCreate?.userErrors?.length > 0) {
-        throw new Error(result.data.cartCreate.userErrors[0].message)
-      }
-
-      if (!result.data?.cartCreate?.cart) {
+      if (!result.cart) {
         throw new Error('No cart returned from Shopify')
       }
 
-      cart = result.data.cartCreate.cart
+      cart = result.cart
+
     } catch (error: unknown) {
       const err = error instanceof Error ? error : new Error(String(error))
       const errorMessage = err.message || 'Unknown Shopify error'
+      const isCircuitOpen = error instanceof CircuitOpenError
 
-      // Log safely (no tokens)
-      console.error('Shopify error:', {
-        creator_slug,
-        variant: typedVariant,
-        routine_id: routine.id,
-        idempotency_key: idempotencyKey,
-        error: errorMessage
-      })
+      logger.error(
+        {
+          requestId,
+          creator_slug,
+          variant: typedVariant,
+          routine_id: routine.id,
+          error: errorMessage,
+          circuitOpen: isCircuitOpen,
+        },
+        'Shopify cart creation failed'
+      )
 
       await supabase
         .from('routine_checkouts')
@@ -431,6 +501,20 @@ export async function POST(request: NextRequest) {
           last_error: errorMessage.substring(0, 500)
         })
         .eq('id', rowId)
+
+      if (isCircuitOpen) {
+        return NextResponse.json(
+          {
+            error: 'Shopify service temporarily unavailable',
+            retryAfter: 30,
+            circuit: 'open',
+          },
+          {
+            status: 503,
+            headers: { 'Retry-After': '30' }
+          }
+        )
+      }
 
       if (err.name === 'AbortError') {
         return NextResponse.json(
@@ -443,8 +527,6 @@ export async function POST(request: NextRequest) {
         { error: 'Shopify API error', details: errorMessage },
         { status: 502 }
       )
-    } finally {
-      clearTimeout(timeoutId)
     }
 
     // ============================================
@@ -461,7 +543,7 @@ export async function POST(request: NextRequest) {
       .eq('id', rowId)
 
     if (updateError) {
-      console.error('Failed to finalize checkout:', updateError.message)
+      logger.error({ requestId, error: updateError.message }, 'Failed to finalize checkout')
       // Cart was created in Shopify, so we still return success
     }
 
@@ -481,6 +563,12 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 9) RETURN SUCCESS
     // ============================================
+    const duration = Date.now() - startTime
+    logger.info(
+      { requestId, duration, checkout_url: cart.checkoutUrl },
+      'Checkout created successfully'
+    )
+
     return NextResponse.json({
       checkout_url: cart.checkoutUrl,
       idempotency_key: idempotencyKey
@@ -488,10 +576,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error: unknown) {
     const err = error instanceof Error ? error : new Error(String(error))
-    console.error('Checkout error:', err.message)
+    const duration = Date.now() - startTime
+
+    logger.error(
+      { requestId, duration, error: err.message, stack: err.stack, debugStep },
+      'Checkout error'
+    )
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', debugStep, details: err.message },
       { status: 500 }
     )
   }
