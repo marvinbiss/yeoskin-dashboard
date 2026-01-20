@@ -17,7 +17,9 @@ export const useCreatorDashboard = (creatorId = null) => {
     },
     recentActivity: [],
     pendingCommissions: { count: 0, amount: 0 },
+    lockedCommissions: { count: 0, amount: 0 },
     payableCommissions: { count: 0, amount: 0 },
+    paidCommissions: { count: 0, amount: 0 },
     unreadNotifications: 0,
   })
   const [forecast, setForecast] = useState({
@@ -57,7 +59,9 @@ export const useCreatorDashboard = (creatorId = null) => {
           },
           recentActivity: data.recent_activity || [],
           pendingCommissions: data.pending_commissions || { count: 0, amount: 0 },
+          lockedCommissions: data.locked_commissions || { count: 0, amount: 0 },
           payableCommissions: data.payable_commissions || { count: 0, amount: 0 },
+          paidCommissions: data.paid_commissions || { count: 0, amount: 0 },
           unreadNotifications: data.unread_notifications || 0,
         })
       }
@@ -145,7 +149,9 @@ export const useCreatorDashboard = (creatorId = null) => {
     balance: dashboard.balance,
     recentActivity: dashboard.recentActivity,
     pendingCommissions: dashboard.pendingCommissions,
+    lockedCommissions: dashboard.lockedCommissions,
     payableCommissions: dashboard.payableCommissions,
+    paidCommissions: dashboard.paidCommissions,
     unreadNotifications: dashboard.unreadNotifications,
     refresh: fetchDashboard,
     refreshForecast: fetchForecast,

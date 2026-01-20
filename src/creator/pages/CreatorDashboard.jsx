@@ -1,4 +1,6 @@
-import { useNavigate } from 'react-router-dom'
+'use client'
+
+import { useNavigate } from '@/lib/navigation'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { useCreatorDashboard } from '../hooks/useCreatorDashboard'
 import {
@@ -8,6 +10,7 @@ import {
   ActivityFeed,
   TierCard,
   PayoutStatusCard,
+  RoutineBreakdownCard,
 } from '../components'
 
 /**
@@ -70,8 +73,8 @@ export const CreatorDashboard = () => {
         {/* Payout Status */}
         {creator?.id && <PayoutStatusCard creatorId={creator.id} />}
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Quick Stats - Commission Status Breakdown */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Code promo</p>
             <p className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -79,24 +82,39 @@ export const CreatorDashboard = () => {
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Taux de commission</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Taux commission</p>
             <p className="text-lg font-semibold text-gray-900 dark:text-white">
               {creator?.commission_rate ? `${(creator.commission_rate * 100).toFixed(0)}%` : '-'}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Commissions en attente</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">En attente</p>
+            <p className="text-lg font-semibold text-gray-500">
               {dashboard.pendingCommissions?.count || 0}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Commissions payables</p>
-            <p className="text-lg font-semibold text-green-600">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-yellow-200 dark:border-yellow-800 p-4 bg-yellow-50 dark:bg-yellow-900/20">
+            <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-1">Verrouillees</p>
+            <p className="text-lg font-semibold text-yellow-600 dark:text-yellow-400">
+              {dashboard.lockedCommissions?.count || 0}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800 p-4 bg-blue-50 dark:bg-blue-900/20">
+            <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Payables</p>
+            <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
               {dashboard.payableCommissions?.count || 0}
             </p>
           </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 p-4 bg-green-50 dark:bg-green-900/20">
+            <p className="text-sm text-green-600 dark:text-green-400 mb-1">Payees</p>
+            <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+              {dashboard.paidCommissions?.count || 0}
+            </p>
+          </div>
         </div>
+
+        {/* Routine Breakdown */}
+        {creator?.id && <RoutineBreakdownCard creatorId={creator.id} />}
 
         {/* Recent Activity */}
         <ActivityFeed
