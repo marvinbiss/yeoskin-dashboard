@@ -1,4 +1,6 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+'use client'
+
+import { NavLink, useNavigate } from '@/lib/navigation'
 import {
   LayoutDashboard,
   Wallet,
@@ -16,7 +18,9 @@ import {
   CreditCard,
   ShoppingBag,
   FolderTree,
-  ShoppingCart
+  ShoppingCart,
+  Package,
+  UserPlus
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
@@ -26,11 +30,13 @@ const navigation = [
   { name: 'Tableau de bord', href: '/', icon: LayoutDashboard },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Produits', href: '/products', icon: ShoppingBag, adminOnly: true },
+  { name: 'Packs', href: '/packs', icon: Package, adminOnly: true },
   { name: 'Categories', href: '/categories', icon: FolderTree, adminOnly: true },
   { name: 'Commandes', href: '/orders', icon: ShoppingCart, adminOnly: true },
   { name: 'Paiements', href: '/payouts', icon: Wallet },
   { name: 'Exec Paiements', href: '/admin-payouts', icon: CreditCard, adminOnly: true },
   { name: 'Créateurs', href: '/creators', icon: Users },
+  { name: 'Candidatures', href: '/applications', icon: UserPlus, adminOnly: true },
   { name: 'Commissions', href: '/commissions', icon: FileText },
   { name: 'Finance', href: '/financial', icon: Landmark, adminOnly: true },
 ]
