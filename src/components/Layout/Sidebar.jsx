@@ -20,7 +20,8 @@ import {
   FolderTree,
   ShoppingCart,
   Package,
-  UserPlus
+  UserPlus,
+  PanelTop
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
@@ -37,6 +38,7 @@ const navigation = [
   { name: 'Exec Paiements', href: '/admin-payouts', icon: CreditCard, adminOnly: true },
   { name: 'Créateurs', href: '/creators', icon: Users },
   { name: 'Candidatures', href: '/applications', icon: UserPlus, adminOnly: true },
+  { name: 'Pages', href: '/pages', icon: PanelTop, adminOnly: true },
   { name: 'Commissions', href: '/commissions', icon: FileText },
   { name: 'Finance', href: '/financial', icon: Landmark, adminOnly: true },
 ]
