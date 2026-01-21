@@ -1,5 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/lib/navigation'
 import { User, Mail, Tag, Percent, Calendar, CheckCircle, XCircle, Save, ArrowLeft } from 'lucide-react'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { CreatorLayout } from '../components'

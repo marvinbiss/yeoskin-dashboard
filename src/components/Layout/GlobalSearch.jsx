@@ -1,10 +1,12 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Global Search Component
  * Search across creators, batches, admins
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from '@/lib/navigation'
 import {
   Search,
   X,

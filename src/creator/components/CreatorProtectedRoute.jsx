@@ -1,4 +1,6 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+'use client'
+
+import { Navigate, useLocation, useNavigate } from '@/lib/navigation'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { Loader2, UserX } from 'lucide-react'
 

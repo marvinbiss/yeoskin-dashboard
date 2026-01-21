@@ -1,9 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Configuration Supabase
-// ⚠️ Remplacer par vos vraies valeurs
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-project.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'your-anon-key'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

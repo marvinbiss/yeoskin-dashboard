@@ -59,6 +59,7 @@ export { LoginPage } from './LoginPage'
 // Re-export AdminPayoutsPage and AnalyticsPage
 export { AdminPayoutsPage } from './AdminPayoutsPage'
 export { AnalyticsPage } from './AnalyticsPage'
+export { default as ApplicationsPage } from './ApplicationsPage'
 
 // ============================================================================
 // DASHBOARD PAGE (Home)

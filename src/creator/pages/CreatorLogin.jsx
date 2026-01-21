@@ -1,5 +1,7 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from '@/lib/navigation'
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { useCreatorAuthActions } from '../hooks/useCreatorAuth'

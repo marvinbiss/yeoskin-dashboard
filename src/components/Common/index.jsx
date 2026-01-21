@@ -387,13 +387,17 @@ export const Card = ({ children, className, ...props }) => {
   )
 }
 
-Card.Header = ({ children, className }) => (
+const CardHeader = ({ children, className }) => (
   <div className={clsx('card-header', className)}>{children}</div>
 )
+CardHeader.displayName = 'Card.Header'
+Card.Header = CardHeader
 
-Card.Body = ({ children, className }) => (
+const CardBody = ({ children, className }) => (
   <div className={clsx('card-body', className)}>{children}</div>
 )
+CardBody.displayName = 'Card.Body'
+Card.Body = CardBody
 
 // ============================================================================
 // CONFIRM DIALOG - FRANÇAIS

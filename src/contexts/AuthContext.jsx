@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { ADMIN_ROLES, hasRequiredRole } from '../lib/adminValidation'

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * CreatorProfileSettings - Self-service profile editor for creators
  * Allows creators to customize their public profile page

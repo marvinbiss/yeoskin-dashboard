@@ -1,4 +1,6 @@
-import { Navigate, useLocation } from 'react-router-dom'
+'use client'
+
+import { Navigate, useLocation, Link } from '@/lib/navigation'
 import { useAuth } from '../../contexts/AuthContext'
 import { Spinner } from '../Common'
 import { ShieldX } from 'lucide-react'
@@ -37,12 +39,12 @@ const UnauthorizedScreen = ({ requiredRole }) => (
           </span>
         )}
       </p>
-      <a
-        href="/"
+      <Link
+        to="/"
         className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors"
       >
         Retour au tableau de bord
-      </a>
+      </Link>
     </div>
   </div>
 )
