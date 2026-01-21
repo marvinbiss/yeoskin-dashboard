@@ -1,5 +1,29 @@
 import { Metadata } from 'next'
+import { createClient } from '@supabase/supabase-js'
 import RoutineHydratationClient from './RoutineHydratationClient'
+
+// Force dynamic rendering to fetch fresh CMS content
+export const dynamic = 'force-dynamic'
+
+// Fetch CMS content server-side
+async function getCmsContent() {
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+    )
+    const { data } = await supabase
+      .from('page_content')
+      .select('section_key, content')
+      .eq('page_slug', 'routine-hydratation')
+      .eq('is_published', true)
+    const content: Record<string, any> = {}
+    data?.forEach(s => { content[s.section_key] = s.content })
+    return content
+  } catch (e) {
+    return {}
+  }
+}
 
 // ============================================================================
 // METADATA SEO
@@ -68,17 +92,15 @@ const jsonLd = {
 // ============================================================================
 // PAGE COMPONENT
 // ============================================================================
-export default function RoutineHydratationPage() {
+export default async function RoutineHydratationPage() {
+  const cms = await getCmsContent()
   return (
     <>
-      {/* JSON-LD Script */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-
-      {/* Client Component with all interactive elements */}
-      <RoutineHydratationClient />
+      <RoutineHydratationClient cms={cms} />
     </>
   )
 }

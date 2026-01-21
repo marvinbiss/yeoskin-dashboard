@@ -222,7 +222,31 @@ const scaleIn: Variants = {
 // MAIN COMPONENT
 // ============================================================================
 
-export default function RoutineHydratationClient() {
+interface Props {
+  cms?: {
+    hero?: { badge?: string; title?: string; subtitle?: string; stats?: { rating?: number; reviews?: number } }
+    pricing?: { base?: { price?: number; original_price?: number }; upsell_1?: { price?: number; original_price?: number }; upsell_2?: { price?: number; original_price?: number } }
+    products?: { section_title?: string; items?: any[] }
+    reviews?: { section_title?: string; items?: any[] }
+    faq?: { section_title?: string; items?: any[] }
+    cta?: { title?: string; button_text?: string }
+  }
+}
+
+export default function RoutineHydratationClient({ cms = {} }: Props) {
+  // Use CMS prices if available, otherwise defaults
+  const cmsPricing = cms.pricing || {}
+  const currentPrices = {
+    base: cmsPricing.base?.price ?? PRICES.base,
+    upsell_1: cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
+    upsell_2: cmsPricing.upsell_2?.price ?? PRICES.upsell_2,
+  }
+  const currentOriginalPrices = {
+    base: cmsPricing.base?.original_price ?? ORIGINAL_PRICES.base,
+    upsell_1: cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
+    upsell_2: cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
+  }
+
   const [selectedVariant, setSelectedVariant] = useState<VariantType>('base')
   const [isLoading, setIsLoading] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
@@ -405,8 +429,8 @@ export default function RoutineHydratationClient() {
               {/* Price */}
               <div className="mb-8">
                 <div className="flex items-baseline gap-4">
-                  <span className="text-5xl font-bold text-gray-950">{PRICES[selectedVariant]}€</span>
-                  <span className="text-xl text-gray-400 line-through">{ORIGINAL_PRICES[selectedVariant]}€</span>
+                  <span className="text-5xl font-bold text-gray-950">{currentPrices[selectedVariant]}€</span>
+                  <span className="text-xl text-gray-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
                   <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
                     Économise {ORIGINAL_PRICES[selectedVariant] - PRICES[selectedVariant]}€
                   </span>
@@ -425,7 +449,7 @@ export default function RoutineHydratationClient() {
                   ) : (
                     <>
                       <ShoppingBag className="w-5 h-5" />
-                      Ajouter au panier • {PRICES[selectedVariant]}€
+                      Ajouter au panier • {currentPrices[selectedVariant]}€
                     </>
                   )}
                 </button>
@@ -795,7 +819,7 @@ export default function RoutineHydratationClient() {
               ) : (
                 <>
                   <ShoppingBag className="w-6 h-6" />
-                  Commander ma routine • {PRICES[selectedVariant]}€
+                  Commander ma routine • {currentPrices[selectedVariant]}€
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
@@ -897,7 +921,7 @@ export default function RoutineHydratationClient() {
               ) : (
                 <>
                   <ShoppingBag className="w-6 h-6" />
-                  Ajouter au panier • {PRICES[selectedVariant]}€
+                  Ajouter au panier • {currentPrices[selectedVariant]}€
                 </>
               )}
             </button>
@@ -937,8 +961,8 @@ export default function RoutineHydratationClient() {
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-bold text-gray-950">{PRICES[selectedVariant]}€</p>
-                <p className="text-sm text-gray-500 line-through">{ORIGINAL_PRICES[selectedVariant]}€</p>
+                <p className="font-bold text-gray-950">{currentPrices[selectedVariant]}€</p>
+                <p className="text-sm text-gray-500 line-through">{currentOriginalPrices[selectedVariant]}€</p>
               </div>
               <button
                 onClick={handleCheckout}
