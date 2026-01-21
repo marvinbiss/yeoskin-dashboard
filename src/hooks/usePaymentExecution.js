@@ -109,7 +109,7 @@ export const usePaymentExecution = (batchId = null) => {
     setOperationLog(prev => [entry, ...prev].slice(0, 100)) // Keep last 100
 
     // Also log to console in development
-    if (import.meta.env.DEV) {
+    if (process.env.NODE_ENV === 'development') {
       console.log(`[PaymentExecution] ${type}:`, message, data)
     }
   }, [])

@@ -12,8 +12,8 @@ import {
   generateIdempotencyKey
 } from './paymentApi'
 
-const N8N_BASE_URL = import.meta.env.VITE_N8N_BASE_URL || 'https://yeoskin.app.n8n.cloud'
-const PAYOUT_SECRET = import.meta.env.VITE_PAYOUT_SECRET || 'your-payout-secret'
+const N8N_BASE_URL = process.env.NEXT_PUBLIC_N8N_BASE_URL || 'https://yeoskin.app.n8n.cloud'
+const PAYOUT_SECRET = process.env.NEXT_PUBLIC_PAYOUT_SECRET || 'your-payout-secret'
 
 // Headers communs pour les appels n8n
 const getHeaders = (idempotencyKey = null) => {

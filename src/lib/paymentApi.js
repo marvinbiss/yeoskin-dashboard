@@ -14,8 +14,8 @@ import { supabase } from './supabase'
 import { fetchWithTimeout, TimeoutError, NetworkError, formatError } from './fetchUtils'
 
 // API Configuration
-const N8N_BASE_URL = import.meta.env.VITE_N8N_BASE_URL || 'https://yeoskin.app.n8n.cloud'
-const PAYOUT_SECRET = import.meta.env.VITE_PAYOUT_SECRET || 'your-payout-secret'
+const N8N_BASE_URL = process.env.NEXT_PUBLIC_N8N_BASE_URL || 'https://yeoskin.app.n8n.cloud'
+const PAYOUT_SECRET = process.env.NEXT_PUBLIC_PAYOUT_SECRET || 'your-payout-secret'
 const DEFAULT_TIMEOUT = 60000 // 60 seconds for payment operations
 
 // ============================================================================
