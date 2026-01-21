@@ -452,7 +452,7 @@ function SectionEditor({ section, config, pageSlug, images, onSave }) {
               ) : (
                 <Save className="w-4 h-4" />
               )}
-              {saving ? 'Sauvegarde...' : 'Sauvegarder'}
+              {saving ? 'Publication...' : 'Sauvegarder & Publier'}
             </button>
           </div>
         </div>
@@ -489,7 +489,7 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
     fetchContent()
   }, [fetchContent])
 
-  // Save section
+  // Save section (and publish it)
   const handleSaveSection = async (sectionKey, content) => {
     try {
       const res = await fetch('/api/cms/content', {
@@ -498,15 +498,17 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
         body: JSON.stringify({
           page_slug: pageSlug,
           section_key: sectionKey,
-          content
+          content,
+          is_published: true  // Always publish when saving
         })
       })
       const data = await res.json()
       if (data.success) {
         // Update local state
         setSections(prev => prev.map(s =>
-          s.section_key === sectionKey ? { ...s, content } : s
+          s.section_key === sectionKey ? { ...s, content, is_published: true } : s
         ))
+        alert('Sauvegardé et publié !')
       } else {
         alert(data.error || 'Erreur de sauvegarde')
       }
