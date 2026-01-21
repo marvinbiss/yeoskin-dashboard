@@ -75,18 +75,9 @@ export function middleware(request: NextRequest) {
   }
 
   // Handle admin.yeoskin.com subdomain
+  // All routes allowed, no rewrites needed (dashboard is at root)
   if (subdomain === 'admin') {
-    const path = url.pathname
-
-    // Allow admin routes
-    if (path.startsWith('/admin') || path.startsWith('/login') || path.startsWith('/api') || path.startsWith('/_next')) {
-      return NextResponse.next()
-    }
-
-    // Redirect root to admin dashboard
-    if (path === '/') {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
+    return NextResponse.next()
   }
 
   // Handle dashboard.yeoskin.com subdomain
