@@ -234,8 +234,12 @@ interface Props {
 }
 
 export default function RoutineHydratationClient({ cms = {} }: Props) {
-  // Use CMS prices if available, otherwise defaults
+  // Use CMS data if available, otherwise defaults
   const cmsPricing = cms.pricing || {}
+  const cmsHero = cms.hero || {}
+  const cmsFaq = cms.faq || {}
+  const cmsCta = cms.cta || {}
+
   const currentPrices = {
     base: cmsPricing.base?.price ?? PRICES.base,
     upsell_1: cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
@@ -246,6 +250,20 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
     upsell_1: cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
     upsell_2: cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
   }
+
+  // CMS Hero content
+  const heroTitle = cmsHero.title || 'Routine Hydratation'
+  const heroSubtitle = cmsHero.subtitle || 'en 3 Gestes'
+  const heroBadge = cmsHero.badge || 'BEST-SELLER'
+  const heroRating = cmsHero.stats?.rating || 4.9
+  const heroReviews = cmsHero.stats?.reviews || 2847
+
+  // CMS FAQ content
+  const faqItems = cmsFaq.items?.length ? cmsFaq.items : FAQS
+
+  // CMS CTA content
+  const ctaTitle = cmsCta.title || 'Prête à Transformer Ta Peau ?'
+  const ctaButton = cmsCta.button_text || 'Ajouter au panier'
 
   const [selectedVariant, setSelectedVariant] = useState<VariantType>('base')
   const [isLoading, setIsLoading] = useState(false)
@@ -373,7 +391,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
                       <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <span className="text-sm font-medium">4.9 (2,847)</span>
+                  <span className="text-sm font-medium">{heroRating} ({heroReviews.toLocaleString()})</span>
                 </motion.div>
               </div>
             </motion.div>
@@ -393,14 +411,14 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
                 className="inline-flex items-center gap-2 bg-pink-light text-pink px-4 py-2 rounded-full text-sm font-medium mb-6"
               >
                 <Sparkles className="w-4 h-4" />
-                Routine Best-seller 2024
+                {heroBadge}
               </motion.div>
 
               {/* Title */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-6">
-                Routine Hydratation
+                {heroTitle}
                 <br />
-                <span className="text-pink">en 3 Gestes</span>
+                <span className="text-pink">{heroSubtitle}</span>
               </h1>
 
               {/* Description */}
@@ -702,8 +720,8 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
               ))}
-              <span className="text-xl font-bold text-gray-950 ml-2">4.9/5</span>
-              <span className="text-gray-600">(2,847 avis)</span>
+              <span className="text-xl font-bold text-gray-950 ml-2">{heroRating}/5</span>
+              <span className="text-gray-600">({heroReviews.toLocaleString()} avis)</span>
             </div>
           </motion.div>
 
@@ -852,7 +870,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
             variants={staggerContainer}
             className="space-y-4"
           >
-            {FAQS.map((faq, i) => (
+            {faqItems.map((faq: any, i: number) => (
               <motion.div key={i} variants={fadeInUp}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
@@ -905,7 +923,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
             variants={fadeInUp}
           >
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-              Prête à Transformer Ta Peau ?
+              {ctaTitle}
             </h2>
             <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
               Rejoins 15,234 personnes qui ont transformé leur peau avec cette routine K-beauty essentielle.
