@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect, createContext, useContext } from 'react'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import clsx from 'clsx'

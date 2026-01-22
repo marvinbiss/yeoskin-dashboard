@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * PacksPage - Admin pack management
  * Create packs of products, assign to creators

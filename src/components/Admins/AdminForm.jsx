@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect, useMemo } from 'react'
 import { Mail, User, Lock, Eye, EyeOff, RefreshCw, Check, X } from 'lucide-react'
 import clsx from 'clsx'

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * SystemHealthCard - Displays system health monitoring
  */

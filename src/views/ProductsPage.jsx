@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * ProductsPage - Admin product catalog management
  * MODULE 2: E-commerce - Admin side

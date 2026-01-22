@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Layout } from '@/components/Layout'
 import {
   FileText,
   Edit3,
@@ -37,14 +38,8 @@ export default function AdminPagesPage() {
   const [loading, setLoading] = useState(false)
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pages</h1>
-          <p className="text-gray-600">Gérez le contenu de vos landing pages</p>
-        </div>
-      </div>
+    <Layout title="Pages" subtitle="Gérez le contenu de vos landing pages">
+      <div className="space-y-6">
 
       {/* Info Banner */}
       <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-4">
@@ -153,6 +148,7 @@ export default function AdminPagesPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </Layout>
   )
 }

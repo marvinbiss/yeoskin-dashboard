@@ -1,8 +1,10 @@
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  Users, 
+'use client'
+
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  Users,
   Wallet,
   Percent,
   Clock,

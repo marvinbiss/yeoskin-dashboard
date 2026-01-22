@@ -63,7 +63,8 @@ export const ProtectedRoute = ({ children, requiredRole }) => {
 
   // Pas de session = rediriger vers login
   if (!session) {
-    return <Navigate to="/login" state={{ from: location }} replace />
+    const redirectPath = location.pathname !== '/' ? `?from=${encodeURIComponent(location.pathname)}` : ''
+    return <Navigate to={`/login${redirectPath}`} replace />
   }
 
   // Vérifier le rôle si requis

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * CategoriesPage - Admin category management
  * MODULE 4: Admin - Categories CRUD

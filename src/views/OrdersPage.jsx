@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * OrdersPage - Admin order management
  * MODULE 4: Admin - Orders view & tracking

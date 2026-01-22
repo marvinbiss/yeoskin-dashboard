@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Error Boundary Component
  * ============================================================================

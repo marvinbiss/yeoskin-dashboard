@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN - Analytics Page for Admin
  * KPIs, charts, and top creators

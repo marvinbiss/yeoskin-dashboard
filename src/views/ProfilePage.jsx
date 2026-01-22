@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Profile Page
  * User profile, security settings, 2FA, sessions

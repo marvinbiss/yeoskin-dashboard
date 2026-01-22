@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Financial Ledger Components
  * ============================================================================

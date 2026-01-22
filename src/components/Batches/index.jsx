@@ -1,6 +1,8 @@
+'use client'
+
 import { useState } from 'react'
-import { 
-  Eye, 
+import {
+  Eye,
   Play, 
   CheckCircle, 
   Calendar,

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Advanced Filters Component
  * Reusable filter panel for tables

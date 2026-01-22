@@ -2,6 +2,7 @@
 
 import { ToastProvider } from '@/components/Common'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { CreatorAuthProvider } from '@/creator'
 import { SessionTimeoutWarning } from '@/components/Auth'
 import { useSession } from '@/hooks/useSession'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -54,9 +55,6 @@ export function AdminProviders({ children }) {
 }
 
 export function CreatorProviders({ children }) {
-  // Import dynamically to avoid circular deps
-  const { CreatorAuthProvider } = require('@/creator')
-
   return (
     <ErrorBoundary>
       <CreatorAuthProvider>

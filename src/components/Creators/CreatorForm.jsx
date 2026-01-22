@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - CreatorForm Component
  * Formulaire de création/modification d'un créateur

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Bulk Actions Component
  * Selection and bulk operations for tables

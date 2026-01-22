@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN DASHBOARD - Notification Center Component
  * Real-time notifications with dropdown panel

@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * YEOSKIN - Admin Payouts Page
  * Interface complete pour gerer les paiements Wise via n8n
