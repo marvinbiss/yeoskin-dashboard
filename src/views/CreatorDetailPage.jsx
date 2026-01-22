@@ -37,6 +37,7 @@ import {
   Check,
   Search,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import {
@@ -71,6 +72,12 @@ export const CreatorDetailPage = () => {
   const [assignedPacks, setAssignedPacks] = useState([])
   const [savingPacks, setSavingPacks] = useState(false)
   const [creatorProfile, setCreatorProfile] = useState(null)
+
+  // Routine assignment state
+  const [routineModal, setRoutineModal] = useState(false)
+  const [allRoutines, setAllRoutines] = useState([])
+  const [assignedRoutine, setAssignedRoutine] = useState(null)
+  const [savingRoutine, setSavingRoutine] = useState(false)
 
   // Fetch creator data
   useEffect(() => {
@@ -176,6 +183,24 @@ export const CreatorDetailPage = () => {
           .map(cp => cp.product_packs)
       )
 
+      // Fetch active routines
+      const { data: routinesData } = await supabase
+        .from('routines')
+        .select('id, title, slug, objective, base_price, is_active')
+        .eq('is_active', true)
+        .order('title')
+
+      setAllRoutines(routinesData || [])
+
+      // Fetch assigned routine for this creator
+      const { data: creatorRoutineData } = await supabase
+        .from('creator_routines')
+        .select('*, routines(id, title, slug, objective)')
+        .eq('creator_id', id)
+        .maybeSingle()
+
+      setAssignedRoutine(creatorRoutineData)
+
     } catch (error) {
       toast.error('Erreur lors du chargement du createur')
       console.error(error)
@@ -239,6 +264,52 @@ export const CreatorDetailPage = () => {
       toast.error('Erreur lors du retrait du pack')
     } finally {
       setSavingPacks(false)
+    }
+  }
+
+  // Assign routine to creator (upsert because UNIQUE on creator_id)
+  const assignRoutine = async (routineId) => {
+    setSavingRoutine(true)
+    try {
+      const { error } = await supabase
+        .from('creator_routines')
+        .upsert({
+          creator_id: id,
+          routine_id: routineId,
+          is_active: true,
+        }, { onConflict: 'creator_id' })
+
+      if (error) throw error
+
+      toast.success('Routine assignee avec succes')
+      setRoutineModal(false)
+      fetchCreatorData()
+    } catch (error) {
+      toast.error("Erreur lors de l'assignation de la routine")
+      console.error(error)
+    } finally {
+      setSavingRoutine(false)
+    }
+  }
+
+  // Unassign routine from creator
+  const unassignRoutine = async () => {
+    setSavingRoutine(true)
+    try {
+      const { error } = await supabase
+        .from('creator_routines')
+        .delete()
+        .eq('creator_id', id)
+
+      if (error) throw error
+
+      setAssignedRoutine(null)
+      toast.success('Routine retiree avec succes')
+      setRoutineModal(false)
+    } catch (error) {
+      toast.error('Erreur lors du retrait de la routine')
+    } finally {
+      setSavingRoutine(false)
     }
   }
 
@@ -704,6 +775,77 @@ export const CreatorDetailPage = () => {
               </Card.Body>
             </Card>
 
+            {/* Assigned Routine */}
+            <Card>
+              <Card.Header>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Routine assignee</h3>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setRoutineModal(true)}
+                  >
+                    <Sparkles className="w-4 h-4 mr-1" />
+                    Gerer
+                  </Button>
+                </div>
+              </Card.Header>
+              <Card.Body>
+                {!assignedRoutine ? (
+                  <div className="text-center py-4">
+                    <Sparkles className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Aucune routine assignee</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Cliquez sur "Gerer" pour assigner une routine
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800">
+                      <Sparkles className="w-5 h-5 text-primary-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {assignedRoutine.routines?.title || 'Routine'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {assignedRoutine.routines?.objective}
+                        </p>
+                      </div>
+                      <button
+                        onClick={unassignRoutine}
+                        disabled={savingRoutine}
+                        className="p-1 text-gray-400 hover:text-red-500 transition"
+                        title="Retirer la routine"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {/* Routine stats */}
+                    <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {(assignedRoutine.base_orders || 0) + (assignedRoutine.upsell_1_orders || 0) + (assignedRoutine.upsell_2_orders || 0)}
+                        </p>
+                        <p className="text-gray-500">Commandes</p>
+                      </div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {(assignedRoutine.base_carts || 0) + (assignedRoutine.upsell_1_carts || 0) + (assignedRoutine.upsell_2_carts || 0)}
+                        </p>
+                        <p className="text-gray-500">Paniers</p>
+                      </div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {((assignedRoutine.base_revenue || 0) + (assignedRoutine.upsell_1_revenue || 0) + (assignedRoutine.upsell_2_revenue || 0)).toFixed(0)}€
+                        </p>
+                        <p className="text-gray-500">Revenus</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card.Body>
+            </Card>
+
             {/* Creator Page Link */}
             {creatorProfile?.slug && (
               <Card>
@@ -901,6 +1043,99 @@ export const CreatorDetailPage = () => {
                 <Button
                   variant="primary"
                   onClick={() => setPacksModal(false)}
+                >
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Routine Modal */}
+      {routineModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setRoutineModal(false)} />
+            <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-md">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Gerer la routine
+                </h3>
+                <button
+                  onClick={() => setRoutineModal(false)}
+                  className="p-1 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-4 max-h-96 overflow-y-auto">
+                <p className="text-sm text-gray-500 mb-4">
+                  Selectionnez la routine a assigner a ce createur.
+                  Chaque createur ne peut avoir qu'une seule routine active.
+                </p>
+
+                {allRoutines.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">Aucune routine disponible</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Creez des routines dans la section Routines
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {allRoutines.map(routine => {
+                      const isAssigned = assignedRoutine?.routine_id === routine.id
+                      return (
+                        <div
+                          key={routine.id}
+                          className={`flex items-center justify-between p-3 rounded-lg border transition ${
+                            isAssigned
+                              ? 'border-primary-300 bg-primary-50 dark:bg-primary-900/20'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Sparkles className={`w-5 h-5 ${
+                              isAssigned ? 'text-primary-600' : 'text-gray-400'
+                            }`} />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">
+                                {routine.title}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {routine.objective} - {routine.base_price}€
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => isAssigned ? unassignRoutine() : assignRoutine(routine.id)}
+                            disabled={savingRoutine}
+                            className={`p-2 rounded-lg transition ${
+                              isAssigned
+                                ? 'bg-primary-100 text-primary-600 hover:bg-primary-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            {isAssigned ? (
+                              <Check className="w-4 h-4" />
+                            ) : (
+                              <Plus className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700">
+                <Button
+                  variant="primary"
+                  onClick={() => setRoutineModal(false)}
                 >
                   Fermer
                 </Button>

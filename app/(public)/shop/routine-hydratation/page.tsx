@@ -5,23 +5,35 @@ import RoutineHydratationClient from './RoutineHydratationClient'
 // Force dynamic rendering to fetch fresh CMS content
 export const dynamic = 'force-dynamic'
 
-// Fetch CMS content server-side
-async function getCmsContent() {
+// Fetch CMS content + routine data server-side
+async function getPageData() {
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL || '',
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
     )
-    const { data } = await supabase
+
+    // Fetch CMS content (hero, reviews, FAQ, CTA, guarantees)
+    const { data: cmsData } = await supabase
       .from('page_content')
       .select('section_key, content')
       .eq('page_slug', 'routine-hydratation')
       .eq('is_published', true)
-    const content: Record<string, any> = {}
-    data?.forEach(s => { content[s.section_key] = s.content })
-    return content
+
+    const cms: Record<string, any> = {}
+    cmsData?.forEach(s => { cms[s.section_key] = s.content })
+
+    // Fetch routine data (products + pricing - single source of truth)
+    const { data: routine } = await supabase
+      .from('routines')
+      .select('id, title, slug, objective, description, base_products, base_price, upsell_1_product, upsell_1_price, upsell_1_original_price, upsell_2_products, upsell_2_price, upsell_2_original_price, image_url, expected_results, is_active')
+      .eq('slug', 'routine-hydratation')
+      .eq('is_active', true)
+      .maybeSingle()
+
+    return { cms, routine }
   } catch (e) {
-    return {}
+    return { cms: {}, routine: null }
   }
 }
 
@@ -93,14 +105,14 @@ const jsonLd = {
 // PAGE COMPONENT
 // ============================================================================
 export default async function RoutineHydratationPage() {
-  const cms = await getCmsContent()
+  const { cms, routine } = await getPageData()
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <RoutineHydratationClient cms={cms} />
+      <RoutineHydratationClient cms={cms} routine={routine} />
     </>
   )
 }

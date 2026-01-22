@@ -11,16 +11,19 @@ import {
   ChevronUp,
   Image as ImageIcon,
   Type,
-  Hash,
   Star,
   Settings,
   RefreshCw,
   Check,
-  X,
-  ExternalLink
+  Sparkles,
+  Globe,
+  Lock,
+  Link as LinkIcon
 } from 'lucide-react'
+import Link from 'next/link'
 
 // Section configurations for different page types
+// NOTE: pricing + products are managed via /routines (single source of truth)
 const SECTION_CONFIGS = {
   'routine-hydratation': {
     hero: {
@@ -37,44 +40,6 @@ const SECTION_CONFIGS = {
         { key: 'urgency.enabled', label: 'Afficher urgence', type: 'checkbox' },
         { key: 'urgency.stock_left', label: 'Stock restant', type: 'number' },
       ]
-    },
-    pricing: {
-      label: 'Prix & Offres',
-      icon: Hash,
-      fields: [
-        { key: 'base.price', label: 'Prix de base', type: 'number' },
-        { key: 'base.original_price', label: 'Prix barré', type: 'number' },
-        { key: 'base.label', label: 'Label pack de base', type: 'text' },
-        { key: 'upsell_1.price', label: 'Prix upsell +1', type: 'number' },
-        { key: 'upsell_1.original_price', label: 'Prix barré upsell +1', type: 'number' },
-        { key: 'upsell_1.badge', label: 'Badge upsell +1', type: 'text' },
-        { key: 'upsell_1.extra_product', label: 'Produit bonus +1', type: 'text' },
-        { key: 'upsell_2.price', label: 'Prix upsell +2', type: 'number' },
-        { key: 'upsell_2.original_price', label: 'Prix barré upsell +2', type: 'number' },
-        { key: 'upsell_2.badge', label: 'Badge upsell +2', type: 'text' },
-      ]
-    },
-    products: {
-      label: 'Produits',
-      icon: ImageIcon,
-      fields: [
-        { key: 'section_title', label: 'Titre de section', type: 'text' },
-        { key: 'section_subtitle', label: 'Sous-titre de section', type: 'text' },
-      ],
-      arrayField: {
-        key: 'items',
-        itemFields: [
-          { key: 'name', label: 'Nom du produit', type: 'text' },
-          { key: 'brand', label: 'Marque', type: 'text' },
-          { key: 'step', label: 'Etape (1, 2, 3)', type: 'number' },
-          { key: 'time', label: 'Moment (ex: MATIN & SOIR)', type: 'text' },
-          { key: 'description', label: 'Description', type: 'textarea' },
-          { key: 'ingredients', label: 'Ingrédients (séparés par virgule)', type: 'text' },
-          { key: 'satisfaction', label: 'Satisfaction (%)', type: 'number' },
-          { key: 'duration', label: 'Durée (ex: 150ml - 4 mois)', type: 'text' },
-          { key: 'image_key', label: 'Clé image', type: 'image' },
-        ]
-      }
     },
     reviews: {
       label: 'Avis Clients',
@@ -467,10 +432,13 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
   const [images, setImages] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [linkedRoutine, setLinkedRoutine] = useState(null)
+  const [publishing, setPublishing] = useState(false)
+  const [isPublished, setIsPublished] = useState(false)
 
   const config = SECTION_CONFIGS[pageSlug] || {}
 
-  // Fetch content
+  // Fetch content + linked routine
   const fetchContent = useCallback(async () => {
     setLoading(true)
     try {
@@ -478,6 +446,19 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
       const data = await res.json()
       setSections(data.content || [])
       setImages(data.images || {})
+
+      // Check if all sections are published
+      const allPublished = (data.content || []).every(s => s.is_published)
+      setIsPublished(allPublished && (data.content || []).length > 0)
+
+      // Fetch linked routine via API
+      try {
+        const routineRes = await fetch(`/api/routines?slug=${pageSlug}`)
+        const routineData = await routineRes.json()
+        setLinkedRoutine(routineData.routine || null)
+      } catch {
+        setLinkedRoutine(null)
+      }
     } catch (err) {
       console.error('Error fetching content:', err)
     } finally {
@@ -503,25 +484,54 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
         })
       })
       const data = await res.json()
-      if (data.success) {
+      if (res.ok && data.success) {
         // Update local state
         setSections(prev => prev.map(s =>
           s.section_key === sectionKey ? { ...s, content, is_published: true } : s
         ))
-        alert('Sauvegardé et publié !')
+        alert('Sauvegarde reussie !')
       } else {
-        alert(data.error || 'Erreur de sauvegarde')
+        console.error('Save error:', data)
+        alert('Erreur: ' + (data.error || 'Sauvegarde echouee'))
       }
     } catch (err) {
-      alert('Erreur de sauvegarde')
+      console.error('Save exception:', err)
+      alert('Erreur reseau - verifiez la connexion')
     }
   }
 
-  // Save all
-  const handleSaveAll = async () => {
-    setSaving(true)
-    // This would save all dirty sections
-    setSaving(false)
+  // Toggle publish all sections + routine via dedicated API
+  const handleTogglePublish = async () => {
+    setPublishing(true)
+    const newStatus = !isPublished
+    try {
+      const res = await fetch('/api/cms/publish', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page_slug: pageSlug,
+          is_published: newStatus
+        })
+      })
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        alert(data.error || 'Erreur lors de la publication')
+        return
+      }
+
+      setIsPublished(newStatus)
+      setSections(prev => prev.map(s => ({ ...s, is_published: newStatus })))
+      if (linkedRoutine) {
+        setLinkedRoutine(prev => ({ ...prev, is_active: newStatus }))
+      }
+      alert(newStatus ? 'Page publiee !' : 'Page depubliee')
+    } catch (err) {
+      alert('Erreur lors de la publication')
+      console.error(err)
+    } finally {
+      setPublishing(false)
+    }
   }
 
   if (loading) {
@@ -537,7 +547,7 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Éditeur de Page</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Editeur de Page</h1>
           <p className="text-gray-600">/{pageSlug}</p>
         </div>
         <div className="flex items-center gap-3">
@@ -548,29 +558,82 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <Eye className="w-4 h-4" />
-            Prévisualiser
-          </a>
-          <a
-            href={`/shop/${pageSlug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            <ExternalLink className="w-4 h-4" />
             Voir la page
           </a>
+          <button
+            onClick={handleTogglePublish}
+            disabled={publishing}
+            className={`flex items-center gap-2 px-5 py-2 rounded-lg font-medium transition-colors ${
+              isPublished
+                ? 'bg-green-600 text-white hover:bg-red-600'
+                : 'bg-pink-600 text-white hover:bg-pink-700'
+            }`}
+          >
+            {publishing ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : isPublished ? (
+              <Globe className="w-4 h-4" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
+            {publishing ? 'En cours...' : isPublished ? 'En ligne' : 'Publier'}
+          </button>
         </div>
       </div>
 
+      {/* Linked Routine Banner */}
+      {linkedRoutine ? (
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-purple-900">Routine liee : {linkedRoutine.title}</h3>
+                <p className="text-sm text-purple-700">
+                  Les produits et prix sont geres depuis la page Routines
+                  ({linkedRoutine.base_price}€ / {linkedRoutine.upsell_1_price}€ / {linkedRoutine.upsell_2_price}€)
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/routines"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              <LinkIcon className="w-4 h-4" />
+              Modifier les produits
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-yellow-600" />
+            <div>
+              <h3 className="font-semibold text-yellow-900">Aucune routine liee</h3>
+              <p className="text-sm text-yellow-700">
+                Creez une routine avec le slug "{pageSlug}" dans la page Routines pour lier les produits et les prix.
+              </p>
+            </div>
+            <Link
+              href="/routines"
+              className="ml-auto flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Creer la routine
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Instructions */}
-      <div className="bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 rounded-xl p-4">
-        <h3 className="font-semibold text-pink-900 mb-2">Comment utiliser l'éditeur</h3>
-        <ul className="text-sm text-pink-800 space-y-1">
-          <li>1. Cliquez sur une section pour l'ouvrir et modifier son contenu</li>
-          <li>2. Modifiez les textes, prix, images selon vos besoins</li>
-          <li>3. Cliquez sur "Sauvegarder" pour enregistrer les changements</li>
-          <li>4. Utilisez "Prévisualiser" pour voir le résultat en temps réel</li>
-        </ul>
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <h3 className="font-semibold text-gray-700 mb-2">Sections editables</h3>
+        <p className="text-sm text-gray-600">
+          Modifiez le contenu textuel (hero, avis, FAQ, garanties, CTA) ci-dessous.
+          Les produits et les prix sont geres automatiquement depuis la routine liee.
+        </p>
       </div>
 
       {/* Sections */}

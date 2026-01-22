@@ -21,7 +21,8 @@ import {
   ShoppingCart,
   Package,
   UserPlus,
-  PanelTop
+  PanelTop,
+  Sparkles
 } from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
@@ -32,6 +33,7 @@ const navigation = [
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Produits', href: '/products', icon: ShoppingBag, adminOnly: true },
   { name: 'Packs', href: '/packs', icon: Package, adminOnly: true },
+  { name: 'Routines', href: '/routines', icon: Sparkles, adminOnly: true },
   { name: 'Categories', href: '/categories', icon: FolderTree, adminOnly: true },
   { name: 'Commandes', href: '/orders', icon: ShoppingCart, adminOnly: true },
   { name: 'Paiements', href: '/payouts', icon: Wallet },

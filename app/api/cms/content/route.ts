@@ -86,24 +86,47 @@ export async function PUT(request: NextRequest) {
 
     if (typeof is_published === 'boolean') {
       updateData.is_published = is_published
-      if (is_published) {
-        updateData.published_at = new Date().toISOString()
-      }
     }
 
-    const { data, error } = await supabase
+    // First try to update existing row
+    const { data: existing } = await supabase
       .from('page_content')
-      .upsert({
-        page_slug,
-        section_key,
-        ...updateData
-      }, {
-        onConflict: 'page_slug,section_key'
-      })
-      .select()
-      .single()
+      .select('id')
+      .eq('page_slug', page_slug)
+      .eq('section_key', section_key)
+      .maybeSingle()
+
+    let data, error
+
+    if (existing) {
+      // Update existing - avoid triggering upsert issues
+      const result = await supabase
+        .from('page_content')
+        .update(updateData)
+        .eq('page_slug', page_slug)
+        .eq('section_key', section_key)
+        .select()
+        .single()
+      data = result.data
+      error = result.error
+    } else {
+      // Insert new
+      const result = await supabase
+        .from('page_content')
+        .insert({
+          page_slug,
+          section_key,
+          ...updateData,
+          sort_order: 0
+        })
+        .select()
+        .single()
+      data = result.data
+      error = result.error
+    }
 
     if (error) {
+      console.error('CMS PUT error detail:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 

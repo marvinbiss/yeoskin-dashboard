@@ -222,6 +222,24 @@ const scaleIn: Variants = {
 // MAIN COMPONENT
 // ============================================================================
 
+interface RoutineData {
+  id?: string
+  title?: string
+  slug?: string
+  objective?: string
+  description?: string
+  base_products?: { name: string; brand: string; image_url?: string; description?: string }[]
+  base_price?: number
+  upsell_1_product?: { name: string; brand: string; image_url?: string; description?: string }
+  upsell_1_price?: number
+  upsell_1_original_price?: number
+  upsell_2_products?: { name: string; brand: string; image_url?: string; description?: string }[]
+  upsell_2_price?: number
+  upsell_2_original_price?: number
+  image_url?: string
+  is_active?: boolean
+}
+
 interface Props {
   cms?: {
     hero?: { badge?: string; title?: string; subtitle?: string; stats?: { rating?: number; reviews?: number } }
@@ -231,28 +249,60 @@ interface Props {
     faq?: { section_title?: string; items?: any[] }
     cta?: { title?: string; button_text?: string }
   }
+  routine?: RoutineData | null
 }
 
-export default function RoutineHydratationClient({ cms = {} }: Props) {
+export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
   // Use CMS data if available, otherwise defaults
-  const cmsPricing = cms.pricing || {}
   const cmsHero = cms.hero || {}
   const cmsFaq = cms.faq || {}
   const cmsCta = cms.cta || {}
 
+  // PRICING: routine table is source of truth, fallback to CMS, then hardcoded
+  const cmsPricing = cms.pricing || {}
   const currentPrices = {
-    base: cmsPricing.base?.price ?? PRICES.base,
-    upsell_1: cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
-    upsell_2: cmsPricing.upsell_2?.price ?? PRICES.upsell_2,
+    base: routine?.base_price ?? cmsPricing.base?.price ?? PRICES.base,
+    upsell_1: routine?.upsell_1_price ?? cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
+    upsell_2: routine?.upsell_2_price ?? cmsPricing.upsell_2?.price ?? PRICES.upsell_2,
   }
   const currentOriginalPrices = {
     base: cmsPricing.base?.original_price ?? ORIGINAL_PRICES.base,
-    upsell_1: cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
-    upsell_2: cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
+    upsell_1: routine?.upsell_1_original_price ?? cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
+    upsell_2: routine?.upsell_2_original_price ?? cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
   }
 
+  // PRODUCTS: routine table is source of truth, fallback to hardcoded
+  const displayProducts = routine?.base_products?.length === 3
+    ? routine.base_products.map((p, i) => ({
+        ...PRODUCTS[i],
+        name: p.name || PRODUCTS[i].name,
+        brand: p.brand || PRODUCTS[i].brand,
+        description: p.description || PRODUCTS[i].description,
+        image: p.image_url || PRODUCTS[i].image,
+      }))
+    : PRODUCTS
+
+  const displayUpsells = [
+    routine?.upsell_1_product ? {
+      ...UPSELLS[0],
+      name: routine.upsell_1_product.name || UPSELLS[0].name,
+      brand: routine.upsell_1_product.brand || UPSELLS[0].brand,
+      image: routine.upsell_1_product.image_url || UPSELLS[0].image,
+      price: currentPrices.upsell_1,
+      originalPrice: currentOriginalPrices.upsell_1,
+    } : UPSELLS[0],
+    routine?.upsell_2_products?.[0] ? {
+      ...UPSELLS[1],
+      name: routine.upsell_2_products.map(p => p.name).join(' + ') || UPSELLS[1].name,
+      brand: routine.upsell_2_products[0].brand || UPSELLS[1].brand,
+      image: routine.upsell_2_products[0].image_url || UPSELLS[1].image,
+      price: currentPrices.upsell_2,
+      originalPrice: currentOriginalPrices.upsell_2,
+    } : UPSELLS[1],
+  ]
+
   // CMS Hero content
-  const heroTitle = cmsHero.title || 'Routine Hydratation'
+  const heroTitle = cmsHero.title || routine?.title || 'Routine Hydratation'
   const heroSubtitle = cmsHero.subtitle || 'en 3 Gestes'
   const heroBadge = cmsHero.badge || 'BEST-SELLER'
   const heroRating = cmsHero.stats?.rating || 4.9
@@ -568,7 +618,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
             variants={staggerContainer}
             className="grid md:grid-cols-3 gap-8"
           >
-            {PRODUCTS.map((product, i) => (
+            {displayProducts.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />
             ))}
           </motion.div>
@@ -599,7 +649,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {PRODUCTS.map((product, i) => (
+            {displayProducts.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial="hidden"
@@ -792,7 +842,7 @@ export default function RoutineHydratationClient({ cms = {} }: Props) {
             </motion.div>
 
             {/* Upsells */}
-            {UPSELLS.map((upsell, i) => (
+            {displayUpsells.map((upsell, i) => (
               <motion.div
                 key={upsell.id}
                 initial="hidden"
