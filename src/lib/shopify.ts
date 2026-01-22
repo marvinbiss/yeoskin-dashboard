@@ -5,7 +5,7 @@
 import { shopifyCircuitBreaker, CircuitOpenError } from './circuit-breaker'
 import { logger } from './logger'
 
-const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN || 'yeoskin.myshopify.com'
+const SHOPIFY_DOMAIN = process.env.SHOPIFY_DOMAIN || 'vqgpah-fb.myshopify.com'
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION || '2024-01'
 const SHOPIFY_STOREFRONT_TOKEN = process.env.SHOPIFY_STOREFRONT_TOKEN
 
