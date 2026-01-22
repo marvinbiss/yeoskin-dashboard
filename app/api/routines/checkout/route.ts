@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     // ============================================
     debugStep = 'parse_body'
     const body = await request.json()
-    const { creator_slug, variant } = body
+    const { creator_slug, variant, routine_slug } = body
 
     debugStep = 'log_request'
     logger.info(
@@ -143,6 +143,7 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 2) RÉSOLUTION CREATOR
     // ============================================
+    debugStep = 'creator_lookup'
     const { data: creator, error: creatorError } = await supabase
       .from('creators')
       .select('id, email, slug')
@@ -157,61 +158,62 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!creator) {
-      logger.warn({ requestId, creator_slug }, 'Creator not found')
-      return NextResponse.json(
-        { error: 'Creator not found' },
-        { status: 404 }
-      )
-    }
-
     // ============================================
-    // 3) RÉSOLUTION ROUTINE (two separate queries for reliability)
+    // 3) RÉSOLUTION ROUTINE
     // ============================================
-    debugStep = 'creator_routine_lookup'
-    const { data: creatorRoutine, error: creatorRoutineError } = await supabase
-      .from('creator_routines')
-      .select('id, routine_id, is_active')
-      .eq('creator_id', creator.id)
-      .eq('is_active', true)
-      .maybeSingle()
+    let routine: { id: string; title: string; base_shopify_variant_ids: (string|number)[]; upsell_1_shopify_variant_ids: (string|number)[]; upsell_2_shopify_variant_ids: (string|number)[] } | null = null
 
-    if (creatorRoutineError) {
-      logger.error({ requestId, error: creatorRoutineError.message }, 'Creator routine lookup error')
-      return NextResponse.json(
-        { error: 'Database error' },
-        { status: 500 }
-      )
+    if (creator) {
+      // Path A: Creator found → look up assigned routine
+      debugStep = 'creator_routine_lookup'
+      const { data: creatorRoutine, error: creatorRoutineError } = await supabase
+        .from('creator_routines')
+        .select('id, routine_id, is_active')
+        .eq('creator_id', creator.id)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (creatorRoutineError) {
+        logger.error({ requestId, error: creatorRoutineError.message }, 'Creator routine lookup error')
+        return NextResponse.json(
+          { error: 'Database error' },
+          { status: 500 }
+        )
+      }
+
+      if (creatorRoutine) {
+        debugStep = 'routine_lookup_via_creator'
+        const { data: routineData } = await supabase
+          .from('routines')
+          .select('id, title, base_shopify_variant_ids, upsell_1_shopify_variant_ids, upsell_2_shopify_variant_ids')
+          .eq('id', creatorRoutine.routine_id)
+          .maybeSingle()
+        routine = routineData
+      }
     }
 
-    if (!creatorRoutine) {
-      logger.warn({ requestId, creator_id: creator.id }, 'No active routine for creator')
-      return NextResponse.json(
-        { error: 'No active routine assigned to this creator' },
-        { status: 404 }
-      )
-    }
+    // Path B: No creator or no assigned routine → fallback to routine_slug
+    if (!routine && routine_slug) {
+      debugStep = 'routine_lookup_by_slug'
+      logger.info({ requestId, routine_slug }, 'Falling back to routine_slug lookup')
+      const { data: routineData, error: routineError } = await supabase
+        .from('routines')
+        .select('id, title, base_shopify_variant_ids, upsell_1_shopify_variant_ids, upsell_2_shopify_variant_ids')
+        .eq('slug', routine_slug)
+        .eq('is_active', true)
+        .maybeSingle()
 
-    // Fetch the routine details separately
-    debugStep = 'routine_lookup'
-    const { data: routine, error: routineError } = await supabase
-      .from('routines')
-      .select('id, title, base_shopify_variant_ids, upsell_1_shopify_variant_ids, upsell_2_shopify_variant_ids')
-      .eq('id', creatorRoutine.routine_id)
-      .maybeSingle()
-
-    if (routineError) {
-      logger.error({ requestId, error: routineError.message }, 'Routine lookup error')
-      return NextResponse.json(
-        { error: 'Database error' },
-        { status: 500 }
-      )
+      if (routineError) {
+        logger.error({ requestId, error: routineError.message }, 'Routine slug lookup error')
+        return NextResponse.json({ error: 'Database error' }, { status: 500 })
+      }
+      routine = routineData
     }
 
     if (!routine) {
-      logger.warn({ requestId, routine_id: creatorRoutine.routine_id }, 'Routine not found')
+      logger.warn({ requestId, creator_slug, routine_slug }, 'No routine found')
       return NextResponse.json(
-        { error: 'Routine configuration not found' },
+        { error: 'No active routine found. Ensure a routine is assigned or active.' },
         { status: 404 }
       )
     }
@@ -295,21 +297,24 @@ export async function POST(request: NextRequest) {
         .substring(0, 32)
     }
 
+    const creatorId = creator?.id || 'organic'
     const payloadHash = crypto
       .createHash('sha256')
-      .update(`${creator.id}|${routine.id}|${typedVariant}|${variantIds.join(',')}`)
+      .update(`${creatorId}|${routine.id}|${typedVariant}|${variantIds.join(',')}`)
       .digest('hex')
 
     // ============================================
     // 6) RÉSERVATION IDEMPOTENCY (LOCK AVANT SHOPIFY)
+    // Only for tracked creator traffic (skip for organic)
     // ============================================
+    let rowId: string | null = null
+
+    if (creator) {
     const { data: existing } = await supabase
       .from('routine_checkouts')
       .select('id, payload_hash, checkout_url, status, created_at')
       .eq('idempotency_key', idempotencyKey)
       .maybeSingle()
-
-    let rowId: string | null = null
 
     if (existing) {
       if (existing.status === 'creating') {
@@ -384,8 +389,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create new reservation if needed
-    if (!rowId) {
+    // Create new reservation if needed (skip for organic traffic without creator)
+    if (!rowId && creator) {
       const now = new Date().toISOString()
       const { data: reservation, error: reservationError } = await supabase
         .from('routine_checkouts')
@@ -447,6 +452,7 @@ export async function POST(request: NextRequest) {
 
       rowId = reservation.id
     }
+    } // end if (creator) - idempotency block
 
     // ============================================
     // 7) APPEL SHOPIFY STOREFRONT API
@@ -455,8 +461,8 @@ export async function POST(request: NextRequest) {
 
     try {
       const attributes = [
-        { key: 'creator_id', value: creator.id },
-        { key: 'creator_slug', value: creator_slug },
+        { key: 'creator_id', value: creator?.id || 'organic' },
+        { key: 'creator_slug', value: creator_slug || 'organic' },
         { key: 'routine_id', value: routine.id },
         { key: 'routine_variant', value: typedVariant },
         { key: 'source', value: 'yeoskin_platform' },
@@ -494,13 +500,15 @@ export async function POST(request: NextRequest) {
         'Shopify cart creation failed'
       )
 
-      await supabase
-        .from('routine_checkouts')
-        .update({
-          status: 'failed',
-          last_error: errorMessage.substring(0, 500)
-        })
-        .eq('id', rowId)
+      if (rowId) {
+        await supabase
+          .from('routine_checkouts')
+          .update({
+            status: 'failed',
+            last_error: errorMessage.substring(0, 500)
+          })
+          .eq('id', rowId)
+      }
 
       if (isCircuitOpen) {
         return NextResponse.json(
@@ -532,33 +540,36 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 8) UPDATE ROUTINE_CHECKOUTS (finaliser)
     // ============================================
-    const { error: updateError } = await supabase
-      .from('routine_checkouts')
-      .update({
-        cart_id: cart.id,
-        checkout_url: cart.checkoutUrl,
-        status: 'completed',
-        last_error: null
-      })
-      .eq('id', rowId)
+    if (rowId) {
+      const { error: updateError } = await supabase
+        .from('routine_checkouts')
+        .update({
+          cart_id: cart.id,
+          checkout_url: cart.checkoutUrl,
+          status: 'completed',
+          last_error: null
+        })
+        .eq('id', rowId)
 
-    if (updateError) {
-      logger.error({ requestId, error: updateError.message }, 'Failed to finalize checkout')
-      // Cart was created in Shopify, so we still return success
+      if (updateError) {
+        logger.error({ requestId, error: updateError.message }, 'Failed to finalize checkout')
+      }
     }
 
-    // Increment cart stats (fire and forget)
-    void (async () => {
-      try {
-        await supabase.rpc('increment_routine_cart', {
-          p_routine_id: routine.id,
-          p_creator_id: creator.id,
-          p_variant: typedVariant
-        })
-      } catch {
-        // Ignore stats errors
-      }
-    })()
+    // Increment cart stats (fire and forget, only if creator exists)
+    if (creator) {
+      void (async () => {
+        try {
+          await supabase.rpc('increment_routine_cart', {
+            p_routine_id: routine.id,
+            p_creator_id: creator.id,
+            p_variant: typedVariant
+          })
+        } catch {
+          // Ignore stats errors
+        }
+      })()
+    }
 
     // ============================================
     // 9) RETURN SUCCESS

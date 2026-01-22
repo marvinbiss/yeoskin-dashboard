@@ -371,6 +371,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
         body: JSON.stringify({
           creator_slug: creatorSlug,
           variant: selectedVariant,
+          routine_slug: 'routine-hydratation',
         }),
       })
 
