@@ -33,7 +33,7 @@ export default function RoutinesPage() {
     setLoading(true)
     const { data, error } = await supabase
       .from('routines')
-      .select('*, creator_routines(count)')
+      .select('*')
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -124,16 +124,15 @@ export default function RoutinesPage() {
     setCreatorsLoading(true)
 
     try {
-      // Fetch all creators
+      // Fetch all creators (direct Supabase - has anon SELECT policy)
       const { data: creators } = await supabase
         .from('creators')
-        .select('id, name, email, slug')
-        .order('name')
+        .select('id, email, slug, discount_code')
+        .order('email')
 
-      // Fetch all creator_routines (to know who is assigned where)
-      const { data: assignments } = await supabase
-        .from('creator_routines')
-        .select('creator_id, routine_id')
+      // Fetch all assignments via API route (uses service_role)
+      const res = await fetch('/api/routines/assignments')
+      const { assignments } = await res.json()
 
       setAllCreators(creators || [])
       setAllAssignments(assignments || [])
@@ -156,37 +155,35 @@ export default function RoutinesPage() {
 
     try {
       if (isAssigned) {
-        // Unassign
-        const { error } = await supabase
-          .from('creator_routines')
-          .delete()
-          .eq('creator_id', creatorId)
-          .eq('routine_id', routine.id)
+        // Unassign via API route
+        const res = await fetch('/api/routines/assignments', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ creator_id: creatorId, routine_id: routine.id })
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error)
 
-        if (error) throw error
         setAssignedCreatorIds(prev => prev.filter(id => id !== creatorId))
         setAllAssignments(prev => prev.filter(a => !(a.creator_id === creatorId && a.routine_id === routine.id)))
         toast.success('Createur retire')
       } else {
-        // Assign (upsert handles UNIQUE constraint on creator_id)
-        const { error } = await supabase
-          .from('creator_routines')
-          .upsert({
-            creator_id: creatorId,
-            routine_id: routine.id,
-            is_active: true,
-          }, { onConflict: 'creator_id' })
+        // Assign via API route (upsert handles UNIQUE constraint)
+        const res = await fetch('/api/routines/assignments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ creator_id: creatorId, routine_id: routine.id })
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error)
 
-        if (error) throw error
         setAssignedCreatorIds(prev => [...prev, creatorId])
-        // Update allAssignments: remove old assignment for this creator, add new one
         setAllAssignments(prev => [
           ...prev.filter(a => a.creator_id !== creatorId),
           { creator_id: creatorId, routine_id: routine.id }
         ])
         toast.success('Createur assigne')
       }
-      fetchRoutines() // refresh counts
     } catch (error) {
       toast.error('Erreur: ' + error.message)
     }
@@ -308,10 +305,10 @@ export default function RoutinesPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {creator.name || creator.email}
+                      {creator.email}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      {creator.slug ? `@${creator.slug}` : creator.email}
+                      {creator.discount_code ? `Code: ${creator.discount_code}` : creator.slug || ''}
                     </p>
                     {otherRoutine && !isAssigned && (
                       <p className="text-xs text-amber-600 flex items-center gap-1 mt-1">

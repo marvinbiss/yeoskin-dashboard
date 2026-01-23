@@ -7,7 +7,6 @@ import { Badge } from '../Common'
  * RoutineCard - Affiche une routine dans la grille
  */
 export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive, onManageCreators }) => {
-  const creatorsCount = routine.creator_routines?.[0]?.count || 0
 
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-xl border ${
@@ -80,7 +79,7 @@ export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive, onManag
           </span>
           <span className="flex items-center gap-1 text-gray-500">
             <Users className="w-3.5 h-3.5" />
-            {creatorsCount} createur{creatorsCount !== 1 ? 's' : ''}
+            Créateurs
           </span>
         </div>
 
@@ -95,7 +94,7 @@ export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive, onManag
           </button>
           <button
             onClick={() => onManageCreators(routine)}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition text-sm font-medium"
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition text-sm font-medium"
           >
             <Users className="w-3.5 h-3.5" />
             Créateurs

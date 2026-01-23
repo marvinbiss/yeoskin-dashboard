@@ -10,8 +10,9 @@ import { supabase } from '../lib/supabase'
 import { Button } from '../components/Common'
 import { Instagram, ShoppingCart, ExternalLink, Youtube, Music2 } from 'lucide-react'
 
-export default function CreatorPage() {
-  const { slug } = useParams()
+export default function CreatorPage({ slug: slugProp }) {
+  const params = useParams()
+  const slug = slugProp || params?.slug
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [products, setProducts] = useState([])
