@@ -6,7 +6,7 @@ import { Badge } from '../Common'
 /**
  * RoutineCard - Affiche une routine dans la grille
  */
-export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive }) => {
+export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive, onManageCreators }) => {
   const creatorsCount = routine.creator_routines?.[0]?.count || 0
 
   return (
@@ -92,6 +92,13 @@ export const RoutineCard = ({ routine, onEdit, onDelete, onToggleActive }) => {
           >
             <Edit2 className="w-3.5 h-3.5" />
             Modifier
+          </button>
+          <button
+            onClick={() => onManageCreators(routine)}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition text-sm font-medium"
+          >
+            <Users className="w-3.5 h-3.5" />
+            Créateurs
           </button>
           <button
             onClick={() => onToggleActive(routine)}
