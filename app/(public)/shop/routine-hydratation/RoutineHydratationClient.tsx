@@ -395,15 +395,15 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* HERO SECTION */}
       {/* ================================================================== */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-0 lg:min-h-screen flex items-center overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-pink-light via-white to-lavender-light opacity-50" />
 
         {/* Floating elements */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-pink/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-lavender/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-20 left-10 w-40 sm:w-64 h-40 sm:h-64 bg-pink/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-60 sm:w-96 h-60 sm:h-96 bg-lavender/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-20 lg:py-0">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-20 lg:py-0">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Image */}
             <motion.div
@@ -466,20 +466,20 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               </motion.div>
 
               {/* Title */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-6">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-4 sm:mb-6">
                 {heroTitle}
                 <br />
                 <span className="text-pink">{heroSubtitle}</span>
               </h1>
 
               {/* Description */}
-              <p className="text-xl text-gray-600 leading-relaxed mb-6 max-w-lg">
+              <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-4 sm:mb-6 max-w-lg">
                 La routine K-beauty minimaliste qui transforme ta peau en 4 semaines.
                 3 produits iconiques, 1 geste matin & soir.
               </p>
 
               {/* Trust badges */}
-              <div className="flex flex-wrap gap-3 mb-8">
+              <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
                 {[
                   { icon: Leaf, label: 'Vegan' },
                   { icon: Heart, label: 'Cruelty-free' },
@@ -496,22 +496,22 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               </div>
 
               {/* Price */}
-              <div className="mb-8">
-                <div className="flex items-baseline gap-4">
-                  <span className="text-5xl font-bold text-gray-950">{currentPrices[selectedVariant]}€</span>
-                  <span className="text-xl text-gray-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
-                    Économise {ORIGINAL_PRICES[selectedVariant] - PRICES[selectedVariant]}€
+              <div className="mb-6 sm:mb-8">
+                <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
+                  <span className="text-3xl sm:text-5xl font-bold text-gray-950">{currentPrices[selectedVariant]}€</span>
+                  <span className="text-base sm:text-xl text-gray-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
+                  <span className="bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
+                    Économise {(currentOriginalPrices[selectedVariant] - currentPrices[selectedVariant]).toFixed(0)}€
                   </span>
                 </div>
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={handleCheckout}
                   disabled={isLoading}
-                  className="group bg-pink hover:bg-pink-dark text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-lg tracking-tight flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="group bg-pink hover:bg-pink-dark text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-lg tracking-tight flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -525,14 +525,14 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
 
                 <a
                   href="#products"
-                  className="bg-white border-2 border-gray-900 text-gray-900 font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:bg-gray-900 hover:text-white text-lg text-center"
+                  className="bg-white border-2 border-gray-900 text-gray-900 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 hover:bg-gray-900 hover:text-white text-base sm:text-lg text-center"
                 >
                   Voir les produits
                 </a>
               </div>
 
               {/* Micro-trust */}
-              <div className="flex items-center gap-6 mt-6 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 sm:mt-6 text-xs sm:text-sm text-gray-500">
                 <span className="flex items-center gap-2">
                   <Truck className="w-4 h-4" />
                   Livraison offerte
@@ -551,7 +551,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:block"
         >
           <motion.div
             animate={{ y: [0, 10, 0] }}
@@ -566,9 +566,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* SOCIAL PROOF BAR */}
       {/* ================================================================== */}
-      <section className="bg-gray-950 py-6">
+      <section className="bg-gray-950 py-4 sm:py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
             {STATS.map((stat, i) => (
               <motion.div
                 key={i}
@@ -578,9 +578,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <stat.icon className="w-5 h-5 text-pink mx-auto mb-2" />
-                <p className="text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-sm text-gray-400">{stat.label}</p>
+                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-pink mx-auto mb-1 sm:mb-2" />
+                <p className="text-lg sm:text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -590,7 +590,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* PRODUCTS SECTION */}
       {/* ================================================================== */}
-      <section id="products" className="py-24 bg-white">
+      <section id="products" className="py-12 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           {/* Section header */}
           <motion.div
@@ -598,15 +598,15 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Ce qui est inclus
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               3 Produits. 3 Étapes. Résultats Garantis.
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Chaque produit a été sélectionné pour sa qualité exceptionnelle et son efficacité prouvée.
             </p>
           </motion.div>
@@ -617,7 +617,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-8"
+            className="grid md:grid-cols-3 gap-4 sm:gap-8"
           >
             {displayProducts.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />
@@ -629,27 +629,27 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* HOW TO USE SECTION */}
       {/* ================================================================== */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-12 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Mode d'emploi
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               2 Minutes Matin & Soir
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Une routine simple qui s'intègre facilement dans ton quotidien.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-8">
             {displayProducts.map((product, i) => (
               <motion.div
                 key={product.id}
@@ -660,7 +660,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="w-20 h-20 bg-pink text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
+                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-pink text-white rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6">
                   {i + 1}
                 </div>
                 <h3 className="text-xl font-bold text-gray-950 mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
@@ -681,27 +681,27 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* BEFORE / AFTER SECTION */}
       {/* ================================================================== */}
-      <section className="py-24 bg-white">
+      <section className="py-12 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Résultats réels
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               Transformations Vérifiées
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Des résultats visibles en 4 semaines, validés par notre communauté.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-8 max-w-4xl mx-auto">
             {[
               {
                 name: 'Claire, 26 ans',
@@ -722,7 +722,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={scaleIn}
-                className="bg-gray-50 rounded-3xl p-8"
+                className="bg-gray-50 rounded-2xl sm:rounded-3xl p-5 sm:p-8"
               >
                 <div className="flex gap-4 mb-6">
                   <div className="flex-1 aspect-square bg-gray-200 rounded-2xl flex items-center justify-center">
@@ -752,19 +752,19 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* REVIEWS SECTION */}
       {/* ================================================================== */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-12 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Avis vérifiés
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               Ce Qu'Elles En Pensent
             </h2>
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -781,7 +781,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
           >
             {REVIEWS.map((review, i) => (
               <ReviewCard key={review.id} review={review} index={i} />
@@ -793,27 +793,27 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* UPSELLS SECTION */}
       {/* ================================================================== */}
-      <section className="py-24 bg-white">
+      <section className="py-12 sm:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Booste ta routine
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               Ajoute un Booster
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
               84% de nos clients ajoutent au moins 1 produit supplémentaire.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-3 sm:gap-8 max-w-4xl mx-auto">
             {/* Base option */}
             <motion.div
               initial="hidden"
@@ -821,7 +821,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               viewport={{ once: true }}
               variants={scaleIn}
               onClick={() => setSelectedVariant('base')}
-              className={`cursor-pointer p-6 rounded-3xl border-2 transition-all duration-300 ${
+              className={`cursor-pointer p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                 selectedVariant === 'base'
                   ? 'border-pink bg-pink-light/30 shadow-lg'
                   : 'border-gray-200 hover:border-gray-300'
@@ -831,7 +831,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
                   PACK DE BASE
                 </span>
-                <p className="text-3xl font-bold text-gray-950 mb-2">{currentPrices.base}€</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{currentPrices.base}€</p>
                 <p className="text-gray-400 line-through text-sm mb-4">{currentOriginalPrices.base}€</p>
                 <p className="text-gray-600 text-sm">3 produits essentiels</p>
               </div>
@@ -852,7 +852,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 variants={scaleIn}
                 transition={{ delay: (i + 1) * 0.1 }}
                 onClick={() => setSelectedVariant(upsell.id as VariantType)}
-                className={`cursor-pointer p-6 rounded-3xl border-2 transition-all duration-300 ${
+                className={`cursor-pointer p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
                   selectedVariant === upsell.id
                     ? 'border-pink bg-pink-light/30 shadow-lg'
                     : 'border-gray-200 hover:border-gray-300'
@@ -864,7 +864,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                   </span>
                   <h3 className="font-bold text-gray-950 mb-1">{upsell.name}</h3>
                   <p className="text-sm text-gray-600 mb-4">{upsell.benefit}</p>
-                  <p className="text-3xl font-bold text-gray-950 mb-2">{upsell.price}€</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{upsell.price}€</p>
                   <p className="text-gray-400 line-through text-sm">au lieu de {upsell.originalPrice}€</p>
                 </div>
                 {selectedVariant === upsell.id && (
@@ -877,19 +877,19 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-12">
+          <div className="text-center mt-8 sm:mt-12">
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="bg-pink hover:bg-pink-dark text-white font-semibold px-12 py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-xl tracking-tight inline-flex items-center gap-3 disabled:opacity-50"
+              className="bg-pink hover:bg-pink-dark text-white font-semibold px-6 sm:px-12 py-4 sm:py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-xl tracking-tight inline-flex items-center gap-2 sm:gap-3 disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShoppingBag className="w-6 h-6" />
-                  Commander ma routine • {currentPrices[selectedVariant]}€
-                  <ArrowRight className="w-5 h-5" />
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
+                  Commander • {currentPrices[selectedVariant]}€
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </>
               )}
             </button>
@@ -900,16 +900,16 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FAQ SECTION */}
       {/* ================================================================== */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-12 sm:py-24 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-16"
+            className="text-center mb-8 sm:mb-16"
           >
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               Questions Fréquentes
             </h2>
           </motion.div>
@@ -925,10 +925,10 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               <motion.div key={i} variants={fadeInUp}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full text-left p-6 bg-white rounded-2xl border border-gray-200 hover:border-gray-300 transition-all"
+                  className="w-full text-left p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border border-gray-200 hover:border-gray-300 transition-all"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-950">{faq.question}</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold text-sm sm:text-base text-gray-950">{faq.question}</span>
                     <ChevronDown
                       className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
                         openFaq === i ? 'rotate-180' : ''
@@ -965,7 +965,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FINAL CTA SECTION */}
       {/* ================================================================== */}
-      <section ref={ctaRef} className="py-24 bg-gradient-to-br from-pink to-pink-dark">
+      <section ref={ctaRef} className="py-12 sm:py-24 bg-gradient-to-br from-pink to-pink-dark">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
           <motion.div
             initial="hidden"
@@ -973,29 +973,29 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
               {ctaTitle}
             </h2>
-            <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+            <p className="text-base sm:text-xl text-white/80 mb-6 sm:mb-10 max-w-2xl mx-auto">
               Rejoins 15,234 personnes qui ont transformé leur peau avec cette routine K-beauty essentielle.
             </p>
 
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="bg-white text-pink hover:bg-gray-100 font-semibold px-12 py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-xl tracking-tight inline-flex items-center gap-3 disabled:opacity-50 mb-8"
+              className="bg-white text-pink hover:bg-gray-100 font-semibold px-6 sm:px-12 py-4 sm:py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-xl tracking-tight inline-flex items-center gap-2 sm:gap-3 disabled:opacity-50 mb-6 sm:mb-8"
             >
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-pink/30 border-t-pink rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShoppingBag className="w-6 h-6" />
+                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
                   Ajouter au panier • {currentPrices[selectedVariant]}€
                 </>
               )}
             </button>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm">
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-white/70 text-xs sm:text-sm">
               <span className="flex items-center gap-2">
                 <Truck className="w-4 h-4" />
                 Livraison offerte
@@ -1072,14 +1072,14 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 border border-gray-100"
+      className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 border border-gray-100"
     >
       {/* Image */}
-      <div className={`aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
+      <div className={`aspect-[4/3] sm:aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Droplets className="w-20 h-20 text-gray-400/30" />
+          <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
         </div>
-        <div className="absolute top-4 left-4 flex gap-2">
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex gap-2">
           <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
             ÉTAPE {product.step}
           </span>
@@ -1093,10 +1093,10 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <p className="text-sm text-pink font-semibold mb-1">{product.brand}</p>
-        <h3 className="text-xl font-bold text-gray-950 mb-3">{product.name}</h3>
-        <p className="text-gray-600 text-sm mb-4 leading-relaxed">{product.description}</p>
+        <h3 className="text-lg sm:text-xl font-bold text-gray-950 mb-2 sm:mb-3">{product.name}</h3>
+        <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed">{product.description}</p>
 
         {/* Ingredients */}
         <div className="flex flex-wrap gap-2 mb-4">
@@ -1133,7 +1133,7 @@ function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: numbe
   return (
     <motion.div
       variants={fadeInUp}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+      className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">

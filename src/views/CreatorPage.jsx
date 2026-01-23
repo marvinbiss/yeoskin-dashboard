@@ -9,6 +9,7 @@ import { useParams, useNavigate } from '@/lib/navigation'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/Common'
 import { Instagram, ShoppingCart, ExternalLink, Youtube, Music2, Sparkles } from 'lucide-react'
+import RoutineHydratationClient from '../../app/(public)/shop/routine-hydratation/RoutineHydratationClient'
 
 export default function CreatorPage({ slug: slugProp }) {
   const params = useParams()
@@ -67,11 +68,11 @@ export default function CreatorPage({ slug: slugProp }) {
         }
       }
 
-      // Fetch assigned routine
+      // Fetch assigned routine (full data for embedded product page)
       if (profileData.creator?.id) {
         const { data: routineData } = await supabase
           .from('creator_routines')
-          .select('routine_id, routines(id, title, slug, objective, objective_color, image_url, base_price)')
+          .select('routine_id, routines(id, title, slug, objective, objective_color, image_url, description, base_price, base_products, upsell_1_product, upsell_1_price, upsell_1_original_price, upsell_2_products, upsell_2_price, upsell_2_original_price, is_active)')
           .eq('creator_id', profileData.creator.id)
           .eq('is_active', true)
           .maybeSingle()
@@ -155,7 +156,7 @@ export default function CreatorPage({ slug: slugProp }) {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Banner */}
       {profile.banner_image_url ? (
-        <div className="relative h-72 w-full">
+        <div className="relative h-48 sm:h-72 w-full">
           <img
             src={profile.banner_image_url}
             alt={profile.display_name}
@@ -165,7 +166,7 @@ export default function CreatorPage({ slug: slugProp }) {
         </div>
       ) : (
         <div
-          className="h-72 w-full"
+          className="h-48 sm:h-72 w-full"
           style={{
             background: `linear-gradient(135deg, ${brandColor}20 0%, ${brandColor}10 100%)`
           }}
@@ -173,20 +174,20 @@ export default function CreatorPage({ slug: slugProp }) {
       )}
 
       {/* Profile Card */}
-      <div className="container mx-auto px-4 -mt-24 relative z-10">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl mx-auto">
-          <div className="flex flex-col items-center text-center mb-6">
+      <div className="container mx-auto px-4 -mt-16 sm:-mt-24 relative z-10">
+        <div className="bg-white rounded-2xl shadow-2xl p-5 sm:p-8 max-w-4xl mx-auto">
+          <div className="flex flex-col items-center text-center mb-4 sm:mb-6">
             {/* Avatar */}
-            <div className="relative w-32 h-32 -mt-20 mb-4">
+            <div className="relative w-24 h-24 sm:w-32 sm:h-32 -mt-16 sm:-mt-20 mb-3 sm:mb-4">
               {profile.profile_image_url ? (
                 <img
                   src={profile.profile_image_url}
                   alt={profile.display_name}
-                  className="w-full h-full rounded-full object-cover border-8 border-white shadow-xl"
+                  className="w-full h-full rounded-full object-cover border-4 sm:border-8 border-white shadow-xl"
                 />
               ) : (
                 <div
-                  className="w-full h-full rounded-full flex items-center justify-center text-5xl font-bold text-white shadow-xl border-8 border-white"
+                  className="w-full h-full rounded-full flex items-center justify-center text-3xl sm:text-5xl font-bold text-white shadow-xl border-4 sm:border-8 border-white"
                   style={{ backgroundColor: brandColor }}
                 >
                   {profile.display_name.charAt(0).toUpperCase()}
@@ -194,31 +195,31 @@ export default function CreatorPage({ slug: slugProp }) {
               )}
             </div>
 
-            <p className="text-sm text-gray-500 font-medium mb-1">Curated by</p>
-            <h1 className="text-4xl font-bold mb-2" style={{ color: brandColor }}>
+            <p className="text-xs sm:text-sm text-gray-500 font-medium mb-1">Curated by</p>
+            <h1 className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2" style={{ color: brandColor }}>
               {profile.display_name}
             </h1>
 
             {profile.tagline && (
-              <p className="text-xl text-gray-600 mb-4">{profile.tagline}</p>
+              <p className="text-base sm:text-xl text-gray-600 mb-3 sm:mb-4">{profile.tagline}</p>
             )}
 
             {profile.bio && (
-              <p className="text-gray-700 max-w-2xl mb-6 leading-relaxed">{profile.bio}</p>
+              <p className="text-sm sm:text-base text-gray-700 max-w-2xl mb-4 sm:mb-6 leading-relaxed">{profile.bio}</p>
             )}
 
             {/* Social Links */}
             {(profile.instagram_handle || profile.tiktok_handle || profile.youtube_handle) && (
-              <div className="flex gap-4 mb-6">
+              <div className="flex gap-3 sm:gap-4 mb-4 sm:mb-6">
                 {profile.instagram_handle && (
                   <a
                     href={`https://instagram.com/${profile.instagram_handle.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 rounded-full hover:bg-gray-100 transition"
+                    className="p-2 sm:p-3 rounded-full hover:bg-gray-100 transition"
                     title="Instagram"
                   >
-                    <Instagram className="w-6 h-6" style={{ color: brandColor }} />
+                    <Instagram className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: brandColor }} />
                   </a>
                 )}
                 {profile.tiktok_handle && (
@@ -226,10 +227,10 @@ export default function CreatorPage({ slug: slugProp }) {
                     href={`https://tiktok.com/@${profile.tiktok_handle.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 rounded-full hover:bg-gray-100 transition"
+                    className="p-2 sm:p-3 rounded-full hover:bg-gray-100 transition"
                     title="TikTok"
                   >
-                    <Music2 className="w-6 h-6" style={{ color: brandColor }} />
+                    <Music2 className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: brandColor }} />
                   </a>
                 )}
                 {profile.youtube_handle && (
@@ -237,10 +238,10 @@ export default function CreatorPage({ slug: slugProp }) {
                     href={`https://youtube.com/@${profile.youtube_handle.replace('@', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-3 rounded-full hover:bg-gray-100 transition"
+                    className="p-2 sm:p-3 rounded-full hover:bg-gray-100 transition"
                     title="YouTube"
                   >
-                    <Youtube className="w-6 h-6" style={{ color: brandColor }} />
+                    <Youtube className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: brandColor }} />
                   </a>
                 )}
               </div>
@@ -249,7 +250,7 @@ export default function CreatorPage({ slug: slugProp }) {
             {/* Promo Code */}
             {profile.creator?.discount_code && (
               <div
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-lg"
+                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-full text-sm sm:text-base font-semibold text-white shadow-lg"
                 style={{ backgroundColor: brandColor }}
               >
                 <span>Code : {profile.creator.discount_code}</span>
@@ -259,58 +260,20 @@ export default function CreatorPage({ slug: slugProp }) {
 
           {/* Custom Message */}
           {profile.custom_message && (
-            <div className="bg-gray-50 rounded-xl p-6">
-              <p className="text-center text-gray-700 italic">&ldquo;{profile.custom_message}&rdquo;</p>
+            <div className="bg-gray-50 rounded-xl p-4 sm:p-6">
+              <p className="text-center text-sm sm:text-base text-gray-700 italic">&ldquo;{profile.custom_message}&rdquo;</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Assigned Routine Section */}
+      {/* Embedded Routine Product Page (when routine assigned) */}
       {assignedRoutine && (
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-4xl mx-auto">
-            <div
-              className="relative overflow-hidden rounded-2xl shadow-xl p-8 md:p-12"
-              style={{
-                background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}DD 100%)`
-              }}
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
-                <Sparkles className="w-full h-full text-white" />
-              </div>
-              <div className="relative z-10 text-center">
-                <p className="text-white/80 text-sm font-medium mb-2 uppercase tracking-wider">
-                  Ma Routine Beaute
-                </p>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                  {assignedRoutine.title}
-                </h2>
-                {assignedRoutine.objective && (
-                  <p className="text-white/90 text-lg mb-6">
-                    {assignedRoutine.objective}
-                  </p>
-                )}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                  <span className="text-white/90 text-2xl font-bold">
-                    A partir de {Number(assignedRoutine.base_price).toFixed(2)}€
-                  </span>
-                  <a
-                    href={`/shop/${assignedRoutine.slug}?creator=${profile.creator?.slug || slug}`}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-lg"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    Decouvrir ma routine
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <RoutineHydratationClient routine={assignedRoutine} />
       )}
 
-      {/* Products Section */}
-      {products.length > 0 && (
+      {/* Products Section (only when NO routine assigned) */}
+      {!assignedRoutine && products.length > 0 && (
         <div className="container mx-auto px-4 py-16">
           <h2 className="text-3xl font-bold text-center mb-4" style={{ color: brandColor }}>
             Ma Selection Beaute
@@ -391,8 +354,8 @@ export default function CreatorPage({ slug: slugProp }) {
         </div>
       )}
 
-      {/* Empty Products State */}
-      {products.length === 0 && (
+      {/* Empty State (only when NO routine assigned and no products) */}
+      {!assignedRoutine && products.length === 0 && (
         <div className="container mx-auto px-4 py-16 text-center">
           <div className="max-w-2xl mx-auto">
             <div
@@ -417,34 +380,8 @@ export default function CreatorPage({ slug: slugProp }) {
         </div>
       )}
 
-      {/* Stats Footer */}
-      <div className="bg-gray-50 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto text-center">
-            <div>
-              <div className="text-3xl font-bold mb-2" style={{ color: brandColor }}>
-                {(profile.views_count || 0).toLocaleString()}
-              </div>
-              <p className="text-gray-600">Visiteurs</p>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2" style={{ color: brandColor }}>
-                100%
-              </div>
-              <p className="text-gray-600">Produits testes</p>
-            </div>
-            <div>
-              <div className="text-3xl font-bold mb-2" style={{ color: brandColor }}>
-                K-Beauty
-              </div>
-              <p className="text-gray-600">Authentique</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Footer */}
-      <footer className="bg-white py-8 border-t border-gray-100">
+      <footer className={`bg-white py-8 border-t border-gray-100 ${assignedRoutine ? 'pb-28 lg:pb-8' : ''}`}>
         <div className="container mx-auto px-4 text-center">
           <p className="text-gray-500 text-sm">
             Propulse par <span className="font-semibold" style={{ color: brandColor }}>Yeoskin</span>
