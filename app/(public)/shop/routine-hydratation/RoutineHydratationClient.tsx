@@ -32,52 +32,52 @@ import {
 type VariantType = 'base' | 'upsell_1' | 'upsell_2'
 
 const PRICES: Record<VariantType, number> = {
-  base: 79,
-  upsell_1: 99,
-  upsell_2: 119,
+  base: 59.90,
+  upsell_1: 69.90,
+  upsell_2: 79.90,
 }
 
 const ORIGINAL_PRICES: Record<VariantType, number> = {
-  base: 110,
-  upsell_1: 140,
-  upsell_2: 170,
+  base: 70.85,
+  upsell_1: 89.80,
+  upsell_2: 111.75,
 }
 
 const PRODUCTS = [
   {
     id: 1,
-    name: 'Low pH Good Morning Gel Cleanser',
+    name: 'Advanced Snail 96 Mucin Essence',
     brand: 'COSRX',
     step: 1,
     time: 'MATIN & SOIR',
-    description: 'Nettoie en douceur sans décaper. Formule pH 5.5 qui respecte la barrière cutanée. Parfait pour les peaux sensibles.',
-    ingredients: ['Tea Tree Oil', 'BHA 0.5%', 'Betaine Salicylate'],
-    stats: { satisfaction: 94, duration: '150ml • 4 mois' },
-    image: '/images/shop/cosrx-cleanser.jpg',
+    description: 'Essence légère à 96% de mucine d\'escargot. Hydrate en profondeur, répare la barrière cutanée et lisse la texture de la peau.',
+    ingredients: ['Snail Mucin 96%', 'Hyaluronic Acid', 'Allantoin'],
+    stats: { satisfaction: 97, duration: '100ml • 3 mois' },
+    image: '/images/shop/cosrx-snail-essence.jpg',
     color: 'from-green-50 to-mint',
   },
   {
     id: 2,
-    name: 'Glow Deep Serum',
-    brand: 'Beauty of Joseon',
+    name: 'Advanced Snail 92 All In One Cream',
+    brand: 'COSRX',
     step: 2,
     time: 'MATIN & SOIR',
-    description: 'Essence concentrée à base de propolis et niacinamide. Pénètre instantanément, booste l\'éclat et unifie le teint.',
-    ingredients: ['Propolis 60%', 'Niacinamide 2%', 'Probiotics'],
-    stats: { satisfaction: 97, duration: '30ml • 3 mois' },
-    image: '/images/shop/boj-serum.jpg',
+    description: 'Crème tout-en-un enrichie en mucine d\'escargot. Nourrit, répare et protège la peau. Texture fondante non grasse.',
+    ingredients: ['Snail Secretion 92%', 'Betaine', 'Allantoin'],
+    stats: { satisfaction: 94, duration: '100ml • 3 mois' },
+    image: '/images/shop/cosrx-snail-cream.jpg',
     color: 'from-amber-50 to-peach',
   },
   {
     id: 3,
-    name: 'Advanced Snail 92 Cream',
+    name: 'Oil-Free Ultra-Moisturizing Lotion',
     brand: 'COSRX',
     step: 3,
     time: 'MATIN & SOIR',
-    description: 'Nourrit et protège toute la journée. Texture légère non grasse, absorption rapide. Répare et régénère.',
-    ingredients: ['Snail Secretion 92%', 'Betaine', 'Allantoin'],
-    stats: { satisfaction: 89, duration: '100ml • 3 mois' },
-    image: '/images/shop/cosrx-cream.jpg',
+    description: 'Lotion hydratante sans huile à base de sève de bouleau. Hydratation longue durée, fini mat. Idéale peaux mixtes à grasses.',
+    ingredients: ['Birch Sap 70%', 'Hyaluronic Acid', 'Betaine'],
+    stats: { satisfaction: 91, duration: '100ml • 3 mois' },
+    image: '/images/shop/cosrx-lotion.jpg',
     color: 'from-purple-50 to-lavender',
   },
 ]
@@ -85,25 +85,25 @@ const PRODUCTS = [
 const UPSELLS = [
   {
     id: 'upsell_1',
-    name: 'Plum Skin Refining Toner',
+    name: 'Revive Serum Ginseng+Snail Mucin',
     brand: 'Beauty of Joseon',
     badge: '+1 PRODUIT',
-    benefit: 'Équilibre le pH',
-    description: 'Prépare la peau',
-    price: 99,
-    originalPrice: 140,
-    image: '/images/shop/boj-toner.jpg',
+    benefit: 'Éclat + Régénération',
+    description: 'Anti-âge naturel',
+    price: 69.90,
+    originalPrice: 89.80,
+    image: '/images/shop/boj-revive-serum.jpg',
   },
   {
     id: 'upsell_2',
-    name: 'Revive Eye Serum',
+    name: 'Glow Deep Serum + Relief Sun',
     brand: 'Beauty of Joseon',
     badge: '+2 PRODUITS',
-    benefit: 'Anti-âge intensif',
-    description: 'Éclat instantané',
-    price: 119,
-    originalPrice: 170,
-    image: '/images/shop/boj-eye.jpg',
+    benefit: 'Éclat + Protection SPF',
+    description: 'Routine complète',
+    price: 79.90,
+    originalPrice: 111.75,
+    image: '/images/shop/boj-glow-sun.jpg',
   },
 ]
 
@@ -428,7 +428,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                   transition={{ delay: 0.5 }}
                   className="absolute top-4 right-4 bg-white rounded-full px-4 py-2 shadow-lg"
                 >
-                  <span className="text-sm font-semibold text-pink">-28%</span>
+                  <span className="text-sm font-semibold text-pink">-15%</span>
                 </motion.div>
 
                 <motion.div
@@ -831,8 +831,8 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
                   PACK DE BASE
                 </span>
-                <p className="text-3xl font-bold text-gray-950 mb-2">79€</p>
-                <p className="text-gray-400 line-through text-sm mb-4">110€</p>
+                <p className="text-3xl font-bold text-gray-950 mb-2">{currentPrices.base}€</p>
+                <p className="text-gray-400 line-through text-sm mb-4">{currentOriginalPrices.base}€</p>
                 <p className="text-gray-600 text-sm">3 produits essentiels</p>
               </div>
               {selectedVariant === 'base' && (

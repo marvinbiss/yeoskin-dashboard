@@ -43,7 +43,7 @@ async function getPageData() {
 export const metadata: Metadata = {
   title: 'Routine Hydratation K-Beauty en 3 Gestes | Yeoskin',
   description:
-    'Pack skincare coréen essentiel : cleanser + essence + cream. Peau hydratée, douce et éclatante en 4 semaines. 79€ au lieu de 110€. Livraison offerte.',
+    'Pack skincare coréen essentiel : essence + crème + lotion. Peau hydratée, douce et éclatante en 4 semaines. 59.90€ au lieu de 70.85€. Livraison offerte.',
   keywords:
     'routine k-beauty, skincare coréen, cosrx, beauty of joseon, hydratation, routine minimaliste, skincare débutant',
   openGraph: {
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Routine Hydratation K-Beauty en 3 Gestes',
-    description: 'Pack skincare coréen : cleanser + essence + cream. 79€ • Livraison offerte.',
+    description: 'Pack skincare coréen : essence + crème + lotion. 59.90€ • Livraison offerte.',
     images: ['/images/shop/twitter-routine-hydratation.jpg'],
   },
   alternates: {
@@ -78,7 +78,7 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Product',
   name: 'Routine Hydratation K-Beauty',
-  description: 'Pack 3 produits skincare coréen pour une peau hydratée et éclatante',
+  description: 'Pack 3 produits skincare coréen COSRX : Snail 96 Essence + Snail 92 Cream + Ultra-Moisturizing Lotion. Peau hydratée et éclatante.',
   image: 'https://www.yeoskin.com/images/shop/routine-hydratation.jpg',
   brand: {
     '@type': 'Brand',
@@ -86,11 +86,11 @@ const jsonLd = {
   },
   offers: {
     '@type': 'Offer',
-    price: '79.00',
+    price: '59.90',
     priceCurrency: 'EUR',
     availability: 'https://schema.org/InStock',
     url: 'https://www.yeoskin.com/shop/routine-hydratation',
-    priceValidUntil: '2025-12-31',
+    priceValidUntil: '2026-12-31',
   },
   aggregateRating: {
     '@type': 'AggregateRating',
