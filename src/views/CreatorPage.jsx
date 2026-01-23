@@ -32,7 +32,7 @@ export default function CreatorPage() {
           id, slug, display_name, tagline, bio, profile_image_url,
           banner_image_url, brand_color, instagram_handle, tiktok_handle,
           youtube_handle, custom_message, featured_products, views_count, clicks_count,
-          creator:creators(id, promo_code)
+          creator:creators(id, discount_code)
         `)
         .eq('slug', slug)
         .eq('is_active', true)
@@ -69,8 +69,8 @@ export default function CreatorPage() {
       trackView(profileData.id)
 
       // Store creator code
-      if (profileData.creator?.promo_code) {
-        sessionStorage.setItem('yeoskin_creator_code', profileData.creator.promo_code)
+      if (profileData.creator?.discount_code) {
+        sessionStorage.setItem('yeoskin_creator_code', profileData.creator.discount_code)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -228,12 +228,12 @@ export default function CreatorPage() {
             )}
 
             {/* Promo Code */}
-            {profile.creator?.promo_code && (
+            {profile.creator?.discount_code && (
               <div
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white shadow-lg"
                 style={{ backgroundColor: brandColor }}
               >
-                <span>Code : {profile.creator.promo_code}</span>
+                <span>Code : {profile.creator.discount_code}</span>
               </div>
             )}
           </div>
