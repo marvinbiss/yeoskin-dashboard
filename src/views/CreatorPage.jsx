@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from '@/lib/navigation'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/Common'
-import { Instagram, ShoppingCart, ExternalLink, Youtube, Music2 } from 'lucide-react'
+import { Instagram, ShoppingCart, ExternalLink, Youtube, Music2, Sparkles } from 'lucide-react'
 
 export default function CreatorPage({ slug: slugProp }) {
   const params = useParams()
@@ -16,6 +16,7 @@ export default function CreatorPage({ slug: slugProp }) {
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
   const [products, setProducts] = useState([])
+  const [assignedRoutine, setAssignedRoutine] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function CreatorPage({ slug: slugProp }) {
           id, slug, display_name, tagline, bio, profile_image_url,
           banner_image_url, brand_color, instagram_handle, tiktok_handle,
           youtube_handle, custom_message, featured_products, views_count, clicks_count,
-          creator:creators(id, discount_code)
+          creator:creators(id, discount_code, slug)
         `)
         .eq('slug', slug)
         .eq('is_active', true)
@@ -66,10 +67,27 @@ export default function CreatorPage({ slug: slugProp }) {
         }
       }
 
+      // Fetch assigned routine
+      if (profileData.creator?.id) {
+        const { data: routineData } = await supabase
+          .from('creator_routines')
+          .select('routine_id, routines(id, title, slug, objective, objective_color, image_url, base_price)')
+          .eq('creator_id', profileData.creator.id)
+          .eq('is_active', true)
+          .maybeSingle()
+
+        if (routineData?.routines) {
+          setAssignedRoutine(routineData.routines)
+        }
+      }
+
       // Track view
       trackView(profileData.id)
 
-      // Store creator code
+      // Store creator slug + code for checkout flow
+      if (profileData.creator?.slug) {
+        sessionStorage.setItem('yeoskin_creator_slug', profileData.creator.slug)
+      }
       if (profileData.creator?.discount_code) {
         sessionStorage.setItem('yeoskin_creator_code', profileData.creator.discount_code)
       }
@@ -247,6 +265,49 @@ export default function CreatorPage({ slug: slugProp }) {
           )}
         </div>
       </div>
+
+      {/* Assigned Routine Section */}
+      {assignedRoutine && (
+        <div className="container mx-auto px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <div
+              className="relative overflow-hidden rounded-2xl shadow-xl p-8 md:p-12"
+              style={{
+                background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}DD 100%)`
+              }}
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 opacity-10">
+                <Sparkles className="w-full h-full text-white" />
+              </div>
+              <div className="relative z-10 text-center">
+                <p className="text-white/80 text-sm font-medium mb-2 uppercase tracking-wider">
+                  Ma Routine Beaute
+                </p>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+                  {assignedRoutine.title}
+                </h2>
+                {assignedRoutine.objective && (
+                  <p className="text-white/90 text-lg mb-6">
+                    {assignedRoutine.objective}
+                  </p>
+                )}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <span className="text-white/90 text-2xl font-bold">
+                    A partir de {Number(assignedRoutine.base_price).toFixed(2)}€
+                  </span>
+                  <a
+                    href={`/shop/${assignedRoutine.slug}?creator=${profile.creator?.slug || slug}`}
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Decouvrir ma routine
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Products Section */}
       {products.length > 0 && (
