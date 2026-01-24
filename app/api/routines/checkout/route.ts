@@ -345,9 +345,18 @@ export async function POST(request: NextRequest) {
       } else if (existing.status === 'completed') {
         if (existing.payload_hash === payloadHash) {
           logger.info({ requestId, existingId: existing.id }, 'Returning cached checkout')
+          // Apply discount URL format even for cached results
+          let cachedUrl = existing.checkout_url
+          if (creator?.discount_code && !cachedUrl.includes('/discount/')) {
+            // Extract the raw cart URL (remove old ?discount= if present)
+            const rawUrl = cachedUrl.replace(/[&?]discount=[^&]*/, '')
+            const urlObj = new URL(rawUrl)
+            const cartPath = urlObj.pathname + '?' + urlObj.searchParams.toString()
+            cachedUrl = `https://www.yeoskin.com/discount/${encodeURIComponent(creator.discount_code)}?redirect=${encodeURIComponent(cartPath)}`
+          }
           return NextResponse.json(
             {
-              checkout_url: existing.checkout_url,
+              checkout_url: cachedUrl,
               idempotency_key: idempotencyKey,
               cached: true,
             },
