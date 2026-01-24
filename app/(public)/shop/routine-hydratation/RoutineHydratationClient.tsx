@@ -237,6 +237,10 @@ interface RoutineData {
   upsell_2_price?: number
   upsell_2_original_price?: number
   image_url?: string
+  before_after_1_before_url?: string
+  before_after_1_after_url?: string
+  before_after_2_before_url?: string
+  before_after_2_after_url?: string
   is_active?: boolean
 }
 
@@ -715,12 +719,16 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 issue: 'Pores dilatés, teint terne',
                 result: 'Pores resserrés, éclat retrouvé',
                 duration: '4 semaines',
+                beforeImage: routine?.before_after_1_before_url,
+                afterImage: routine?.before_after_1_after_url,
               },
               {
                 name: 'Julie, 32 ans',
                 issue: 'Déshydratation, ridules',
                 result: 'Peau repulpée, ridules atténuées',
                 duration: '6 semaines',
+                beforeImage: routine?.before_after_2_before_url,
+                afterImage: routine?.before_after_2_after_url,
               },
             ].map((testimonial, i) => (
               <motion.div
@@ -732,11 +740,19 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 className="bg-gray-50 rounded-2xl sm:rounded-3xl p-5 sm:p-8"
               >
                 <div className="flex gap-4 mb-6">
-                  <div className="flex-1 aspect-square bg-gray-200 rounded-2xl flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">Avant</span>
+                  <div className="flex-1 aspect-square bg-gray-200 rounded-2xl overflow-hidden flex items-center justify-center">
+                    {testimonial.beforeImage ? (
+                      <img src={testimonial.beforeImage} alt="Avant" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-gray-400 text-sm">Avant</span>
+                    )}
                   </div>
-                  <div className="flex-1 aspect-square bg-pink-light rounded-2xl flex items-center justify-center">
-                    <span className="text-pink text-sm">Après</span>
+                  <div className="flex-1 aspect-square bg-pink-light rounded-2xl overflow-hidden flex items-center justify-center">
+                    {testimonial.afterImage ? (
+                      <img src={testimonial.afterImage} alt="Après" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-pink text-sm">Après</span>
+                    )}
                   </div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-950 mb-2">{testimonial.name}</h3>

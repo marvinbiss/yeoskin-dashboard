@@ -72,7 +72,7 @@ export default function CreatorPage({ slug: slugProp }) {
       if (profileData.creator?.id) {
         const { data: routineData } = await supabase
           .from('creator_routines')
-          .select('routine_id, routines(id, title, slug, objective, objective_color, image_url, description, base_price, base_products, upsell_1_product, upsell_1_price, upsell_1_original_price, upsell_2_products, upsell_2_price, upsell_2_original_price, is_active)')
+          .select('routine_id, routines(id, title, slug, objective, objective_color, image_url, description, base_price, base_products, upsell_1_product, upsell_1_price, upsell_1_original_price, upsell_2_products, upsell_2_price, upsell_2_original_price, before_after_1_before_url, before_after_1_after_url, before_after_2_before_url, before_after_2_after_url, is_active)')
           .eq('creator_id', profileData.creator.id)
           .eq('is_active', true)
           .maybeSingle()

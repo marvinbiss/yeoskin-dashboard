@@ -36,6 +36,10 @@ const emptyForm = {
   is_active: true,
   is_featured: false,
   expected_results: '',
+  before_after_1_before_url: '',
+  before_after_1_after_url: '',
+  before_after_2_before_url: '',
+  before_after_2_after_url: '',
   meta_title: '',
   meta_description: '',
 }
@@ -74,6 +78,10 @@ export const RoutineForm = ({ isOpen, onClose, routine = null, onSubmit, loading
           is_active: routine.is_active ?? true,
           is_featured: routine.is_featured ?? false,
           expected_results: Array.isArray(routine.expected_results) ? routine.expected_results.join('\n') : '',
+          before_after_1_before_url: routine.before_after_1_before_url || '',
+          before_after_1_after_url: routine.before_after_1_after_url || '',
+          before_after_2_before_url: routine.before_after_2_before_url || '',
+          before_after_2_after_url: routine.before_after_2_after_url || '',
           meta_title: routine.meta_title || '',
           meta_description: routine.meta_description || '',
         })
@@ -210,6 +218,10 @@ export const RoutineForm = ({ isOpen, onClose, routine = null, onSubmit, loading
       expected_results: formData.expected_results.trim()
         ? formData.expected_results.split('\n').filter(r => r.trim())
         : null,
+      before_after_1_before_url: formData.before_after_1_before_url.trim() || null,
+      before_after_1_after_url: formData.before_after_1_after_url.trim() || null,
+      before_after_2_before_url: formData.before_after_2_before_url.trim() || null,
+      before_after_2_after_url: formData.before_after_2_after_url.trim() || null,
       meta_title: formData.meta_title.trim() || null,
       meta_description: formData.meta_description.trim() || null,
     }
@@ -552,6 +564,90 @@ export const RoutineForm = ({ isOpen, onClose, routine = null, onSubmit, loading
               ))}
             </div>
             {errors.upsell_2_variant_ids && <p className="mt-1 text-xs text-danger-500">{errors.upsell_2_variant_ids}</p>}
+          </div>
+        </div>
+
+        {/* Section: Avant / Apres */}
+        <div className="space-y-4">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2 border-b pb-2">
+            <Image className="w-4 h-4" />
+            Avant / Apres (4 images)
+          </h4>
+
+          <div className="space-y-3">
+            <p className="text-xs text-gray-500">Temoignage 1</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Image Avant
+                </label>
+                <input
+                  type="text"
+                  value={formData.before_after_1_before_url}
+                  onChange={(e) => handleChange('before_after_1_before_url', e.target.value)}
+                  placeholder="https://..."
+                  className="input"
+                  disabled={loading}
+                />
+                {formData.before_after_1_before_url && (
+                  <img src={formData.before_after_1_before_url} alt="Avant 1" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Image Apres
+                </label>
+                <input
+                  type="text"
+                  value={formData.before_after_1_after_url}
+                  onChange={(e) => handleChange('before_after_1_after_url', e.target.value)}
+                  placeholder="https://..."
+                  className="input"
+                  disabled={loading}
+                />
+                {formData.before_after_1_after_url && (
+                  <img src={formData.before_after_1_after_url} alt="Apres 1" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs text-gray-500">Temoignage 2</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Image Avant
+                </label>
+                <input
+                  type="text"
+                  value={formData.before_after_2_before_url}
+                  onChange={(e) => handleChange('before_after_2_before_url', e.target.value)}
+                  placeholder="https://..."
+                  className="input"
+                  disabled={loading}
+                />
+                {formData.before_after_2_before_url && (
+                  <img src={formData.before_after_2_before_url} alt="Avant 2" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Image Apres
+                </label>
+                <input
+                  type="text"
+                  value={formData.before_after_2_after_url}
+                  onChange={(e) => handleChange('before_after_2_after_url', e.target.value)}
+                  placeholder="https://..."
+                  className="input"
+                  disabled={loading}
+                />
+                {formData.before_after_2_after_url && (
+                  <img src={formData.before_after_2_after_url} alt="Apres 2" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
