@@ -164,6 +164,27 @@ export const useCreators = (options = {}) => {
           })
       }
 
+      // Envoyer l'invitation par email (crée le compte auth + envoie le lien)
+      try {
+        const inviteRes = await fetch('/api/creators/invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: insertData.email })
+        })
+
+        if (inviteRes.ok) {
+          const { user_id } = await inviteRes.json()
+          if (user_id) {
+            await supabase
+              .from(TABLES.CREATORS)
+              .update({ user_id })
+              .eq('id', data.id)
+          }
+        }
+      } catch (inviteErr) {
+        console.warn('Invitation email failed:', inviteErr.message)
+      }
+
       await fetchCreators()
       return data
     } catch (err) {

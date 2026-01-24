@@ -6,9 +6,9 @@ import { CreatorProtectedRoute } from '@/creator'
 
 export default function CreatorLayout({ children }) {
   const pathname = usePathname()
-  const isLoginPage = pathname === '/c/creator/login'
+  const isPublicPage = pathname === '/c/creator/login' || pathname === '/c/creator/set-password'
 
-  if (isLoginPage) {
+  if (isPublicPage) {
     return <CreatorProviders>{children}</CreatorProviders>
   }
 
