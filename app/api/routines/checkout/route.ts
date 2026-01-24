@@ -541,11 +541,12 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 8) UPDATE ROUTINE_CHECKOUTS (finaliser)
     // ============================================
-    // Build final checkout URL with discount code for Shopify display
+    // Use Shopify's /discount/CODE endpoint to apply code before checkout
+    // This sets a session cookie with the discount, then redirects to checkout
     let finalCheckoutUrl = cart.checkoutUrl
     if (creator?.discount_code) {
-      const separator = cart.checkoutUrl.includes('?') ? '&' : '?'
-      finalCheckoutUrl = `${cart.checkoutUrl}${separator}discount=${encodeURIComponent(creator.discount_code)}`
+      const cartPath = new URL(cart.checkoutUrl).pathname + '?' + new URL(cart.checkoutUrl).searchParams.toString()
+      finalCheckoutUrl = `https://www.yeoskin.com/discount/${encodeURIComponent(creator.discount_code)}?redirect=${encodeURIComponent(cartPath)}`
     }
 
     if (rowId) {
