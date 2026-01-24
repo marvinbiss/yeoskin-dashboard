@@ -189,8 +189,9 @@ export const CreatorDetailPage = () => {
       // Fetch commission tiers
       const { data: tiersData } = await supabase
         .from('commission_tiers')
-        .select('id, name, commission_percent, color')
-        .order('commission_percent')
+        .select('id, display_name, commission_rate, color')
+        .eq('is_active', true)
+        .order('sort_order')
 
       setCommissionTiers(tiersData || [])
 
@@ -658,7 +659,7 @@ export const CreatorDetailPage = () => {
                             className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
                             style={{ backgroundColor: tier.color }}
                           >
-                            {tier.name}
+                            {tier.display_name}
                           </span>
                         ) : null
                       })()}

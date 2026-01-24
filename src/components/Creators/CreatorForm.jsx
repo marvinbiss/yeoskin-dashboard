@@ -115,7 +115,7 @@ export const CreatorForm = ({
         setFormData(prev => ({
           ...prev,
           tier_id: tierId,
-          commission_rate: tier.commission_percent,
+          commission_rate: tier.commission_rate * 100,
         }))
       }
     } else {
@@ -278,8 +278,8 @@ export const CreatorForm = ({
                     }`}
                   >
                     <Award className="w-5 h-5 mb-1" style={{ color: tier.color }} />
-                    <span className="text-sm font-medium">{tier.name}</span>
-                    <span className="text-xs text-gray-500">{tier.commission_percent}%</span>
+                    <span className="text-sm font-medium">{tier.display_name}</span>
+                    <span className="text-xs text-gray-500">{(tier.commission_rate * 100).toFixed(0)}%</span>
                   </button>
                 ))}
                 <button
