@@ -437,23 +437,23 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="absolute top-4 right-4 bg-white rounded-full px-4 py-2 shadow-lg"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg"
                 >
-                  <span className="text-sm font-semibold text-pink">-15%</span>
+                  <span className="text-xs sm:text-sm font-semibold text-pink">-15%</span>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 }}
-                  className="absolute bottom-4 left-4 bg-white rounded-2xl p-3 shadow-lg flex items-center gap-2"
+                  className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-lg flex items-center gap-1.5 sm:gap-2"
                 >
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <span className="text-sm font-medium">{heroRating} ({heroReviews.toLocaleString()})</span>
+                  <span className="text-xs sm:text-sm font-medium">{heroRating}</span>
                 </motion.div>
               </div>
             </motion.div>
@@ -498,9 +498,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 ].map((badge, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm"
+                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-100 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm"
                   >
-                    <badge.icon className="w-4 h-4" />
+                    <badge.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     {badge.label}
                   </span>
                 ))}
@@ -674,9 +674,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 <div className="w-14 h-14 sm:w-20 sm:h-20 bg-pink text-white rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6">
                   {i + 1}
                 </div>
-                <h3 className="text-xl font-bold text-gray-950 mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
-                <p className="text-gray-600 mb-2">{product.brand}</p>
-                <p className="text-sm text-pink font-medium">{product.time}</p>
+                <h3 className="text-base sm:text-xl font-bold text-gray-950 mb-1 sm:mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
+                <p className="text-sm sm:text-base text-gray-600 mb-1 sm:mb-2">{product.brand}</p>
+                <p className="text-xs sm:text-sm text-pink font-medium">{product.time}</p>
               </motion.div>
             ))}
           </div>
@@ -790,12 +790,12 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
               Ce Qu'Elles En Pensent
             </h2>
-            <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-4">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                <Star key={i} className="w-4 h-4 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
               ))}
-              <span className="text-xl font-bold text-gray-950 ml-2">{heroRating}/5</span>
-              <span className="text-gray-600">({heroReviews.toLocaleString()} avis)</span>
+              <span className="text-base sm:text-xl font-bold text-gray-950 ml-2">{heroRating}/5</span>
+              <span className="text-xs sm:text-base text-gray-600">({heroReviews.toLocaleString()} avis)</span>
             </div>
           </motion.div>
 
@@ -804,7 +804,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
           >
             {REVIEWS.map((review, i) => (
               <ReviewCard key={review.id} review={review} index={i} />
@@ -967,7 +967,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <p className="pt-4 text-gray-600">{faq.answer}</p>
+                        <p className="pt-3 sm:pt-4 text-sm sm:text-base text-gray-600">{faq.answer}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -1018,21 +1018,21 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               )}
             </button>
 
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-white/70 text-xs sm:text-sm">
-              <span className="flex items-center gap-2">
-                <Truck className="w-4 h-4" />
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-6 text-white/70 text-xs sm:text-sm">
+              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Livraison offerte
               </span>
-              <span className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
-                30j satisfait ou remboursé
+              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                30j remboursé
               </span>
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
+              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Paiement sécurisé
               </span>
-              <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Support 7j/7
               </span>
             </div>
@@ -1130,26 +1130,26 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
         <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed">{product.description}</p>
 
         {/* Ingredients */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
           {product.ingredients.map((ing, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1 bg-lavender/20 text-gray-700 px-3 py-1 rounded-full text-xs font-medium"
+              className="inline-flex items-center gap-1 bg-lavender/20 text-gray-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium"
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               {ing}
             </span>
           ))}
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
           <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-semibold text-gray-900">{product.stats.satisfaction}%</span>
-            <span className="text-sm text-gray-500">satisfaites</span>
+            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-xs sm:text-sm font-semibold text-gray-900">{product.stats.satisfaction}%</span>
+            <span className="text-xs sm:text-sm text-gray-500">satisfaites</span>
           </div>
-          <span className="text-sm text-gray-500">{product.stats.duration}</span>
+          <span className="text-xs sm:text-sm text-gray-500">{product.stats.duration}</span>
         </div>
       </div>
     </motion.article>
@@ -1202,9 +1202,9 @@ function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: numbe
       <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content}</p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-400">
-        <span>{review.date}</span>
-        <span>{review.helpful} personnes ont trouvé cet avis utile</span>
+      <div className="flex items-center justify-between text-xs text-gray-400 gap-2">
+        <span className="shrink-0">{review.date}</span>
+        <span className="truncate">{review.helpful} utile</span>
       </div>
     </motion.div>
   )
