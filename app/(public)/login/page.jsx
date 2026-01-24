@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { LoginPage } from '@/views'
 
-export const dynamic = 'force-dynamic'
+// No force-dynamic needed - this page is purely client-rendered
 
 function LoadingFallback() {
   return (

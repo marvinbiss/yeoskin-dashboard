@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 
 /**
@@ -98,23 +98,32 @@ export const useCreatorDashboard = (creatorId = null) => {
     fetchForecast()
   }, [fetchDashboard, fetchForecast])
 
-  // Real-time subscription for ledger changes
+  // Debounced refresh to avoid rapid consecutive fetches
+  const debounceRef = useRef(null)
+  const debouncedRefresh = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetchDashboard()
+      fetchForecast()
+    }, 2000)
+  }, [fetchDashboard, fetchForecast])
+
+  // Real-time subscription for ledger changes (filtered by creator_id)
   useEffect(() => {
+    if (!creatorId) return
+
     const channel = supabase
-      .channel('creator-dashboard-changes')
+      .channel(`creator-dashboard-${creatorId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'financial_ledger',
+          filter: `creator_id=eq.${creatorId}`,
         },
-        (payload) => {
-          // Refresh dashboard when new ledger entry is added for this creator
-          if (!creatorId || payload.new.creator_id === creatorId) {
-            fetchDashboard()
-            fetchForecast()
-          }
+        () => {
+          debouncedRefresh()
         }
       )
       .on(
@@ -123,23 +132,22 @@ export const useCreatorDashboard = (creatorId = null) => {
           event: 'INSERT',
           schema: 'public',
           table: 'creator_notifications',
+          filter: `creator_id=eq.${creatorId}`,
         },
-        (payload) => {
-          // Increment notification count
-          if (!creatorId || payload.new.creator_id === creatorId) {
-            setDashboard(prev => ({
-              ...prev,
-              unreadNotifications: prev.unreadNotifications + 1
-            }))
-          }
+        () => {
+          setDashboard(prev => ({
+            ...prev,
+            unreadNotifications: prev.unreadNotifications + 1
+          }))
         }
       )
       .subscribe()
 
     return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
       supabase.removeChannel(channel)
     }
-  }, [creatorId, fetchDashboard, fetchForecast])
+  }, [creatorId, debouncedRefresh])
 
   return {
     loading,

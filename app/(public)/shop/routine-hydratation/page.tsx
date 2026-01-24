@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import RoutineHydratationClient from './RoutineHydratationClient'
 
-// Force dynamic rendering to fetch fresh CMS content
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every hour for fresh CMS content without blocking requests
+export const revalidate = 3600
 
 // Fetch CMS content + routine data server-side
 async function getPageData() {

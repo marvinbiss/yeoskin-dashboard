@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 import ApplyClient from './ApplyClient'
 
-// Force dynamic rendering to fetch fresh CMS content
-export const dynamic = 'force-dynamic'
+// ISR: revalidate every hour for fresh CMS content
+export const revalidate = 3600
 
 export const metadata = {
   title: 'Deviens Créateur Yeoskin | Programme Affiliation K-Beauty',

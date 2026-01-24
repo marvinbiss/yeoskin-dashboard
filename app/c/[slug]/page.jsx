@@ -1,6 +1,6 @@
 import CreatorPage from '@/views/CreatorPage'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600 // ISR: revalidate every 10 minutes
 export const dynamicParams = true
 
 export default async function PublicCreatorPage({ params }) {

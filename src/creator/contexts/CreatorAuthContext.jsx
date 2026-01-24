@@ -19,45 +19,28 @@ export const CreatorAuthProvider = ({ children }) => {
   const [creator, setCreator] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // Fetch creator profile - simple query
+  // Fetch creator profile - direct query by user_id or email
   const fetchCreatorProfile = useCallback(async (authUser) => {
-    console.log('fetchCreatorProfile called with:', authUser?.id, authUser?.email)
-
     if (!authUser?.id || !authUser?.email) {
-      console.log('No authUser, returning null')
       return null
     }
 
     try {
-      // Try simple query first - just get all and filter
-      console.log('Fetching all creators...')
-      const { data: allCreators, error: allError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('creators')
         .select('id, email, discount_code, commission_rate, status, user_id')
+        .or(`user_id.eq.${authUser.id},email.ilike.${authUser.email}`)
+        .limit(1)
+        .maybeSingle()
 
-      console.log('All creators result:', allCreators?.length, 'error:', allError?.message)
-
-      if (allError) {
-        console.log('Error fetching creators:', allError.message)
+      if (fetchError) {
+        console.error('Error fetching creator:', fetchError.message)
         return null
       }
 
-      // Find matching creator
-      const userEmail = authUser.email.toLowerCase()
-      const userId = authUser.id
-
-      console.log('Looking for creator with user_id:', userId, 'or email:', userEmail)
-
-      const found = allCreators?.find(c =>
-        c.user_id === userId ||
-        c.email?.toLowerCase() === userEmail
-      )
-
-      console.log('Found creator:', found)
-
-      return found ? { ...found, found: true } : null
+      return data ? { ...data, found: true } : null
     } catch (err) {
-      console.log('Creator fetch error:', err.message)
+      console.error('Creator fetch error:', err.message)
       return null
     }
   }, [])
@@ -105,8 +88,6 @@ export const CreatorAuthProvider = ({ children }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return
-
-        console.log('Auth event:', event)
 
         if (event === 'SIGNED_IN' && newSession?.user) {
           setSession(newSession)
