@@ -10,14 +10,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Shopify store URL for proxying
-const SHOPIFY_STORE_URL = 'https://vqgpah-fb.myshopify.com'
-
 // Domains that should skip all processing (dev environments)
 const SKIP_DOMAINS = ['localhost', '127.0.0.1', 'vercel.app']
 
-// Root domains where Shopify proxy applies
-const ROOT_DOMAINS = ['yeoskin.com', 'www.yeoskin.com']
+// Domains that serve /c/ routes directly (no Shopify proxy needed)
+const CREATOR_DOMAINS = ['yeoskin.fr', 'www.yeoskin.fr']
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl
@@ -30,8 +27,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Handle yeoskin.com (root domain) - proxy to Shopify except /c/ routes
-  if (ROOT_DOMAINS.includes(hostname.replace(':443', '').replace(':80', ''))) {
+  // Handle yeoskin.fr - serve /c/ routes, redirect everything else to yeoskin.com
+  if (CREATOR_DOMAINS.includes(hostname.replace(':443', '').replace(':80', ''))) {
     const path = url.pathname
 
     // /c/* routes are handled by Next.js (creator pages + dashboard)
@@ -44,9 +41,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
-    // Everything else → proxy to Shopify
-    const shopifyUrl = new URL(path + url.search, SHOPIFY_STORE_URL)
-    return NextResponse.rewrite(shopifyUrl)
+    // Everything else → redirect to yeoskin.com
+    return NextResponse.redirect(new URL(path, 'https://yeoskin.com'))
   }
 
   // Extract subdomain
