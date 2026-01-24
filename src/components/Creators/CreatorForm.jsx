@@ -315,7 +315,7 @@ export const CreatorForm = ({
                   value={formData.commission_rate}
                   onChange={(e) => handleChange('commission_rate', parseFloat(e.target.value) || 0)}
                   className={`input ${errors.commission_rate ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-                  disabled={loading || !!formData.tier_id}
+                  disabled={loading || (!!formData.tier_id && tiers.length > 0)}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
               </div>
