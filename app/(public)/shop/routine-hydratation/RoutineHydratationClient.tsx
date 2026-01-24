@@ -417,12 +417,20 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               className="relative order-2 lg:order-1"
             >
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
-                    <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
+                {routine?.image_url ? (
+                  <img
+                    src={routine.image_url}
+                    alt={heroTitle}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
+                      <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Floating badges */}
                 <motion.div
@@ -1091,9 +1099,17 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
     >
       {/* Image */}
       <div className={`aspect-[4/3] sm:aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
-        </div>
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
+          </div>
+        )}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex gap-2">
           <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
             ÉTAPE {product.step}
