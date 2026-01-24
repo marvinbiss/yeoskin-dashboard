@@ -73,6 +73,9 @@ export const CreatorDetailPage = () => {
   const [savingPacks, setSavingPacks] = useState(false)
   const [creatorProfile, setCreatorProfile] = useState(null)
 
+  // Commission tiers
+  const [commissionTiers, setCommissionTiers] = useState([])
+
   // Routine assignment state
   const [routineModal, setRoutineModal] = useState(false)
   const [allRoutines, setAllRoutines] = useState([])
@@ -182,6 +185,14 @@ export const CreatorDetailPage = () => {
           .filter(cp => cp.product_packs)
           .map(cp => cp.product_packs)
       )
+
+      // Fetch commission tiers
+      const { data: tiersData } = await supabase
+        .from('commission_tiers')
+        .select('id, name, commission_percent, color')
+        .order('commission_percent')
+
+      setCommissionTiers(tiersData || [])
 
       // Fetch active routines
       const { data: routinesData } = await supabase
@@ -392,6 +403,7 @@ export const CreatorDetailPage = () => {
         .update({
           email: formData.email,
           discount_code: formData.discount_code,
+          tier_id: formData.tier_id,
           commission_rate: formData.commission_rate,
           lock_days: formData.lock_days,
           iban: formData.iban,
@@ -637,7 +649,20 @@ export const CreatorDetailPage = () => {
                   <Percent className="w-4 h-4 text-gray-400" />
                   <div>
                     <p className="text-xs text-gray-500">Taux de commission</p>
-                    <p className="font-medium">{((creator.commission_rate || 0.15) * 100).toFixed(0)}%</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium">{((creator.commission_rate || 0.15) * 100).toFixed(0)}%</p>
+                      {creator.tier_id && commissionTiers.length > 0 && (() => {
+                        const tier = commissionTiers.find(t => t.id === creator.tier_id)
+                        return tier ? (
+                          <span
+                            className="px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: tier.color }}
+                          >
+                            {tier.name}
+                          </span>
+                        ) : null
+                      })()}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -939,6 +964,7 @@ export const CreatorDetailPage = () => {
         creator={creator}
         onSubmit={handleFormSubmit}
         loading={actionLoading}
+        tiers={commissionTiers}
       />
 
       {/* Delete Confirmation */}

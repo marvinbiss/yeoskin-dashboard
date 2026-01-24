@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { User, Mail, Tag, Percent, Calendar, CreditCard, AlertCircle } from 'lucide-react'
+import { User, Mail, Tag, Percent, Calendar, CreditCard, AlertCircle, Award } from 'lucide-react'
 import { Modal, Button } from '../Common'
 
 /**
@@ -46,6 +46,7 @@ export const CreatorForm = ({
   creator = null,
   onSubmit,
   loading = false,
+  tiers = [],
 }) => {
   const isEditing = !!creator
 
@@ -53,6 +54,7 @@ export const CreatorForm = ({
   const [formData, setFormData] = useState({
     email: '',
     discount_code: '',
+    tier_id: '',
     commission_rate: 15,
     lock_days: 30,
     status: 'active',
@@ -71,6 +73,7 @@ export const CreatorForm = ({
         setFormData({
           email: creator.email || '',
           discount_code: creator.discount_code || '',
+          tier_id: creator.tier_id || '',
           commission_rate: (creator.commission_rate || 0.15) * 100,
           lock_days: creator.lock_days || 30,
           status: creator.status || 'active',
@@ -82,6 +85,7 @@ export const CreatorForm = ({
         setFormData({
           email: '',
           discount_code: '',
+          tier_id: '',
           commission_rate: 15,
           lock_days: 30,
           status: 'active',
@@ -100,6 +104,22 @@ export const CreatorForm = ({
     // Effacer l'erreur du champ modifié
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
+    }
+  }
+
+  // Gérer le changement de tier
+  const handleTierChange = (tierId) => {
+    if (tierId) {
+      const tier = tiers.find(t => t.id === tierId)
+      if (tier) {
+        setFormData(prev => ({
+          ...prev,
+          tier_id: tierId,
+          commission_rate: tier.commission_percent,
+        }))
+      }
+    } else {
+      setFormData(prev => ({ ...prev, tier_id: '' }))
     }
   }
 
@@ -150,6 +170,7 @@ export const CreatorForm = ({
       await onSubmit({
         email: formData.email.trim(),
         discount_code: formData.discount_code.trim(),
+        tier_id: formData.tier_id || null,
         commission_rate: formData.commission_rate / 100, // Convertir en décimal
         lock_days: parseInt(formData.lock_days),
         status: formData.status,
@@ -237,6 +258,48 @@ export const CreatorForm = ({
             Paramètres de commission
           </h4>
 
+          {/* Tier selector */}
+          {tiers.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Offre
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {tiers.map(tier => (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => handleTierChange(tier.id)}
+                    disabled={loading}
+                    className={`flex flex-col items-center p-3 rounded-lg border-2 transition ${
+                      formData.tier_id === tier.id
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    <Award className="w-5 h-5 mb-1" style={{ color: tier.color }} />
+                    <span className="text-sm font-medium">{tier.name}</span>
+                    <span className="text-xs text-gray-500">{tier.commission_percent}%</span>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => handleTierChange('')}
+                  disabled={loading}
+                  className={`flex flex-col items-center p-3 rounded-lg border-2 transition ${
+                    !formData.tier_id
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Percent className="w-5 h-5 mb-1 text-gray-400" />
+                  <span className="text-sm font-medium">Custom</span>
+                  <span className="text-xs text-gray-500">Manuel</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Taux de commission */}
             <div>
@@ -252,7 +315,7 @@ export const CreatorForm = ({
                   value={formData.commission_rate}
                   onChange={(e) => handleChange('commission_rate', parseFloat(e.target.value) || 0)}
                   className={`input ${errors.commission_rate ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-                  disabled={loading}
+                  disabled={loading || !!formData.tier_id}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
               </div>
