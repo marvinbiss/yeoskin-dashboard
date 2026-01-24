@@ -21,7 +21,7 @@ export async function POST(request) {
     const origin = request.headers.get('origin') || 'https://dashboard.yeoskin.com'
 
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${origin}/c/creator/set-password`
+      redirectTo: `${origin}/auth/set-password`
     })
 
     if (error) {

@@ -97,8 +97,8 @@ export function middleware(request: NextRequest) {
   if (subdomain === 'dashboard') {
     const path = url.pathname
 
-    // Allow creator routes under /c/creator
-    if (path.startsWith('/c/creator') || path.startsWith('/api') || path.startsWith('/_next')) {
+    // Allow creator routes, auth routes, API, and assets
+    if (path.startsWith('/c/creator') || path.startsWith('/auth') || path.startsWith('/api') || path.startsWith('/_next')) {
       return NextResponse.next()
     }
 
