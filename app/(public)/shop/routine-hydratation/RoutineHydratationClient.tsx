@@ -412,14 +412,21 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               transition={{ duration: 0.8 }}
               className="relative order-2 lg:order-1"
             >
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light p-8">
-                {/* Product image placeholder */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
-                    <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
+              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
+                {routine?.image_url ? (
+                  <img
+                    src={routine.image_url}
+                    alt={heroTitle}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
+                      <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Floating badges */}
                 <motion.div
@@ -828,9 +835,18 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               }`}
             >
               <div className="text-center">
-                <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
+                <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mb-3">
                   PACK DE BASE
                 </span>
+                {routine?.image_url && (
+                  <div className="w-full aspect-square rounded-xl overflow-hidden mb-3">
+                    <img
+                      src={routine.image_url}
+                      alt="Pack de base"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{currentPrices.base}€</p>
                 <p className="text-gray-400 line-through text-sm mb-4">{currentOriginalPrices.base}€</p>
                 <p className="text-gray-600 text-sm">3 produits essentiels</p>
@@ -859,9 +875,18 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 }`}
               >
                 <div className="text-center">
-                  <span className="inline-block bg-pink text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
+                  <span className="inline-block bg-pink text-white px-3 py-1 rounded-full text-sm font-medium mb-3">
                     {upsell.badge}
                   </span>
+                  {upsell.image && (
+                    <div className="w-full aspect-square rounded-xl overflow-hidden mb-3">
+                      <img
+                        src={upsell.image}
+                        alt={upsell.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
                   <h3 className="font-bold text-gray-950 mb-1">{upsell.name}</h3>
                   <p className="text-sm text-gray-600 mb-4">{upsell.benefit}</p>
                   <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{upsell.price}€</p>
@@ -1076,9 +1101,17 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
     >
       {/* Image */}
       <div className={`aspect-[4/3] sm:aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
-        </div>
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
+          </div>
+        )}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex gap-2">
           <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
             ÉTAPE {product.step}
