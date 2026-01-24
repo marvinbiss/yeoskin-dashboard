@@ -8,6 +8,7 @@
 import { useState, useEffect } from 'react'
 import { User, Mail, Tag, Percent, Calendar, CreditCard, AlertCircle, Award } from 'lucide-react'
 import { Modal, Button } from '../Common'
+import { supabase } from '../../lib/supabase'
 
 /**
  * Validation de l'email
@@ -21,7 +22,6 @@ const validateEmail = (email) => {
  * Validation du code promo
  */
 const validateDiscountCode = (code) => {
-  // Code promo: lettres, chiffres, tirets, 3-20 caractères
   const re = /^[A-Z0-9_-]{3,20}$/i
   return re.test(code)
 }
@@ -30,8 +30,7 @@ const validateDiscountCode = (code) => {
  * Validation de l'IBAN
  */
 const validateIBAN = (iban) => {
-  if (!iban) return true // Optional
-  // IBAN basique: 2 lettres + 2 chiffres + jusqu'à 30 alphanumériques
+  if (!iban) return true
   const cleaned = iban.replace(/\s/g, '').toUpperCase()
   const re = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{4,30}$/
   return re.test(cleaned)
@@ -46,11 +45,9 @@ export const CreatorForm = ({
   creator = null,
   onSubmit,
   loading = false,
-  tiers = [],
 }) => {
   const isEditing = !!creator
 
-  // État du formulaire
   const [formData, setFormData] = useState({
     email: '',
     discount_code: '',
@@ -62,14 +59,27 @@ export const CreatorForm = ({
     account_type: 'iban',
   })
 
-  // Erreurs de validation
   const [errors, setErrors] = useState({})
+  const [tiers, setTiers] = useState([])
+
+  // Charger les tiers depuis Supabase quand le modal s'ouvre
+  useEffect(() => {
+    if (isOpen) {
+      supabase
+        .from('commission_tiers')
+        .select('id, display_name, commission_rate, color')
+        .eq('is_active', true)
+        .order('sort_order')
+        .then(({ data }) => {
+          setTiers(data || [])
+        })
+    }
+  }, [isOpen])
 
   // Réinitialiser le formulaire quand le modal s'ouvre
   useEffect(() => {
     if (isOpen) {
       if (creator) {
-        // Mode édition
         setFormData({
           email: creator.email || '',
           discount_code: creator.discount_code || '',
@@ -81,7 +91,6 @@ export const CreatorForm = ({
           account_type: creator.bankAccount?.account_type || 'iban',
         })
       } else {
-        // Mode création
         setFormData({
           email: '',
           discount_code: '',
@@ -97,17 +106,13 @@ export const CreatorForm = ({
     }
   }, [isOpen, creator])
 
-  // Gérer les changements de champs
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-
-    // Effacer l'erreur du champ modifié
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: null }))
     }
   }
 
-  // Gérer le changement de tier
   const handleTierChange = (tierId) => {
     if (tierId) {
       const tier = tiers.find(t => t.id === tierId)
@@ -115,7 +120,7 @@ export const CreatorForm = ({
         setFormData(prev => ({
           ...prev,
           tier_id: tierId,
-          commission_rate: tier.commission_rate * 100,
+          commission_rate: Math.round(tier.commission_rate * 100),
         }))
       }
     } else {
@@ -123,35 +128,29 @@ export const CreatorForm = ({
     }
   }
 
-  // Valider le formulaire
   const validateForm = () => {
     const newErrors = {}
 
-    // Email obligatoire et valide
     if (!formData.email.trim()) {
       newErrors.email = 'L\'email est obligatoire'
     } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Format d\'email invalide'
     }
 
-    // Code promo obligatoire et valide
     if (!formData.discount_code.trim()) {
       newErrors.discount_code = 'Le code promo est obligatoire'
     } else if (!validateDiscountCode(formData.discount_code)) {
       newErrors.discount_code = 'Le code doit contenir 3-20 caractères (lettres, chiffres, tirets)'
     }
 
-    // Taux de commission valide
     if (formData.commission_rate < 0 || formData.commission_rate > 100) {
       newErrors.commission_rate = 'Le taux doit être entre 0 et 100%'
     }
 
-    // Jours de blocage valide
     if (formData.lock_days < 0 || formData.lock_days > 365) {
       newErrors.lock_days = 'Les jours de blocage doivent être entre 0 et 365'
     }
 
-    // IBAN valide si fourni
     if (formData.iban && !validateIBAN(formData.iban)) {
       newErrors.iban = 'Format IBAN invalide'
     }
@@ -160,10 +159,8 @@ export const CreatorForm = ({
     return Object.keys(newErrors).length === 0
   }
 
-  // Soumettre le formulaire
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     if (!validateForm()) return
 
     try {
@@ -171,14 +168,13 @@ export const CreatorForm = ({
         email: formData.email.trim(),
         discount_code: formData.discount_code.trim(),
         tier_id: formData.tier_id || null,
-        commission_rate: formData.commission_rate / 100, // Convertir en décimal
+        commission_rate: formData.commission_rate / 100,
         lock_days: parseInt(formData.lock_days),
         status: formData.status,
         iban: formData.iban.trim() || null,
         account_type: formData.account_type,
       })
     } catch (err) {
-      // L'erreur sera gérée par le parent
       setErrors({ submit: err.message })
     }
   }
@@ -191,7 +187,6 @@ export const CreatorForm = ({
       size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Erreur générale */}
         {errors.submit && (
           <div className="p-4 bg-danger-50 dark:bg-danger-500/20 border border-danger-200 dark:border-danger-800 rounded-lg flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-danger-500 flex-shrink-0 mt-0.5" />
@@ -207,7 +202,6 @@ export const CreatorForm = ({
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Email <span className="text-danger-500">*</span>
@@ -223,12 +217,9 @@ export const CreatorForm = ({
                   disabled={loading}
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-danger-500">{errors.email}</p>
-              )}
+              {errors.email && <p className="mt-1 text-sm text-danger-500">{errors.email}</p>}
             </div>
 
-            {/* Code promo */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Code promo <span className="text-danger-500">*</span>
@@ -244,64 +235,59 @@ export const CreatorForm = ({
                   disabled={loading}
                 />
               </div>
-              {errors.discount_code && (
-                <p className="mt-1 text-sm text-danger-500">{errors.discount_code}</p>
-              )}
+              {errors.discount_code && <p className="mt-1 text-sm text-danger-500">{errors.discount_code}</p>}
             </div>
           </div>
         </div>
 
-        {/* Section Commission */}
+        {/* Section Commission avec Tier Selector */}
         <div className="space-y-4">
           <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
             <Percent className="w-4 h-4" />
-            Paramètres de commission
+            Offre & Commission
           </h4>
 
-          {/* Tier selector */}
-          {tiers.length > 0 && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Offre
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {tiers.map(tier => (
-                  <button
-                    key={tier.id}
-                    type="button"
-                    onClick={() => handleTierChange(tier.id)}
-                    disabled={loading}
-                    className={`flex flex-col items-center p-3 rounded-lg border-2 transition ${
-                      formData.tier_id === tier.id
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                    }`}
-                  >
-                    <Award className="w-5 h-5 mb-1" style={{ color: tier.color }} />
-                    <span className="text-sm font-medium">{tier.display_name}</span>
-                    <span className="text-xs text-gray-500">{(tier.commission_rate * 100).toFixed(0)}%</span>
-                  </button>
-                ))}
+          {/* Tier selector - toujours visible */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Niveau
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              {tiers.map(tier => (
                 <button
+                  key={tier.id}
                   type="button"
-                  onClick={() => handleTierChange('')}
+                  onClick={() => handleTierChange(tier.id)}
                   disabled={loading}
                   className={`flex flex-col items-center p-3 rounded-lg border-2 transition ${
-                    !formData.tier_id
+                    formData.tier_id === tier.id
                       ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                       : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  <Percent className="w-5 h-5 mb-1 text-gray-400" />
-                  <span className="text-sm font-medium">Custom</span>
-                  <span className="text-xs text-gray-500">Manuel</span>
+                  <Award className="w-5 h-5 mb-1" style={{ color: tier.color }} />
+                  <span className="text-sm font-medium">{tier.display_name}</span>
+                  <span className="text-xs text-gray-500">{Math.round(tier.commission_rate * 100)}%</span>
                 </button>
-              </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => handleTierChange('')}
+                disabled={loading}
+                className={`flex flex-col items-center p-3 rounded-lg border-2 transition ${
+                  !formData.tier_id
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Percent className="w-5 h-5 mb-1 text-gray-400" />
+                <span className="text-sm font-medium">Custom</span>
+                <span className="text-xs text-gray-500">Manuel</span>
+              </button>
             </div>
-          )}
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Taux de commission */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Taux de commission (%)
@@ -315,16 +301,13 @@ export const CreatorForm = ({
                   value={formData.commission_rate}
                   onChange={(e) => handleChange('commission_rate', parseFloat(e.target.value) || 0)}
                   className={`input ${errors.commission_rate ? 'border-danger-500 focus:ring-danger-500' : ''}`}
-                  disabled={loading || (!!formData.tier_id && tiers.length > 0)}
+                  disabled={loading || !!formData.tier_id}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">%</span>
               </div>
-              {errors.commission_rate && (
-                <p className="mt-1 text-sm text-danger-500">{errors.commission_rate}</p>
-              )}
+              {errors.commission_rate && <p className="mt-1 text-sm text-danger-500">{errors.commission_rate}</p>}
             </div>
 
-            {/* Jours de blocage */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Jours de blocage
@@ -341,15 +324,10 @@ export const CreatorForm = ({
                   disabled={loading}
                 />
               </div>
-              {errors.lock_days && (
-                <p className="mt-1 text-sm text-danger-500">{errors.lock_days}</p>
-              )}
-              <p className="mt-1 text-xs text-gray-500">
-                Période avant que les commissions soient payables
-              </p>
+              {errors.lock_days && <p className="mt-1 text-sm text-danger-500">{errors.lock_days}</p>}
+              <p className="mt-1 text-xs text-gray-500">Période avant que les commissions soient payables</p>
             </div>
 
-            {/* Statut */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Statut
@@ -375,7 +353,6 @@ export const CreatorForm = ({
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Type de compte */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Type de compte
@@ -392,7 +369,6 @@ export const CreatorForm = ({
               </select>
             </div>
 
-            {/* IBAN */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 IBAN / Numéro de compte
@@ -405,28 +381,17 @@ export const CreatorForm = ({
                 className={`input uppercase ${errors.iban ? 'border-danger-500 focus:ring-danger-500' : ''}`}
                 disabled={loading}
               />
-              {errors.iban && (
-                <p className="mt-1 text-sm text-danger-500">{errors.iban}</p>
-              )}
+              {errors.iban && <p className="mt-1 text-sm text-danger-500">{errors.iban}</p>}
             </div>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={onClose}
-            disabled={loading}
-          >
+          <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
             Annuler
           </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={loading}
-          >
+          <Button type="submit" variant="primary" loading={loading}>
             {isEditing ? 'Enregistrer les modifications' : 'Créer le créateur'}
           </Button>
         </div>

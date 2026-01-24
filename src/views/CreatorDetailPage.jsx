@@ -376,15 +376,16 @@ export const CreatorDetailPage = () => {
   const handleVerifyBank = async (verified) => {
     setActionLoading(true)
     try {
-      const { error } = await supabase
-        .from('creator_bank_accounts')
-        .update({
-          is_verified: verified,
-          updated_at: new Date().toISOString()
-        })
-        .eq('creator_id', id)
-
-      if (error) throw error
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/admin/bank-accounts', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ creator_id: id, is_verified: verified }),
+      })
+      if (!res.ok) throw new Error('Failed')
 
       setCreator(prev => ({ ...prev, bankVerified: verified }))
       toast.success(verified ? 'Compte bancaire verifie' : 'Verification retiree')
@@ -414,17 +415,20 @@ export const CreatorDetailPage = () => {
 
       // Save bank account if IBAN provided
       if (formData.iban) {
-        const { error: bankError } = await supabase
-          .from('creator_bank_accounts')
-          .upsert({
+        const { data: { session } } = await supabase.auth.getSession()
+        const bankRes = await fetch('/api/admin/bank-accounts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
             creator_id: id,
             iban: formData.iban,
             account_type: formData.account_type || 'iban',
-            is_verified: false,
-          }, { onConflict: 'creator_id' })
-
-        if (bankError) {
-          console.error('Bank account save error:', bankError)
+          }),
+        })
+        if (!bankRes.ok) {
           toast.warning('Createur modifie mais erreur sur le compte bancaire')
         }
       }
@@ -981,7 +985,6 @@ export const CreatorDetailPage = () => {
         creator={creator}
         onSubmit={handleFormSubmit}
         loading={actionLoading}
-        tiers={commissionTiers}
       />
 
       {/* Delete Confirmation */}
