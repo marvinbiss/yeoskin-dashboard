@@ -541,12 +541,19 @@ export async function POST(request: NextRequest) {
     // ============================================
     // 8) UPDATE ROUTINE_CHECKOUTS (finaliser)
     // ============================================
+    // Build final checkout URL with discount code for Shopify display
+    let finalCheckoutUrl = cart.checkoutUrl
+    if (creator?.discount_code) {
+      const separator = cart.checkoutUrl.includes('?') ? '&' : '?'
+      finalCheckoutUrl = `${cart.checkoutUrl}${separator}discount=${encodeURIComponent(creator.discount_code)}`
+    }
+
     if (rowId) {
       const { error: updateError } = await supabase
         .from('routine_checkouts')
         .update({
           cart_id: cart.id,
-          checkout_url: cart.checkoutUrl,
+          checkout_url: finalCheckoutUrl,
           status: 'completed',
           last_error: null
         })
@@ -582,7 +589,7 @@ export async function POST(request: NextRequest) {
     )
 
     return NextResponse.json({
-      checkout_url: cart.checkoutUrl,
+      checkout_url: finalCheckoutUrl,
       idempotency_key: idempotencyKey
     })
 
