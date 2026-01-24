@@ -148,7 +148,8 @@ export async function createCart(
   variantIds: number[],
   attributes: Array<{ key: string; value: string }>,
   note: string,
-  requestId: string
+  requestId: string,
+  discountCodes?: string[]
 ): Promise<CartCreateResult> {
   const query = `
     mutation cartCreate($input: CartInput!) {
@@ -173,6 +174,7 @@ export async function createCart(
       })),
       attributes,
       note,
+      ...(discountCodes?.length ? { discountCodes } : {}),
     },
   }
 

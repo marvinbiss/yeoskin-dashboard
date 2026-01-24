@@ -22,7 +22,8 @@ import {
   Leaf,
   Award,
   Users,
-  Package
+  Package,
+  Tag
 } from 'lucide-react'
 
 // ============================================================================
@@ -324,6 +325,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [showStickyBar, setShowStickyBar] = useState(false)
+  const [creatorCode, setCreatorCode] = useState<string | null>(null)
 
   // Refs for scroll detection
   const heroRef = useRef<HTMLDivElement>(null)
@@ -340,6 +342,12 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Read creator discount code from sessionStorage
+  useEffect(() => {
+    const code = sessionStorage.getItem('yeoskin_creator_code')
+    if (code) setCreatorCode(code)
   }, [])
 
   // Get creator slug from URL params or sessionStorage
@@ -836,6 +844,17 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               84% de nos clients ajoutent au moins 1 produit supplémentaire.
             </p>
           </motion.div>
+
+          {creatorCode && (
+            <div className="flex items-center justify-center mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
+                <Tag className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium text-green-700">
+                  Code promo <strong>{creatorCode}</strong> appliqué automatiquement
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="grid md:grid-cols-3 gap-3 sm:gap-8 max-w-4xl mx-auto">
             {/* Base option */}

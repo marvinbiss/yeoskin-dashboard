@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     debugStep = 'creator_lookup'
     const { data: creator, error: creatorError } = await supabase
       .from('creators')
-      .select('id, email, slug')
+      .select('id, email, slug, discount_code')
       .eq('slug', creator_slug)
       .maybeSingle()
 
@@ -470,8 +470,9 @@ export async function POST(request: NextRequest) {
       ]
 
       const note = `Routine ${routine.title} via ${creator_slug}`
+      const discountCodes = creator?.discount_code ? [creator.discount_code] : []
 
-      const result = await createCart(variantIds, attributes, note, requestId)
+      const result = await createCart(variantIds, attributes, note, requestId, discountCodes)
 
       if (result.userErrors?.length > 0) {
         throw new Error(result.userErrors[0].message)
