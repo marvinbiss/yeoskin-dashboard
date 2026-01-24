@@ -242,7 +242,7 @@ const CreatorProfileSettings = () => {
             <div className="flex items-center gap-2">
               <div className="flex-1 flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <span className="px-3 py-2 text-gray-500 text-sm bg-gray-100 dark:bg-gray-700 border-r border-gray-200 dark:border-gray-600">
-                  yeoskin.com/c/
+                  yeoskin.fr/c/
                 </span>
                 <input
                   type="text"
