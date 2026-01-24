@@ -411,7 +411,7 @@ export default function CreatorProducts() {
 
               {profile && (
                 <a
-                  href={`/c/${profile.slug || 'preview'}`}
+                  href={`https://yeoskin.fr/c/${profile.slug || 'preview'}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"

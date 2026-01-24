@@ -156,7 +156,7 @@ const CreatorProfileSettings = () => {
     )
   }
 
-  const profileUrl = `${window.location.origin}/c/${profile?.slug}`
+  const profileUrl = `https://yeoskin.fr/c/${profile?.slug}`
 
   return (
     <CreatorLayout title="Ma Page" subtitle="Personnalisez votre page publique">

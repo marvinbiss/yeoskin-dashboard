@@ -219,7 +219,7 @@ export default function CreatorAnalyticsDashboard() {
         </div>
 
         <a
-          href={`/c/${profile.slug}`}
+          href={`https://yeoskin.fr/c/${profile.slug}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg transition"
