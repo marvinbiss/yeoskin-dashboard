@@ -154,15 +154,18 @@ export const AuthProvider = ({ children }) => {
   }, [getUserDisplayName])
 
   const getUserRole = useCallback(() => {
-    if (adminProfile?.role) return adminProfile.role
-    if (user) return ADMIN_ROLES.SUPER_ADMIN
-    return ADMIN_ROLES.VIEWER
-  }, [user, adminProfile])
+    if (!adminProfile) return null
+    if (!adminProfile.is_active) return null
+    return adminProfile.role
+  }, [adminProfile])
 
   const hasRole = useCallback((requiredRole) => {
-    return hasRequiredRole(getUserRole(), requiredRole)
+    const role = getUserRole()
+    if (!role) return false
+    return hasRequiredRole(role, requiredRole)
   }, [getUserRole])
 
+  const isAuthorizedAdmin = !!adminProfile && adminProfile.is_active
   const isAdmin = useCallback(() => hasRole(ADMIN_ROLES.ADMIN), [hasRole])
   const isSuperAdmin = useCallback(() => getUserRole() === ADMIN_ROLES.SUPER_ADMIN, [getUserRole])
   const isViewer = useCallback(() => getUserRole() === ADMIN_ROLES.VIEWER, [getUserRole])
@@ -185,6 +188,7 @@ export const AuthProvider = ({ children }) => {
     getUserInitials,
     getUserRole,
     hasRole,
+    isAuthorizedAdmin,
     isAdmin,
     isSuperAdmin,
     isViewer,

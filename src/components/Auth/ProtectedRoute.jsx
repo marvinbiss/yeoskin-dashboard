@@ -53,7 +53,7 @@ const UnauthorizedScreen = ({ requiredRole }) => (
  * Protected Route Component
  */
 export const ProtectedRoute = ({ children, requiredRole }) => {
-  const { session, loading, hasRole } = useAuth()
+  const { session, loading, adminProfile, hasRole } = useAuth()
   const location = useLocation()
 
   // Montrer le loading uniquement pendant le chargement initial
@@ -65,6 +65,11 @@ export const ProtectedRoute = ({ children, requiredRole }) => {
   if (!session) {
     const redirectPath = location.pathname !== '/' ? `?from=${encodeURIComponent(location.pathname)}` : ''
     return <Navigate to={`/login${redirectPath}`} replace />
+  }
+
+  // Pas de profil admin ou compte inactif = accès refusé
+  if (!adminProfile || !adminProfile.is_active) {
+    return <UnauthorizedScreen />
   }
 
   // Vérifier le rôle si requis
