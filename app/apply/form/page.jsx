@@ -161,7 +161,7 @@ export default function ApplicationForm() {
       }
 
       // Redirect to success page with application info
-      router.push(`/success?id=${data.id}&auto=${data.auto_approved}`)
+      router.push(`/apply/success?id=${data.id}&auto=${data.auto_approved}`)
     } catch (err) {
       setError(err.message)
     } finally {

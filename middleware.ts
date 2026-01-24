@@ -58,16 +58,25 @@ export function middleware(request: NextRequest) {
     if (path === '/') {
       return NextResponse.rewrite(new URL('/apply', request.url))
     }
-    if (path === '/form') {
+    if (path === '/form' || path === '/apply/form') {
       return NextResponse.rewrite(new URL('/apply/form', request.url))
     }
-    if (path === '/success' || path.startsWith('/success')) {
-      return NextResponse.rewrite(new URL(`/apply${path}`, request.url))
+    if (path === '/success' || path.startsWith('/success') || path === '/apply/success' || path.startsWith('/apply/success')) {
+      const cleanPath = path.replace(/^\/apply/, '') || '/success'
+      return NextResponse.rewrite(new URL(`/apply${cleanPath}`, request.url))
+    }
+    if (path === '/apply') {
+      return NextResponse.rewrite(new URL('/apply', request.url))
     }
 
     // Allow static assets
     if (path.startsWith('/_next') || path.startsWith('/favicon') || path.startsWith('/images')) {
       return NextResponse.next()
+    }
+
+    // Allow /apply paths (in case links use full paths)
+    if (path.startsWith('/apply')) {
+      return NextResponse.rewrite(new URL(path, request.url))
     }
 
     // Block access to other routes on apply subdomain
