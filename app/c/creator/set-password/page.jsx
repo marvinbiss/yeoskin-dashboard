@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -11,21 +11,20 @@ export default function SetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [sessionReady, setSessionReady] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
+  const sessionRef = useRef(null)
 
-  // Attendre que Supabase détecte le token dans l'URL et établisse la session
+  // Écouter les événements auth pour capturer la session du token recovery/invite
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION')) {
-        setSessionReady(true)
+      if (session) {
+        sessionRef.current = session
       }
     })
 
-    // Vérifier si une session existe déjà
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setSessionReady(true)
+      if (session) sessionRef.current = session
     })
 
     return () => subscription.unsubscribe()
@@ -48,6 +47,14 @@ export default function SetPasswordPage() {
     setLoading(true)
 
     try {
+      // Vérifier qu'on a une session valide
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Session expirée. Veuillez utiliser un nouveau lien d\'invitation.')
+        setLoading(false)
+        return
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({ password })
 
       if (updateError) {
@@ -76,19 +83,6 @@ export default function SetPasswordPage() {
     }
   }
 
-  // Loading: en attente du token
-  if (!sessionReady) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mx-auto" />
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Vérification en cours...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Succès
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
@@ -108,13 +102,11 @@ export default function SetPasswordPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-600">Yeoskin</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">Portail Créateurs</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
