@@ -170,11 +170,12 @@ export async function POST(request: NextRequest) {
       // Get tier info
       const { data: tier } = await supabase
         .from('commission_tiers')
-        .select('name, display_name')
+        .select('name, display_name, commission_rate')
         .eq('id', application.suggested_tier_id)
         .single()
 
       tierName = tier?.display_name || 'Silver'
+      const commissionRate = tier?.commission_rate || 0.15
 
       // Update application status to approved
       await supabase
@@ -186,14 +187,50 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', application.id)
 
-      // Convert to creator
-      const { error: convertError } = await supabase.rpc('convert_application_to_creator', {
-        p_application_id: application.id,
-      })
+      // Generate discount code
+      const prefix = (body.first_name || 'YEO').substring(0, 3).toUpperCase()
+      const hash = Array.from(body.email + Date.now().toString())
+        .reduce((acc: number, char: string) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
+      const discountCode = prefix + Math.abs(hash).toString(36).substring(0, 5).toUpperCase()
 
-      if (convertError) {
-        console.error('[Apply] Convert error:', convertError)
-        // Don't fail the request, just log it
+      // Generate slug
+      const slug = `${(body.first_name || '').toLowerCase()}-${(body.last_name || '').toLowerCase()}`
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+
+      // Check if creator already exists
+      const { data: existingCreator } = await supabase
+        .from('creators')
+        .select('id')
+        .eq('email', body.email.toLowerCase().trim())
+        .maybeSingle()
+
+      if (!existingCreator) {
+        // Check slug uniqueness
+        const { data: slugExists } = await supabase
+          .from('creators')
+          .select('id')
+          .eq('slug', slug)
+          .maybeSingle()
+
+        const finalSlug = slugExists ? slug + '-' + Math.random().toString(36).substring(2, 6) : slug
+
+        // Create creator directly
+        const { error: createError } = await supabase
+          .from('creators')
+          .insert({
+            email: body.email.toLowerCase().trim(),
+            discount_code: discountCode,
+            commission_rate: commissionRate,
+            tier_id: application.suggested_tier_id,
+            slug: finalSlug,
+            status: 'active',
+          })
+
+        if (createError) {
+          console.error('[Apply] Creator creation error:', createError)
+        }
       }
     }
 

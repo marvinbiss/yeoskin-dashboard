@@ -118,7 +118,98 @@ export default function ApplicationsPage() {
   const handleApprove = async (app, tierId = null) => {
     setProcessing(true)
     try {
-      // Update status
+      // 1. Check if creator already exists with this email
+      const { data: existingCreator } = await supabase
+        .from('creators')
+        .select('id')
+        .eq('email', app.email.toLowerCase())
+        .maybeSingle()
+
+      if (existingCreator) {
+        // Already exists, just update application status
+        await supabase
+          .from('creator_applications')
+          .update({
+            status: 'approved',
+            reviewed_at: new Date().toISOString(),
+            review_notes: 'Approved by admin',
+          })
+          .eq('id', app.id)
+
+        showToast(`${app.first_name} ${app.last_name} existe déjà dans les créateurs`, 'success')
+        setShowModal(false)
+        setSelectedApp(null)
+        fetchData()
+        return
+      }
+
+      // 2. Get commission rate from tier
+      const selectedTierId = tierId || app.suggested_tier_id
+      let commissionRate = 0.15 // default Bronze
+
+      if (selectedTierId) {
+        const { data: tierData } = await supabase
+          .from('commission_tiers')
+          .select('commission_rate')
+          .eq('id', selectedTierId)
+          .maybeSingle()
+
+        if (tierData?.commission_rate) {
+          commissionRate = tierData.commission_rate
+        }
+      }
+
+      // 3. Generate unique discount code
+      const prefix = (app.first_name || 'YEO').substring(0, 3).toUpperCase()
+      const hash = Array.from(app.email + Date.now())
+        .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
+      let discountCode = prefix + Math.abs(hash).toString(36).substring(0, 5).toUpperCase()
+
+      // Ensure uniqueness
+      const { data: codeExists } = await supabase
+        .from('creators')
+        .select('id')
+        .eq('discount_code', discountCode)
+        .maybeSingle()
+
+      if (codeExists) {
+        discountCode = prefix + Math.random().toString(36).substring(2, 7).toUpperCase()
+      }
+
+      // 4. Generate slug
+      const slug = `${(app.first_name || '').toLowerCase()}-${(app.last_name || '').toLowerCase()}`
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+
+      let finalSlug = slug
+      const { data: slugExists } = await supabase
+        .from('creators')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle()
+
+      if (slugExists) {
+        finalSlug = slug + '-' + Math.random().toString(36).substring(2, 6)
+      }
+
+      // 5. Create the creator
+      const { data: newCreator, error: insertError } = await supabase
+        .from('creators')
+        .insert({
+          email: app.email.toLowerCase(),
+          discount_code: discountCode,
+          commission_rate: commissionRate,
+          tier_id: selectedTierId || null,
+          slug: finalSlug,
+          status: 'active',
+        })
+        .select('id')
+        .single()
+
+      if (insertError) throw insertError
+
+      // 6. Update application status
       const { error: updateError } = await supabase
         .from('creator_applications')
         .update({
@@ -128,23 +219,18 @@ export default function ApplicationsPage() {
         })
         .eq('id', app.id)
 
-      if (updateError) throw updateError
+      if (updateError) {
+        console.error('Application update error:', updateError)
+        // Creator was created, just warn about status update
+      }
 
-      // Convert to creator
-      const { error: convertError } = await supabase.rpc('convert_application_to_creator', {
-        p_application_id: app.id,
-        p_tier_id: tierId || app.suggested_tier_id,
-      })
-
-      if (convertError) throw convertError
-
-      showToast(`${app.first_name} ${app.last_name} approuvé(e) !`, 'success')
+      showToast(`${app.first_name} ${app.last_name} approuvé(e) ! Code: ${discountCode}`, 'success')
       setShowModal(false)
       setSelectedApp(null)
       fetchData()
     } catch (error) {
       console.error('Approve error:', error)
-      showToast('Erreur lors de l\'approbation', 'error')
+      showToast(`Erreur: ${error.message || 'Erreur lors de l\'approbation'}`, 'error')
     } finally {
       setProcessing(false)
     }
