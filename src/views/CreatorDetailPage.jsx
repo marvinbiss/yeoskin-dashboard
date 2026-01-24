@@ -407,11 +407,27 @@ export const CreatorDetailPage = () => {
           tier_id: formData.tier_id,
           commission_rate: formData.commission_rate,
           lock_days: formData.lock_days,
-          iban: formData.iban,
         })
         .eq('id', id)
 
       if (error) throw error
+
+      // Save bank account if IBAN provided
+      if (formData.iban) {
+        const { error: bankError } = await supabase
+          .from('creator_bank_accounts')
+          .upsert({
+            creator_id: id,
+            iban: formData.iban,
+            account_type: formData.account_type || 'iban',
+            is_verified: false,
+          }, { onConflict: 'creator_id' })
+
+        if (bankError) {
+          console.error('Bank account save error:', bankError)
+          toast.warning('Createur modifie mais erreur sur le compte bancaire')
+        }
+      }
 
       toast.success('Createur modifie avec succes')
       setFormModal(false)
