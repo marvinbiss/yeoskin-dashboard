@@ -1,34 +1,23 @@
 /**
  * Next.js Middleware for Yeoskin
- * Handles subdomain routing for:
+ * Handles:
+ * - yeoskin.com -> /c/* routes (Next.js) + everything else proxied to Shopify
  * - apply.yeoskin.com -> /apply routes
- * - admin.yeoskin.com -> /admin routes (existing)
- * - dashboard.yeoskin.com -> /creator routes (existing)
+ * - admin.yeoskin.com -> /admin routes
+ * - dashboard.yeoskin.com -> /c/creator routes (legacy, redirects)
  */
 
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Subdomain configuration
-const SUBDOMAINS = {
-  apply: {
-    // Routes that should be accessible on apply.yeoskin.com
-    allowedPaths: ['/', '/form', '/success', '/api/apply'],
-    // Rewrite root to /apply page (the (apply) route group)
-    rewriteRoot: true,
-  },
-  admin: {
-    allowedPaths: null, // null = all paths allowed
-    rewriteRoot: false,
-  },
-  dashboard: {
-    allowedPaths: null,
-    rewriteRoot: false,
-  },
-}
+// Shopify store URL for proxying
+const SHOPIFY_STORE_URL = 'https://vqgpah-fb.myshopify.com'
 
-// Domains that should skip subdomain processing
+// Domains that should skip all processing (dev environments)
 const SKIP_DOMAINS = ['localhost', '127.0.0.1', 'vercel.app']
+
+// Root domains where Shopify proxy applies
+const ROOT_DOMAINS = ['yeoskin.com', 'www.yeoskin.com']
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl
@@ -39,6 +28,25 @@ export function middleware(request: NextRequest) {
 
   if (shouldSkip) {
     return NextResponse.next()
+  }
+
+  // Handle yeoskin.com (root domain) - proxy to Shopify except /c/ routes
+  if (ROOT_DOMAINS.includes(hostname.replace(':443', '').replace(':80', ''))) {
+    const path = url.pathname
+
+    // /c/* routes are handled by Next.js (creator pages + dashboard)
+    if (path.startsWith('/c/') || path === '/c') {
+      return NextResponse.next()
+    }
+
+    // Next.js internal assets needed for /c/ pages
+    if (path.startsWith('/_next') || path.startsWith('/api')) {
+      return NextResponse.next()
+    }
+
+    // Everything else → proxy to Shopify
+    const shopifyUrl = new URL(path + url.search, SHOPIFY_STORE_URL)
+    return NextResponse.rewrite(shopifyUrl)
   }
 
   // Extract subdomain
