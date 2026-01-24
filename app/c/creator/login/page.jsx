@@ -1,11 +1,7 @@
 'use client'
 
-import { CreatorAuthProvider, CreatorLogin } from '@/creator'
+import { CreatorLogin } from '@/creator'
 
 export default function CreatorLoginPage() {
-  return (
-    <CreatorAuthProvider>
-      <CreatorLogin />
-    </CreatorAuthProvider>
-  )
+  return <CreatorLogin />
 }
