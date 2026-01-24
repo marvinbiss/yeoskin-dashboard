@@ -261,6 +261,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
   const cmsHero = cms.hero || {}
   const cmsFaq = cms.faq || {}
   const cmsCta = cms.cta || {}
+  const reviews = cms.reviews?.items?.length ? cms.reviews.items : REVIEWS
 
   // PRICING: routine table is source of truth, fallback to CMS, then hardcoded
   const cmsPricing = cms.pricing || {}
@@ -806,8 +807,8 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             variants={staggerContainer}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
           >
-            {REVIEWS.map((review, i) => (
-              <ReviewCard key={review.id} review={review} index={i} />
+            {reviews.map((review, i) => (
+              <ReviewCard key={review.id || i} review={review} index={i} />
             ))}
           </motion.div>
         </div>
@@ -1160,7 +1161,7 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
 // REVIEW CARD COMPONENT
 // ============================================================================
 
-function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: number }) {
+function ReviewCard({ review, index }: { review: { id?: number; name: string; age?: number; skinType?: string; skin_type?: string; rating: number; title: string; content?: string; text?: string; date?: string; verified?: boolean; helpful?: number; avatar?: string }; index: number }) {
   return (
     <motion.div
       variants={fadeInUp}
@@ -1174,7 +1175,7 @@ function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: numbe
           </div>
           <div>
             <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
-            <p className="text-xs text-gray-500">{review.skinType} • {review.age} ans</p>
+            <p className="text-xs text-gray-500">{review.skinType || review.skin_type} • {review.age} ans</p>
           </div>
         </div>
         {review.verified && (
@@ -1199,7 +1200,7 @@ function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: numbe
 
       {/* Content */}
       <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
-      <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content}</p>
+      <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content || review.text}</p>
 
       {/* Footer */}
       <div className="flex items-center justify-between text-xs text-gray-400 gap-2">

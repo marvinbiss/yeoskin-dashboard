@@ -25,6 +25,97 @@ import Link from 'next/link'
 // Section configurations for different page types
 // NOTE: pricing + products are managed via /routines (single source of truth)
 const SECTION_CONFIGS = {
+  'apply': {
+    hero: {
+      label: 'Hero / En-tête',
+      icon: Star,
+      fields: [
+        { key: 'badge', label: 'Badge (ex: Programme Créateur 2025)', type: 'text' },
+        { key: 'title_line1', label: 'Titre ligne 1', type: 'text' },
+        { key: 'title_highlight', label: 'Mot en couleur gradient', type: 'text' },
+        { key: 'title_line2', label: 'Titre ligne 2', type: 'text' },
+        { key: 'subtitle', label: 'Sous-titre', type: 'textarea' },
+        { key: 'cta_text', label: 'Texte bouton CTA', type: 'text' },
+        { key: 'social_proof_text', label: 'Texte preuve sociale (ex: +200 créateurs)', type: 'text' },
+        { key: 'social_proof_rating', label: 'Note affichée (ex: 4.9/5)', type: 'text' },
+      ]
+    },
+    benefits: {
+      label: 'Avantages',
+      icon: Check,
+      fields: [
+        { key: 'section_title', label: 'Titre de section', type: 'text' },
+        { key: 'section_subtitle', label: 'Sous-titre', type: 'text' },
+      ],
+      arrayField: {
+        key: 'items',
+        itemFields: [
+          { key: 'icon', label: 'Icône (TrendingUp, Gift, Zap, Users, ShieldCheck, Heart)', type: 'text' },
+          { key: 'title', label: 'Titre', type: 'text' },
+          { key: 'description', label: 'Description', type: 'text' },
+          { key: 'color', label: 'Couleur (green, purple, yellow, blue, pink, red)', type: 'text' },
+        ]
+      }
+    },
+    tiers: {
+      label: 'Niveaux de Commission',
+      icon: Star,
+      fields: [
+        { key: 'section_title', label: 'Titre', type: 'text' },
+        { key: 'section_subtitle', label: 'Sous-titre', type: 'text' },
+      ],
+      arrayField: {
+        key: 'items',
+        itemFields: [
+          { key: 'name', label: 'Nom (Bronze, Silver, Gold)', type: 'text' },
+          { key: 'rate', label: 'Taux (ex: 15%)', type: 'text' },
+          { key: 'requirement', label: 'Condition', type: 'text' },
+          { key: 'features', label: 'Avantages (1 par ligne)', type: 'textarea' },
+          { key: 'popular', label: 'Badge populaire', type: 'checkbox' },
+        ]
+      }
+    },
+    testimonials: {
+      label: 'Témoignages',
+      icon: Star,
+      fields: [
+        { key: 'section_title', label: 'Titre de section', type: 'text' },
+      ],
+      arrayField: {
+        key: 'items',
+        itemFields: [
+          { key: 'name', label: 'Nom', type: 'text' },
+          { key: 'handle', label: 'Pseudo (@...)', type: 'text' },
+          { key: 'avatar', label: 'Emoji avatar', type: 'text' },
+          { key: 'quote', label: 'Citation', type: 'textarea' },
+          { key: 'followers', label: 'Followers (ex: 45K)', type: 'text' },
+        ]
+      }
+    },
+    faq: {
+      label: 'FAQ',
+      icon: Type,
+      fields: [
+        { key: 'section_title', label: 'Titre de section', type: 'text' },
+      ],
+      arrayField: {
+        key: 'items',
+        itemFields: [
+          { key: 'question', label: 'Question', type: 'text' },
+          { key: 'answer', label: 'Réponse', type: 'textarea' },
+        ]
+      }
+    },
+    cta: {
+      label: 'Call-to-Action Final',
+      icon: Star,
+      fields: [
+        { key: 'title', label: 'Titre', type: 'text' },
+        { key: 'subtitle', label: 'Sous-titre', type: 'text' },
+        { key: 'button_text', label: 'Texte du bouton', type: 'text' },
+      ]
+    }
+  },
   'routine-hydratation': {
     hero: {
       label: 'Hero / En-tête',
@@ -552,7 +643,7 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
         </div>
         <div className="flex items-center gap-3">
           <a
-            href={`/shop/${pageSlug}`}
+            href={pageSlug === 'apply' ? '/apply' : `/shop/${pageSlug}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -581,8 +672,8 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
         </div>
       </div>
 
-      {/* Linked Routine Banner */}
-      {linkedRoutine ? (
+      {/* Linked Routine Banner (only for routine pages) */}
+      {pageSlug !== 'apply' && linkedRoutine ? (
         <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -606,7 +697,7 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
             </Link>
           </div>
         </div>
-      ) : (
+      ) : pageSlug !== 'apply' ? (
         <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
           <div className="flex items-center gap-3">
             <Sparkles className="w-5 h-5 text-yellow-600" />
@@ -625,7 +716,7 @@ export default function PageEditorPage({ pageSlug = 'routine-hydratation' }) {
             </Link>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Instructions */}
       <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">

@@ -29,7 +29,7 @@ const AVAILABLE_PAGES = [
     description: 'Landing page programme créateur',
     icon: Users,
     url: '/apply',
-    status: 'coming_soon'
+    status: 'active'
   }
 ]
 
