@@ -137,12 +137,16 @@ export const CreatorAuthProvider = ({ children }) => {
   // Sign out
   const signOut = useCallback(async () => {
     try {
-      await supabase.auth.signOut()
       setUser(null)
       setSession(null)
       setCreator(null)
+      await supabase.auth.signOut({ scope: 'global' })
       return { error: null }
     } catch (error) {
+      // Even if signOut API fails, clear local state
+      setUser(null)
+      setSession(null)
+      setCreator(null)
       return { error }
     }
   }, [])

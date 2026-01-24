@@ -65,7 +65,7 @@ export const CreatorProtectedRoute = ({ children }) => {
 
   const handleLogout = async () => {
     await signOut()
-    navigate('/creator/login', { replace: true })
+    window.location.href = '/creator/login'
   }
 
   // Show loading while checking auth

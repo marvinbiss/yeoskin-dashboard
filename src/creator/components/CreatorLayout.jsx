@@ -42,7 +42,7 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/creator/login')
+    window.location.href = '/creator/login'
   }
 
   const isActive = (href) => {
