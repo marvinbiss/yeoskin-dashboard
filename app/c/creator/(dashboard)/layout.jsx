@@ -1,9 +1,9 @@
 'use client'
 
-import { CreatorProviders } from '../providers'
+import { CreatorProviders } from '../../../providers'
 import { CreatorProtectedRoute } from '@/creator'
 
-export default function CreatorLayout({ children }) {
+export default function CreatorDashboardLayout({ children }) {
   return (
     <CreatorProviders>
       <CreatorProtectedRoute>

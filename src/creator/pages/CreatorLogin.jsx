@@ -22,7 +22,7 @@ export const CreatorLogin = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && isCreator) {
-      const from = location.state?.from?.pathname || '/creator'
+      const from = location.state?.from?.pathname || '/c/creator'
       navigate(from, { replace: true })
     }
   }, [isAuthenticated, isCreator, navigate, location])
@@ -33,7 +33,7 @@ export const CreatorLogin = () => {
 
     const result = await signIn(email, password)
     if (result.success) {
-      navigate('/creator', { replace: true })
+      navigate('/c/creator', { replace: true })
     }
   }
 

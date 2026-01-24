@@ -22,15 +22,15 @@ import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { NotificationBell } from './NotificationBell'
 
 const navigation = [
-  { name: 'Tableau de bord', href: '/creator', icon: LayoutDashboard },
-  { name: 'Ma Page', href: '/creator/my-page', icon: Globe },
-  { name: 'Ma Sélection', href: '/creator/products', icon: ShoppingBag },
-  { name: 'Mes Analytics', href: '/creator/analytics', icon: BarChart3 },
-  { name: 'Analytics Avancés', href: '/creator/analytics-dashboard', icon: TrendingUp },
-  { name: 'Historique', href: '/creator/history', icon: History },
-  { name: 'Mon profil', href: '/creator/profile', icon: User },
-  { name: 'Coordonnees bancaires', href: '/creator/bank', icon: CreditCard },
-  { name: 'Parametres', href: '/creator/settings', icon: Settings },
+  { name: 'Tableau de bord', href: '/c/creator', icon: LayoutDashboard },
+  { name: 'Ma Page', href: '/c/creator/my-page', icon: Globe },
+  { name: 'Ma Sélection', href: '/c/creator/products', icon: ShoppingBag },
+  { name: 'Mes Analytics', href: '/c/creator/analytics', icon: BarChart3 },
+  { name: 'Analytics Avancés', href: '/c/creator/analytics-dashboard', icon: TrendingUp },
+  { name: 'Historique', href: '/c/creator/history', icon: History },
+  { name: 'Mon profil', href: '/c/creator/profile', icon: User },
+  { name: 'Coordonnees bancaires', href: '/c/creator/bank', icon: CreditCard },
+  { name: 'Parametres', href: '/c/creator/settings', icon: Settings },
 ]
 
 export const CreatorLayout = ({ children, title, subtitle }) => {
@@ -42,12 +42,12 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
 
   const handleSignOut = async () => {
     await signOut()
-    window.location.href = '/creator/login'
+    window.location.href = '/c/creator/login'
   }
 
   const isActive = (href) => {
-    if (href === '/creator') {
-      return location.pathname === '/creator'
+    if (href === '/c/creator') {
+      return location.pathname === '/c/creator'
     }
     return location.pathname.startsWith(href)
   }

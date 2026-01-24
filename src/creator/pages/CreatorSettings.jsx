@@ -116,7 +116,7 @@ export const CreatorSettings = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back button */}
         <button
-          onClick={() => navigate('/creator/profile')}
+          onClick={() => navigate('/c/creator/profile')}
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -65,7 +65,7 @@ export const CreatorProtectedRoute = ({ children }) => {
 
   const handleLogout = async () => {
     await signOut()
-    window.location.href = '/creator/login'
+    window.location.href = '/c/creator/login'
   }
 
   // Show loading while checking auth
@@ -75,7 +75,7 @@ export const CreatorProtectedRoute = ({ children }) => {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/creator/login" state={{ from: location }} replace />
+    return <Navigate to="/c/creator/login" state={{ from: location }} replace />
   }
 
   // Show not linked screen if authenticated but no creator profile

@@ -66,7 +66,7 @@ export const CreatorDashboard = () => {
   }
 
   const handleViewAll = () => {
-    navigate('/creator/history')
+    navigate('/c/creator/history')
   }
 
   // Get creator's first name for greeting

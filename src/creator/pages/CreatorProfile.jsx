@@ -70,7 +70,7 @@ export const CreatorProfile = () => {
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Back button */}
         <button
-          onClick={() => navigate('/creator')}
+          onClick={() => navigate('/c/creator')}
           className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -152,7 +152,7 @@ export const CreatorProfile = () => {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
-            onClick={() => navigate('/creator/bank')}
+            onClick={() => navigate('/c/creator/bank')}
             className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 transition-colors text-left"
           >
             <h4 className="font-medium text-gray-900 dark:text-white mb-1">
@@ -164,7 +164,7 @@ export const CreatorProfile = () => {
           </button>
 
           <button
-            onClick={() => navigate('/creator/settings')}
+            onClick={() => navigate('/c/creator/settings')}
             className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 transition-colors text-left"
           >
             <h4 className="font-medium text-gray-900 dark:text-white mb-1">

@@ -93,14 +93,20 @@ export function middleware(request: NextRequest) {
   if (subdomain === 'dashboard') {
     const path = url.pathname
 
-    // Allow creator routes
-    if (path.startsWith('/creator') || path.startsWith('/login') || path.startsWith('/api') || path.startsWith('/_next')) {
+    // Allow creator routes under /c/creator
+    if (path.startsWith('/c/creator') || path.startsWith('/api') || path.startsWith('/_next')) {
       return NextResponse.next()
+    }
+
+    // Redirect old /creator paths to new /c/creator paths
+    if (path.startsWith('/creator')) {
+      const newPath = '/c' + path
+      return NextResponse.redirect(new URL(newPath, request.url))
     }
 
     // Redirect root to creator dashboard
     if (path === '/') {
-      return NextResponse.redirect(new URL('/creator', request.url))
+      return NextResponse.redirect(new URL('/c/creator', request.url))
     }
   }
 

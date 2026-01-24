@@ -83,7 +83,7 @@ export const useCreatorAuthActions = () => {
     try {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(
         email.trim().toLowerCase(),
-        { redirectTo: `${window.location.origin}/creator/reset-password` }
+        { redirectTo: `${window.location.origin}/c/creator/reset-password` }
       )
 
       if (resetError) {
