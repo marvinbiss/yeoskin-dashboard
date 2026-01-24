@@ -18,10 +18,8 @@ export async function POST(request) {
 
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
-    const origin = request.headers.get('origin') || 'https://dashboard.yeoskin.com'
-
     const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      redirectTo: `${origin}/auth/set-password`
+      redirectTo: 'https://yeoskin.fr/auth/set-password'
     })
 
     if (error) {

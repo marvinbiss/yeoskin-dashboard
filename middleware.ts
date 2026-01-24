@@ -27,12 +27,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Handle yeoskin.fr - serve /c/ routes, redirect everything else to yeoskin.com
+  // Handle yeoskin.fr - serve /c/ routes + /auth/ routes, redirect everything else to yeoskin.com
   if (CREATOR_DOMAINS.includes(hostname.replace(':443', '').replace(':80', ''))) {
     const path = url.pathname
 
     // /c/* routes are handled by Next.js (creator pages + dashboard)
     if (path.startsWith('/c/') || path === '/c') {
+      return NextResponse.next()
+    }
+
+    // /auth/* routes for password setup
+    if (path.startsWith('/auth')) {
       return NextResponse.next()
     }
 
