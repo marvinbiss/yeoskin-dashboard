@@ -83,7 +83,7 @@ export const KPICards = ({ stats, loading }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
       {kpis.map((kpi, index) => (
         <Card key={index} className="kpi-card">
           <div className="flex items-start justify-between">

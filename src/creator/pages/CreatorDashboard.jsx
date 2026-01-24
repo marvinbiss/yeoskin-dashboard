@@ -96,13 +96,13 @@ export const CreatorDashboard = () => {
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* VIP Tier Card */}
         {creator?.id && <TierCard creatorId={creator.id} />}
 
         {/* Assigned Routine Card */}
         {assignedRoutine && (
-          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-6 border border-violet-200 dark:border-violet-800">
+          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-6 border border-violet-200 dark:border-violet-800">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-violet-600 dark:text-violet-400" />
@@ -137,7 +137,7 @@ export const CreatorDashboard = () => {
         )}
 
         {/* Balance and Forecast Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <BalanceCard balance={balance} loading={loading} />
           <PayoutForecast forecast={forecast} loading={loading} />
         </div>
@@ -146,40 +146,40 @@ export const CreatorDashboard = () => {
         {creator?.id && <PayoutStatusCard creatorId={creator.id} />}
 
         {/* Quick Stats - Commission Status Breakdown */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Code promo</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Code promo</p>
+            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
               {creator?.discount_code || '-'}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Taux commission</p>
-            <p className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Taux commission</p>
+            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
               {creator?.commission_rate ? `${(creator.commission_rate * 100).toFixed(0)}%` : '-'}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">En attente</p>
-            <p className="text-lg font-semibold text-gray-500">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">En attente</p>
+            <p className="text-base sm:text-lg font-semibold text-gray-500">
               {dashboard.pendingCommissions?.count || 0}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-yellow-200 dark:border-yellow-800 p-4 bg-yellow-50 dark:bg-yellow-900/20">
-            <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-1">Verrouillees</p>
-            <p className="text-lg font-semibold text-yellow-600 dark:text-yellow-400">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-yellow-200 dark:border-yellow-800 p-3 sm:p-4 bg-yellow-50 dark:bg-yellow-900/20">
+            <p className="text-xs sm:text-sm text-yellow-600 dark:text-yellow-400 mb-1">Verrouillees</p>
+            <p className="text-base sm:text-lg font-semibold text-yellow-600 dark:text-yellow-400">
               {dashboard.lockedCommissions?.count || 0}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800 p-4 bg-blue-50 dark:bg-blue-900/20">
-            <p className="text-sm text-blue-600 dark:text-blue-400 mb-1">Payables</p>
-            <p className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800 p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20">
+            <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 mb-1">Payables</p>
+            <p className="text-base sm:text-lg font-semibold text-blue-600 dark:text-blue-400">
               {dashboard.payableCommissions?.count || 0}
             </p>
           </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 p-4 bg-green-50 dark:bg-green-900/20">
-            <p className="text-sm text-green-600 dark:text-green-400 mb-1">Payees</p>
-            <p className="text-lg font-semibold text-green-600 dark:text-green-400">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-green-200 dark:border-green-800 p-3 sm:p-4 bg-green-50 dark:bg-green-900/20">
+            <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mb-1">Payees</p>
+            <p className="text-base sm:text-lg font-semibold text-green-600 dark:text-green-400">
               {dashboard.paidCommissions?.count || 0}
             </p>
           </div>
@@ -196,7 +196,7 @@ export const CreatorDashboard = () => {
         />
 
         {/* Help Section */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-6 border border-blue-100 dark:border-blue-800">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 sm:p-6 border border-blue-100 dark:border-blue-800">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             Besoin d'aide ?
           </h3>

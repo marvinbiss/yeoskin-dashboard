@@ -162,12 +162,12 @@ export const DashboardPage = () => {
 
   return (
     <Layout title="Tableau de bord" subtitle="Bienvenue ! Voici l'aperçu de vos paiements.">
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* KPI Cards */}
         <KPICards stats={stats} loading={statsLoading} />
 
         {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2">
             <PayoutChart />
           </div>
@@ -175,7 +175,7 @@ export const DashboardPage = () => {
         </div>
 
         {/* Quick Actions, System Health, Low Stock & Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="space-y-6">
             <QuickActions
               onTriggerDaily={handleTriggerDaily}

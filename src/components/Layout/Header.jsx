@@ -6,14 +6,15 @@ import {
   Sun,
   RefreshCw,
   Wifi,
-  WifiOff
+  WifiOff,
+  Menu
 } from 'lucide-react'
 import clsx from 'clsx'
 import { checkConnection } from '../../lib/supabase'
 import { GlobalSearch } from './GlobalSearch'
 import { NotificationCenter } from './NotificationCenter'
 
-export const Header = ({ title, subtitle }) => {
+export const Header = ({ title, subtitle, onMenuClick }) => {
   const [darkMode, setDarkMode] = useState(false)
   const [connected, setConnected] = useState(true)
   const [lastSync, setLastSync] = useState(new Date())
@@ -59,21 +60,29 @@ export const Header = ({ title, subtitle }) => {
 
   return (
     <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-      <div className="flex items-center justify-between h-16 px-6">
-        {/* Left side - Title */}
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {title}
-          </h1>
+      <div className="flex items-center justify-between h-16 px-4 sm:px-6">
+        {/* Left side - Menu + Title */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onMenuClick}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+          >
+            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+          <div>
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+              {title}
+            </h1>
           {subtitle && (
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {subtitle}
             </p>
           )}
+          </div>
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           {/* Global Search */}
           <div className="hidden md:block">
             <GlobalSearch />
