@@ -24,6 +24,7 @@ export default function CreatorAnalyticsDashboard() {
   const [profile, setProfile] = useState(null)
   const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [period, setPeriod] = useState('30')
   const [refreshing, setRefreshing] = useState(false)
 
@@ -35,44 +36,64 @@ export default function CreatorAnalyticsDashboard() {
 
   const fetchAnalytics = async () => {
     setLoading(true)
+    setError(null)
 
-    // Get profile
-    const { data: profileData } = await supabase
-      .from('creator_profiles')
-      .select('id, slug, views_count, clicks_count, orders_count')
-      .eq('creator_id', creator.id)
-      .single()
+    try {
+      // Get profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('creator_profiles')
+        .select('id, slug, views_count, clicks_count, orders_count')
+        .eq('creator_id', creator.id)
+        .maybeSingle()
 
-    if (!profileData) {
+      if (profileError) {
+        throw profileError
+      }
+
+      if (!profileData) {
+        setProfile(null)
+        setLoading(false)
+        return
+      }
+
+      setProfile(profileData)
+
+      const startDate = new Date()
+      startDate.setDate(startDate.getDate() - parseInt(period))
+
+      // Fetch views
+      const { data: views, error: viewsError } = await supabase
+        .from('profile_views')
+        .select('viewed_at, device_type, referrer, utm_source')
+        .eq('profile_id', profileData.id)
+        .gte('viewed_at', startDate.toISOString())
+        .order('viewed_at', { ascending: true })
+
+      if (viewsError) {
+        console.error('Error fetching views:', viewsError)
+      }
+
+      // Fetch clicks
+      const { data: clicks, error: clicksError } = await supabase
+        .from('profile_clicks')
+        .select('clicked_at, product_id, converted, conversion_value')
+        .eq('profile_id', profileData.id)
+        .gte('clicked_at', startDate.toISOString())
+        .order('clicked_at', { ascending: true })
+
+      if (clicksError) {
+        console.error('Error fetching clicks:', clicksError)
+      }
+
+      // Process data
+      const processedAnalytics = processAnalytics(views || [], clicks || [], parseInt(period))
+      setAnalytics(processedAnalytics)
+    } catch (err) {
+      console.error('Error fetching analytics:', err)
+      setError(err.message || 'Erreur lors du chargement des analytics')
+    } finally {
       setLoading(false)
-      return
     }
-
-    setProfile(profileData)
-
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - parseInt(period))
-
-    // Fetch views
-    const { data: views } = await supabase
-      .from('profile_views')
-      .select('viewed_at, device_type, referrer, utm_source')
-      .eq('profile_id', profileData.id)
-      .gte('viewed_at', startDate.toISOString())
-      .order('viewed_at', { ascending: true })
-
-    // Fetch clicks
-    const { data: clicks } = await supabase
-      .from('profile_clicks')
-      .select('clicked_at, product_id, converted, conversion_value')
-      .eq('profile_id', profileData.id)
-      .gte('clicked_at', startDate.toISOString())
-      .order('clicked_at', { ascending: true })
-
-    // Process data
-    const processedAnalytics = processAnalytics(views || [], clicks || [], parseInt(period))
-    setAnalytics(processedAnalytics)
-    setLoading(false)
   }
 
   const processAnalytics = (views, clicks, days) => {
@@ -179,6 +200,22 @@ export default function CreatorAnalyticsDashboard() {
       <CreatorLayout title="Analytics" subtitle="Statistiques de votre page">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+      </CreatorLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <CreatorLayout title="Analytics" subtitle="Statistiques de votre page">
+        <div className="text-center py-12">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+          >
+            Réessayer
+          </button>
         </div>
       </CreatorLayout>
     )

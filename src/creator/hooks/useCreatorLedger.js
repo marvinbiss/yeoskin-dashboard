@@ -17,18 +17,21 @@ export const useCreatorLedger = (creatorId = null, options = {}) => {
   const [hasMore, setHasMore] = useState(false)
 
   // Fetch ledger entries
-  const fetchLedger = useCallback(async (newOffset = 0, append = false) => {
+  const fetchLedger = useCallback(async (newOffset = 0, append = false, filterType = undefined) => {
     if (!append) {
       setLoading(true)
     }
     setError(null)
+
+    // Use provided filterType or current state
+    const typeToUse = filterType !== undefined ? filterType : transactionType
 
     try {
       const { data, error: rpcError } = await supabase.rpc('get_creator_ledger', {
         p_creator_id: creatorId,
         p_limit: limit,
         p_offset: newOffset,
-        p_transaction_type: transactionType
+        p_transaction_type: typeToUse
       })
 
       if (rpcError) {
@@ -67,11 +70,12 @@ export const useCreatorLedger = (creatorId = null, options = {}) => {
     }
   }, [fetchLedger, hasMore, loading, offset, limit])
 
-  // Change filter
+  // Change filter - immediately fetch with new type
   const filterByType = useCallback((type) => {
     setTransactionType(type)
     setOffset(0)
-  }, [])
+    fetchLedger(0, false, type)
+  }, [fetchLedger])
 
   // Refresh
   const refresh = useCallback(() => {

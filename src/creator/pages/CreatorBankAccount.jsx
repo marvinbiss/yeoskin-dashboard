@@ -125,11 +125,13 @@ export const CreatorBankAccount = () => {
       }
 
       // Check if bank account exists
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('creator_bank_accounts')
         .select('id')
         .eq('creator_id', creator.id)
-        .single()
+        .maybeSingle()
+
+      if (existingError) throw existingError
 
       if (existing) {
         // Update existing

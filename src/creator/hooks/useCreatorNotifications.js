@@ -40,8 +40,20 @@ export const useCreatorNotifications = (creatorId = null, options = {}) => {
     }
   }, [creatorId, initialLimit, unreadOnly])
 
-  // Mark single notification as read
+  // Mark single notification as read (with optimistic update and rollback)
   const markAsRead = useCallback(async (notificationId) => {
+    // Store previous state for rollback
+    const prevNotifications = notifications
+    const prevUnreadCount = unreadCount
+
+    // Optimistic update
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === notificationId ? { ...n, read: true } : n
+      )
+    )
+    setUnreadCount(prev => Math.max(0, prev - 1))
+
     try {
       const { error: rpcError } = await supabase.rpc('mark_notification_read', {
         p_notification_id: notificationId
@@ -51,23 +63,28 @@ export const useCreatorNotifications = (creatorId = null, options = {}) => {
         throw rpcError
       }
 
-      // Update local state
-      setNotifications(prev =>
-        prev.map(n =>
-          n.id === notificationId ? { ...n, read: true } : n
-        )
-      )
-      setUnreadCount(prev => Math.max(0, prev - 1))
-
       return { success: true }
     } catch (err) {
+      // Rollback on error
+      setNotifications(prevNotifications)
+      setUnreadCount(prevUnreadCount)
       console.error('Error marking notification as read:', err)
       return { success: false, error: err.message }
     }
-  }, [])
+  }, [notifications, unreadCount])
 
-  // Mark all notifications as read
+  // Mark all notifications as read (with optimistic update and rollback)
   const markAllAsRead = useCallback(async () => {
+    // Store previous state for rollback
+    const prevNotifications = notifications
+    const prevUnreadCount = unreadCount
+
+    // Optimistic update
+    setNotifications(prev =>
+      prev.map(n => ({ ...n, read: true }))
+    )
+    setUnreadCount(0)
+
     try {
       const { data, error: rpcError } = await supabase.rpc('mark_all_notifications_read')
 
@@ -75,52 +92,50 @@ export const useCreatorNotifications = (creatorId = null, options = {}) => {
         throw rpcError
       }
 
-      // Update local state
-      setNotifications(prev =>
-        prev.map(n => ({ ...n, read: true }))
-      )
-      setUnreadCount(0)
-
       return { success: true, count: data }
     } catch (err) {
+      // Rollback on error
+      setNotifications(prevNotifications)
+      setUnreadCount(prevUnreadCount)
       console.error('Error marking all notifications as read:', err)
       return { success: false, error: err.message }
     }
-  }, [])
+  }, [notifications, unreadCount])
 
   // Initial fetch
   useEffect(() => {
     fetchNotifications()
   }, [fetchNotifications])
 
-  // Real-time subscription for new notifications
+  // Real-time subscription for new notifications (filtered by creator_id)
   useEffect(() => {
+    if (!creatorId) return
+
     const channel = supabase
-      .channel('creator-notifications')
+      .channel(`creator-notifications-${creatorId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'creator_notifications',
+          filter: `creator_id=eq.${creatorId}`,
         },
         (payload) => {
           // Add new notification to the list
-          if (!creatorId || payload.new.creator_id === creatorId) {
-            const newNotif = {
-              id: payload.new.id,
-              type: payload.new.type,
-              title: payload.new.title,
-              message: payload.new.message,
-              amount: payload.new.amount,
-              reference_id: payload.new.reference_id,
-              read: payload.new.read,
-              created_at: payload.new.created_at,
-            }
-
-            setNotifications(prev => [newNotif, ...prev])
-            setUnreadCount(prev => prev + 1)
+          const newNotif = {
+            id: payload.new.id,
+            type: payload.new.type,
+            title: payload.new.title,
+            message: payload.new.message,
+            amount: payload.new.amount,
+            reference_id: payload.new.reference_id,
+            read: payload.new.read,
+            created_at: payload.new.created_at,
           }
+
+          setNotifications(prev => [newNotif, ...prev])
+          setUnreadCount(prev => prev + 1)
         }
       )
       .subscribe()

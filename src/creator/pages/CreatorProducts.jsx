@@ -118,6 +118,8 @@ export default function CreatorProducts() {
     if (error) {
       showToast('Erreur lors de la sauvegarde', 'error')
     } else {
+      // Update local profile state with saved selection
+      setProfile(prev => ({ ...prev, featured_products: selectedProducts }))
       showToast('Selection enregistree avec succes!')
     }
   }

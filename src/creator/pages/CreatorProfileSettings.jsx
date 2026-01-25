@@ -77,6 +77,7 @@ const CreatorProfileSettings = () => {
   const [slugValue, setSlugValue] = useState('')
   const [slugError, setSlugError] = useState('')
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState(null)
   const [copied, setCopied] = useState(false)
 
   // Refs for file inputs
@@ -109,10 +110,15 @@ const CreatorProfileSettings = () => {
 
   // Save profile
   const handleSave = async () => {
+    setSaveError(null)
+    setSaveSuccess(false)
     const result = await updateProfile(formData)
     if (result.success) {
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
+    } else {
+      setSaveError(result.error || 'Erreur lors de la sauvegarde')
+      setTimeout(() => setSaveError(null), 5000)
     }
   }
 
@@ -586,6 +592,12 @@ const CreatorProfileSettings = () => {
             <div className="flex items-center gap-2 text-green-600">
               <Check className="w-5 h-5" />
               <span>Modifications enregistrees !</span>
+            </div>
+          )}
+          {saveError && (
+            <div className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              <span>{saveError}</span>
             </div>
           )}
         </div>
