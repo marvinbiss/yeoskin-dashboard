@@ -1,0 +1,44 @@
+[
+  {
+    "page_slug": "apply",
+    "section_key": "hero",
+    "content": {"badge":"Programme Créateur 2025","title_line1":"Transforme ta passion pour la","title_highlight":"K-Beauty","title_line2":"en revenus","subtitle":"Rejoins +200 créateurs qui gagnent jusqu'à 20% de commission en partageant les meilleurs produits de beauté coréenne.","cta_text":"Postuler maintenant","social_proof_text":"+200 créateurs","social_proof_rating":"4.9/5"},
+    "sort_order": 1,
+    "is_published": true
+  },
+  {
+    "page_slug": "apply",
+    "section_key": "benefits",
+    "content": {"section_title":"Pourquoi rejoindre Yeoskin ?","section_subtitle":"Un programme conçu pour maximiser tes revenus et simplifier ta vie de créateur","items":[{"icon":"TrendingUp","title":"Commissions attractives","description":"Jusqu'à 20% sur chaque vente générée via ton lien unique","color":"green"},{"icon":"Gift","title":"Produits gratuits","description":"Reçois des produits exclusifs pour créer ton contenu","color":"purple"},{"icon":"Zap","title":"Paiements rapides","description":"Virements automatiques chaque mois sur ton compte","color":"yellow"},{"icon":"Users","title":"Communauté exclusive","description":"Rejoins une communauté de créateurs passionnés","color":"blue"},{"icon":"ShieldCheck","title":"Dashboard dédié","description":"Suis tes performances en temps réel","color":"pink"},{"icon":"Heart","title":"Support prioritaire","description":"Une équipe dédiée pour t'accompagner","color":"red"}]},
+    "sort_order": 2,
+    "is_published": true
+  },
+  {
+    "page_slug": "apply",
+    "section_key": "tiers",
+    "content": {"section_title":"Nos niveaux de commission","section_subtitle":"Plus tu grandis, plus tes avantages augmentent","items":[{"name":"Bronze","rate":"15%","requirement":"Ouvert à tous","features":"Lien d'affiliation unique\nDashboard analytics\nSupport email\nPaiement mensuel","popular":false},{"name":"Silver","rate":"17%","requirement":"5 000+ followers","features":"Tout Bronze +\nProduits gratuits\nAccès anticipé nouveautés\nSupport prioritaire","popular":true},{"name":"Gold","rate":"20%","requirement":"Sur invitation","features":"Tout Silver +\nCommission maximale\nCo-création produits\nManager dédié","popular":false}]},
+    "sort_order": 3,
+    "is_published": true
+  },
+  {
+    "page_slug": "apply",
+    "section_key": "testimonials",
+    "content": {"section_title":"Ce que disent nos créateurs","items":[{"name":"Emma L.","handle":"@emma.skincare","avatar":"👩🏻","quote":"Yeoskin m'a permis de transformer ma passion en revenus. Le dashboard est super intuitif !","followers":"45K"},{"name":"Sarah M.","handle":"@sarahbeauty","avatar":"👩🏽","quote":"Les produits sont incroyables et la commission est vraiment généreuse. Je recommande !","followers":"28K"},{"name":"Julie R.","handle":"@juliekbeauty","avatar":"👩🏼","quote":"L'équipe est réactive et les paiements toujours à l'heure. Parfait pour les créateurs.","followers":"67K"}]},
+    "sort_order": 4,
+    "is_published": true
+  },
+  {
+    "page_slug": "apply",
+    "section_key": "faq",
+    "content": {"section_title":"Questions fréquentes","items":[{"question":"Qui peut devenir créateur Yeoskin ?","answer":"Toute personne passionnée par la K-Beauty avec une présence sur les réseaux sociaux peut postuler. Nous acceptons les créateurs de toutes tailles."},{"question":"Combien puis-je gagner ?","answer":"Vos gains dépendent de votre audience et engagement. Nos créateurs gagnent entre 100€ et 5000€+ par mois selon leur activité."},{"question":"Quand suis-je payé(e) ?","answer":"Les paiements sont effectués mensuellement, le 15 de chaque mois, pour toutes les commissions du mois précédent."},{"question":"Dois-je acheter les produits ?","answer":"Non ! Nous envoyons gratuitement les produits aux créateurs Silver et Gold. Les Bronze bénéficient de réductions exclusives."},{"question":"Comment fonctionne le tracking ?","answer":"Chaque créateur reçoit un code promo unique et un lien personnalisé. Toutes les ventes sont trackées automatiquement."},{"question":"Puis-je promouvoir d'autres marques ?","answer":"Oui, nous n'exigeons pas d'exclusivité. Vous êtes libre de collaborer avec d'autres marques."}]},
+    "sort_order": 5,
+    "is_published": true
+  },
+  {
+    "page_slug": "apply",
+    "section_key": "cta",
+    "content": {"title":"Prêt(e) à rejoindre l'aventure ?","subtitle":"Candidature en 2 minutes. Réponse sous 48h pour les créateurs avec 5K+ followers.","button_text":"Postuler maintenant"},
+    "sort_order": 6,
+    "is_published": true
+  }
+]

@@ -133,77 +133,155 @@ function getApprovalEmailHtml(data: {
   commissionRate?: number
   discountCode?: string
 }): string {
+  const tierColors: Record<string, { bg: string; text: string; accent: string }> = {
+    'Bronze': { bg: '#fef3e2', text: '#92400e', accent: '#cd7f32' },
+    'Silver': { bg: '#f3f4f6', text: '#374151', accent: '#9ca3af' },
+    'Gold': { bg: '#fef9c3', text: '#854d0e', accent: '#eab308' },
+  }
+  const tier = tierColors[data.tierName || ''] || tierColors['Bronze']
+
   return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Candidature approuvée - Yeoskin</title>
+  <title>Bienvenue chez Yeoskin</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #fdf2f8;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #fdf2f8; -webkit-font-smoothing: antialiased;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #fdf2f8;">
     <tr>
-      <td>
-        <!-- Header -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px 16px 0 0; padding: 40px 30px; text-align: center;">
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="max-width: 600px; width: 100%;">
+
+          <!-- Logo Header -->
           <tr>
-            <td>
-              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">🎉 Candidature approuvée !</h1>
+            <td align="center" style="padding-bottom: 30px;">
+              <img src="https://yeoskin.fr/logo.png" alt="Yeoskin" width="150" style="display: block; max-width: 150px;" />
             </td>
           </tr>
-        </table>
 
-        <!-- Content -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: white; padding: 40px 30px; border-radius: 0 0 16px 16px;">
+          <!-- Main Card -->
           <tr>
             <td>
-              <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
-                Félicitations ${data.firstName} ! Ta candidature a été approuvée par notre équipe.
-              </p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
 
-              ${data.tierName ? `
-              <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 24px; margin: 20px 0; text-align: center;">
-                <p style="margin: 0 0 12px; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Ton tier</p>
-                <p style="margin: 0 0 8px; color: #047857; font-size: 32px; font-weight: bold;">${data.tierName}</p>
-                ${data.commissionRate ? `<p style="margin: 0; color: #059669; font-size: 18px;">${Math.round(data.commissionRate * 100)}% de commission</p>` : ''}
-              </div>
-              ` : ''}
+                <!-- Hero Banner -->
+                <tr>
+                  <td style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #6366f1 100%); padding: 50px 40px; text-align: center;">
+                    <div style="font-size: 60px; margin-bottom: 16px;">🎉</div>
+                    <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">Félicitations ${data.firstName} !</h1>
+                    <p style="color: rgba(255,255,255,0.9); margin: 12px 0 0; font-size: 18px; font-weight: 400;">Ta candidature a été approuvée</p>
+                  </td>
+                </tr>
 
-              ${data.discountCode ? `
-              <div style="background: #fef3c7; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
-                <p style="margin: 0 0 8px; color: #92400e; font-size: 14px;">Ton code promo unique</p>
-                <p style="margin: 0; color: #78350f; font-size: 24px; font-weight: bold; font-family: monospace;">${data.discountCode}</p>
-              </div>
-              ` : ''}
+                <!-- Content -->
+                <tr>
+                  <td style="padding: 40px;">
 
-              <div style="background: #eff6ff; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #3b82f6;">
-                <p style="margin: 0 0 8px; color: #1e40af; font-weight: 600;">📧 Email de configuration</p>
-                <p style="margin: 0; color: #1d4ed8; font-size: 14px;">Tu vas recevoir un second email pour définir ton mot de passe et accéder à ton dashboard.</p>
-              </div>
+                    <p style="color: #4b5563; font-size: 16px; line-height: 1.7; margin: 0 0 30px; text-align: center;">
+                      Bienvenue dans le programme créateur Yeoskin ! Tu fais maintenant partie d'une communauté passionnée de K-Beauty.
+                    </p>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="https://yeoskin.fr/auth/set-password" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 600; font-size: 16px;">
-                  Configurer mon compte →
-                </a>
-              </div>
+                    <!-- Tier & Commission Card -->
+                    ${data.tierName ? `
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: ${tier.bg}; border-radius: 16px; margin-bottom: 24px; border: 2px solid ${tier.accent};">
+                      <tr>
+                        <td style="padding: 30px; text-align: center;">
+                          <div style="display: inline-block; background: ${tier.accent}; color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Ton niveau</div>
+                          <h2 style="color: ${tier.text}; margin: 12px 0 8px; font-size: 36px; font-weight: 800;">${data.tierName}</h2>
+                          ${data.commissionRate ? `<p style="color: ${tier.text}; margin: 0; font-size: 20px; font-weight: 600;">${Math.round(data.commissionRate * 100)}% de commission</p>` : ''}
+                        </td>
+                      </tr>
+                    </table>
+                    ` : ''}
 
-              <p style="color: #6b7280; font-size: 14px; margin: 30px 0 0; text-align: center;">
-                Bienvenue dans la famille Yeoskin ! 💖
-              </p>
+                    <!-- Discount Code Card -->
+                    ${data.discountCode ? `
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 16px; margin-bottom: 24px;">
+                      <tr>
+                        <td style="padding: 30px; text-align: center;">
+                          <p style="color: #92400e; margin: 0 0 12px; font-size: 14px; font-weight: 500;">Ton code promo exclusif</p>
+                          <div style="background: white; display: inline-block; padding: 16px 32px; border-radius: 12px; border: 2px dashed #d97706;">
+                            <span style="color: #b45309; font-size: 28px; font-weight: 800; font-family: 'SF Mono', Monaco, monospace; letter-spacing: 2px;">${data.discountCode}</span>
+                          </div>
+                          <p style="color: #a16207; margin: 16px 0 0; font-size: 13px;">Partage ce code avec ta communauté pour leur offrir une réduction</p>
+                        </td>
+                      </tr>
+                    </table>
+                    ` : ''}
+
+                    <!-- Info Box -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0f9ff; border-radius: 12px; border-left: 4px solid #0ea5e9; margin-bottom: 30px;">
+                      <tr>
+                        <td style="padding: 20px 24px;">
+                          <p style="color: #0369a1; margin: 0 0 6px; font-size: 15px; font-weight: 600;">📧 Prochaine étape</p>
+                          <p style="color: #0c4a6e; margin: 0; font-size: 14px; line-height: 1.6;">Tu vas recevoir un email pour définir ton mot de passe et accéder à ton dashboard créateur.</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- CTA Button -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td align="center" style="padding: 10px 0 30px;">
+                          <a href="https://yeoskin.fr/dashboard" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 18px 48px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px 0 rgba(236, 72, 153, 0.4);">
+                            Accéder à mon dashboard →
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Divider -->
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td style="border-top: 1px solid #e5e7eb; padding-top: 30px;">
+                          <p style="color: #9ca3af; font-size: 14px; text-align: center; margin: 0;">
+                            Bienvenue dans la famille Yeoskin ! 💖
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
-        </table>
 
-        <!-- Footer -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding: 30px 0; text-align: center;">
+          <!-- Footer -->
           <tr>
-            <td>
-              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+            <td style="padding: 40px 20px; text-align: center;">
+              <!-- Social Links -->
+              <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto 20px;">
+                <tr>
+                  <td style="padding: 0 8px;">
+                    <a href="https://instagram.com/yeoskin" style="display: inline-block; width: 36px; height: 36px; background: #e5e7eb; border-radius: 50%; text-align: center; line-height: 36px; text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram" width="18" style="vertical-align: middle;" />
+                    </a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://tiktok.com/@yeoskin" style="display: inline-block; width: 36px; height: 36px; background: #e5e7eb; border-radius: 50%; text-align: center; line-height: 36px; text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" width="18" style="vertical-align: middle;" />
+                    </a>
+                  </td>
+                  <td style="padding: 0 8px;">
+                    <a href="https://yeoskin.fr" style="display: inline-block; width: 36px; height: 36px; background: #e5e7eb; border-radius: 50%; text-align: center; line-height: 36px; text-decoration: none;">
+                      <img src="https://cdn-icons-png.flaticon.com/512/1006/1006771.png" alt="Website" width="18" style="vertical-align: middle;" />
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #9ca3af; font-size: 12px; margin: 0 0 8px;">
                 © ${new Date().getFullYear()} Yeoskin. Tous droits réservés.
               </p>
+              <p style="color: #d1d5db; font-size: 11px; margin: 0;">
+                Tu reçois cet email car tu as postulé au programme créateur Yeoskin.
+              </p>
             </td>
           </tr>
+
         </table>
       </td>
     </tr>
