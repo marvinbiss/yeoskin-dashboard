@@ -139,8 +139,18 @@ export const CreatorLogin = () => {
             </button>
           </form>
 
+          {/* Forgot password link */}
+          <div className="mt-4 text-center">
+            <a
+              href="/auth/forgot-password"
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Mot de passe oublié ?
+            </a>
+          </div>
+
           {/* Help text */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Probleme de connexion ?{' '}
               <a
