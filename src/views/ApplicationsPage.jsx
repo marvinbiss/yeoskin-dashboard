@@ -224,6 +224,35 @@ export default function ApplicationsPage() {
         // Creator was created, just warn about status update
       }
 
+      // 7. Send approval email + Supabase invite for password
+      const { data: { session } } = await supabase.auth.getSession()
+      const tierData = selectedTierId
+        ? tiers.find(t => t.id === selectedTierId)
+        : null
+
+      fetch('/api/admin/approve-application', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          email: app.email,
+          firstName: app.first_name,
+          tierName: tierData?.display_name || 'Bronze',
+          commissionRate: commissionRate,
+          discountCode: discountCode,
+        }),
+      }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Approval emails sent:', data.results)
+          } else {
+            console.error('Approval email error:', data)
+          }
+        })
+        .catch(err => console.error('Approval email fetch error:', err))
+
       showToast(`${app.first_name} ${app.last_name} approuvé(e) ! Code: ${discountCode}`, 'success')
       setShowModal(false)
       setSelectedApp(null)
@@ -249,6 +278,29 @@ export default function ApplicationsPage() {
         .eq('id', app.id)
 
       if (error) throw error
+
+      // Send rejection email
+      const { data: { session } } = await supabase.auth.getSession()
+      fetch('/api/admin/reject-application', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          email: app.email,
+          firstName: app.first_name,
+          reason: reason || 'Profil non retenu',
+        }),
+      }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            console.log('Rejection email sent')
+          } else {
+            console.error('Rejection email error:', data)
+          }
+        })
+        .catch(err => console.error('Rejection email fetch error:', err))
 
       showToast(`Candidature de ${app.first_name} refusée`, 'success')
       setShowModal(false)
