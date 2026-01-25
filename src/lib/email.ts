@@ -253,9 +253,15 @@ function getAutoApprovedEmailHtml(data: ApplicationEmailData): string {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <td align="center" style="padding: 10px 0 20px;">
-                          <a href="https://yeoskin.fr/dashboard" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 18px 48px; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px 0 rgba(236, 72, 153, 0.4);">
+                          <table role="presentation" cellspacing="0" cellpadding="0">
+                            <tr>
+                              <td align="center" bgcolor="#ec4899" style="border-radius: 50px;">
+                                <a href="https://yeoskin.fr/dashboard" target="_blank" style="display: inline-block; color: #ffffff; text-decoration: none; padding: 18px 48px; font-weight: 600; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                             Accéder à mon dashboard →
-                          </a>
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
                         </td>
                       </tr>
                     </table>
@@ -491,11 +497,21 @@ function getApprovalEmailHtml(data: {
                 <p style="margin: 0; color: #78350f; font-size: 24px; font-weight: bold; font-family: monospace;">${data.discountCode}</p>
               </div>
 
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="https://dashboard.yeoskin.com" style="display: inline-block; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 14px 32px; border-radius: 50px; font-weight: 600; font-size: 16px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 30px 0;">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td align="center" bgcolor="#ec4899" style="border-radius: 50px;">
+                          <a href="https://yeoskin.fr/dashboard" target="_blank" style="display: inline-block; color: #ffffff; text-decoration: none; padding: 14px 32px; font-weight: 600; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
                   Accéder à mon dashboard →
-                </a>
-              </div>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
               <p style="color: #6b7280; font-size: 14px; margin: 30px 0 0; text-align: center;">
                 Bienvenue dans la famille Yeoskin ! 💖
