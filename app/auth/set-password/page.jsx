@@ -32,11 +32,16 @@ export default function SetPasswordPage() {
     let mounted = true
 
     const initialize = async () => {
+      // Vérifier si c'est un lien de recovery via le hash
+      const hash = window.location.hash
+      const isRecoveryLink = hash.includes('type=recovery') || hash.includes('type=invite')
+
       // Écouter les changements d'auth (le token dans le hash sera détecté automatiquement)
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (!mounted) return
         console.log('[SetPassword] Auth event:', event)
-        if (session) {
+        // Accepter PASSWORD_RECOVERY, SIGNED_IN (pour invite), ou session existante avec lien recovery
+        if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || (session && isRecoveryLink)) {
           setHasValidSession(true)
           setInitializing(false)
         }
@@ -47,9 +52,9 @@ export default function SetPasswordPage() {
 
       if (!mounted) return
 
-      // Vérifier si une session a été établie
+      // Vérifier si une session a été établie ET si c'est un lien recovery/invite
       const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
+      if (session && isRecoveryLink) {
         setHasValidSession(true)
       }
       setInitializing(false)
