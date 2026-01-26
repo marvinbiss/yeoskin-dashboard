@@ -176,7 +176,7 @@ export default function SetPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-purple-600">Yeoskin</h1>
+          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-12 w-auto mx-auto" />
           <p className="text-gray-600 mt-2">Bienvenue dans l'équipe !</p>
         </div>
 

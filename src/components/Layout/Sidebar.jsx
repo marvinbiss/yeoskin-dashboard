@@ -74,13 +74,14 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
+          <img
+            src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138"
+            alt="Yeoskin"
+            className={clsx(collapsed && !isMobile ? 'h-8 w-8 object-contain' : 'h-10 w-auto')}
+          />
           {(isMobile || !collapsed) && (
             <div>
-              <h1 className="font-bold text-gray-900 dark:text-white">Yeoskin</h1>
-              <p className="text-xs text-gray-500">Tableau de bord des opérations</p>
+              <p className="text-xs text-gray-500">Tableau de bord</p>
             </div>
           )}
         </div>

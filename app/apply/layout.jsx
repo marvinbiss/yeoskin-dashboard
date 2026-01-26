@@ -24,13 +24,8 @@ export default function ApplyLayout({ children }) {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Y</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                Yeoskin
-              </span>
+            <Link href="/" className="flex items-center">
+              <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-10 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center gap-6">
               <a href="#benefits" className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors">
@@ -63,11 +58,8 @@ export default function ApplyLayout({ children }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">Y</span>
-                </div>
-                <span className="text-xl font-bold">Yeoskin</span>
+              <div className="flex items-center mb-4">
+                <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-10 w-auto" />
               </div>
               <p className="text-gray-400 text-sm max-w-md">
                 La marketplace de référence pour les créateurs passionnés de K-Beauty.

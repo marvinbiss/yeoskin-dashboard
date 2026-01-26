@@ -68,7 +68,7 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-          <span className="text-xl font-bold text-primary-600">Yeoskin</span>
+          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-8 w-auto" />
           <button
             onClick={() => setSidebarOpen(false)}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -104,7 +104,7 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-1 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
           <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-            <span className="text-xl font-bold text-primary-600">Yeoskin</span>
+            <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-8 w-auto" />
             <span className="ml-2 text-sm text-gray-500">Creator</span>
           </div>
           <nav className="flex-1 p-4 space-y-1">

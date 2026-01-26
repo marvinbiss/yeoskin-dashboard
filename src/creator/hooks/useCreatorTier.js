@@ -29,12 +29,12 @@ export function useCreatorTier(creatorId) {
       // Parallel fetch: tiers, creator, and commissions
       const [tiersResult, creatorResult, commissionsResult] = await Promise.all([
         supabase
-          .from('creator_tiers')
+          .from('commission_tiers')
           .select('*')
           .order('min_monthly_revenue', { ascending: true }),
         supabase
           .from('creators')
-          .select('current_tier_id')
+          .select('tier_id')
           .eq('id', creatorId)
           .single(),
         supabase
@@ -58,7 +58,7 @@ export function useCreatorTier(creatorId) {
       )
 
       // Find current tier
-      let currentTier = tiers.find(t => t.id === creator.current_tier_id)
+      let currentTier = tiers.find(t => t.id === creator.tier_id)
       if (!currentTier) {
         // Default to first tier (Bronze)
         currentTier = tiers[0]

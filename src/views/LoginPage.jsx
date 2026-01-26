@@ -53,11 +53,9 @@ export const LoginPage = () => {
       <div className="w-full max-w-md">
         {/* Logo et titre */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 mb-4">
-            <Zap className="w-8 h-8 text-white" />
-          </div>
+          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-14 w-auto mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Yeoskin Dashboard
+            Dashboard
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-2">
             Connectez-vous pour accéder au tableau de bord

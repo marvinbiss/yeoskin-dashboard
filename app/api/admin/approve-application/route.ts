@@ -166,7 +166,7 @@ function getApprovalEmailHtml(data: {
           <!-- Logo Header -->
           <tr>
             <td align="center" style="padding-bottom: 30px;">
-              <img src="https://yeoskin.fr/logo.png" alt="Yeoskin" width="150" style="display: block; max-width: 150px;" />
+              <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" width="150" style="display: block; max-width: 150px;" />
             </td>
           </tr>
 
