@@ -25,7 +25,7 @@ import {
   Cell
 } from 'recharts'
 import clsx from 'clsx'
-import { Card, StatusBadge, Spinner } from '../Common'
+import { Card, StatusBadge, Spinner, Skeleton, SkeletonKPICard } from '../Common'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -70,13 +70,9 @@ export const KPICards = ({ stats, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {[...Array(4)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <Card.Body>
-              <div className="h-20 bg-gray-200 dark:bg-gray-700 rounded" />
-            </Card.Body>
-          </Card>
+          <SkeletonKPICard key={i} />
         ))}
       </div>
     )
@@ -257,9 +253,18 @@ export const RecentActivity = ({ transfers, loading }) => {
         <Card.Header>
           <h3 className="font-semibold text-gray-900 dark:text-white">Transferts récents</h3>
         </Card.Header>
-        <Card.Body>
-          <div className="flex items-center justify-center py-8">
-            <Spinner />
+        <Card.Body className="p-0">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4 px-6 py-4">
+                <Skeleton className="w-5 h-5 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="w-3/4 h-4 mb-2" />
+                  <Skeleton className="w-1/2 h-3" />
+                </div>
+                <Skeleton className="w-20 h-6 rounded-full" />
+              </div>
+            ))}
           </div>
         </Card.Body>
       </Card>

@@ -1,11 +1,13 @@
 'use client'
 
+import { SWRConfig } from 'swr'
 import { ToastProvider } from '@/components/Common'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { CreatorAuthProvider } from '@/creator'
 import { SessionTimeoutWarning } from '@/components/Auth'
 import { useSession } from '@/hooks/useSession'
 import ErrorBoundary from '@/components/ErrorBoundary'
+import { swrConfig } from '@/hooks/useSWROptimized'
 
 // Session manager component
 const SessionManager = ({ children }) => {
@@ -43,13 +45,15 @@ const SessionManager = ({ children }) => {
 export function AdminProviders({ children }) {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <ToastProvider>
-          <SessionManager>
-            {children}
-          </SessionManager>
-        </ToastProvider>
-      </AuthProvider>
+      <SWRConfig value={swrConfig}>
+        <AuthProvider>
+          <ToastProvider>
+            <SessionManager>
+              {children}
+            </SessionManager>
+          </ToastProvider>
+        </AuthProvider>
+      </SWRConfig>
     </ErrorBoundary>
   )
 }

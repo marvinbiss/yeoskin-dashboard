@@ -31,6 +31,11 @@ import {
   useRecentTransfers,
   useCommissions
 } from '../hooks/useSupabase'
+import {
+  useDashboardStatsOptimized,
+  useBatchesOptimized,
+  useTransfersOptimized,
+} from '../hooks/useSWROptimized'
 import { useAdmins } from '../hooks/useAdmins'
 import { useCreators as useCreatorsHook } from '../hooks/useCreators'
 import { triggerDailyBatch, getConfig } from '../lib/api'
@@ -51,6 +56,12 @@ import {
   CREATOR_BULK_ACTIONS,
   ADMIN_BULK_ACTIONS,
   BATCH_BULK_ACTIONS,
+  SkeletonDashboardStats,
+  SkeletonChart,
+  SkeletonActivityFeed,
+  SkeletonTable,
+  SkeletonCard,
+  Skeleton,
 } from '../components/Common'
 
 // Re-export LoginPage
@@ -142,9 +153,10 @@ const LowStockAlert = () => {
 export const DashboardPage = () => {
   const navigate = useNavigate()
   const toast = useToast()
-  const { stats, loading: statsLoading } = useDashboardStats()
-  const { batches, loading: batchesLoading, refresh: refreshBatches, approveBatch } = useBatches({ limit: 5 })
-  const { transfers, loading: transfersLoading } = useRecentTransfers(5)
+  // Use optimized SWR hooks for caching and faster loading
+  const { stats, loading: statsLoading, refreshing: statsRefreshing } = useDashboardStatsOptimized()
+  const { batches, loading: batchesLoading, refreshing: batchesRefreshing, refresh: refreshBatches, approveBatch } = useBatchesOptimized({ limit: 5 })
+  const { transfers, loading: transfersLoading, refreshing: transfersRefreshing } = useTransfersOptimized(5)
 
   const handleTriggerDaily = async () => {
     try {
@@ -207,7 +219,7 @@ export const DashboardPage = () => {
 
 export const PayoutsPage = () => {
   const toast = useToast()
-  const { batches, loading, refresh, approveBatch } = useBatches({ limit: 50 })
+  const { batches, loading, refreshing, refresh, approveBatch } = useBatchesOptimized({ limit: 50 })
 
   const handleTriggerDaily = async () => {
     try {

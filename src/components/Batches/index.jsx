@@ -13,7 +13,7 @@ import {
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import clsx from 'clsx'
-import { Card, Button, StatusBadge, Modal, ConfirmDialog, Spinner, EmptyState, useToast } from '../Common'
+import { Card, Button, StatusBadge, Modal, ConfirmDialog, Spinner, EmptyState, useToast, Skeleton, SkeletonTableRow } from '../Common'
 import { executeBatch } from '../../lib/api'
 
 // ============================================================================
@@ -62,13 +62,31 @@ export const BatchesTable = ({ batches, loading, onApprove, onRefresh }) => {
     return (
       <Card>
         <Card.Header>
-          <h3 className="font-semibold text-gray-900 dark:text-white">Lots de paiement</h3>
-        </Card.Header>
-        <Card.Body>
-          <div className="flex items-center justify-center py-12">
-            <Spinner size="lg" />
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-gray-900 dark:text-white">Lots de paiement</h3>
+            <Skeleton className="w-20 h-8 rounded-lg" />
           </div>
-        </Card.Body>
+        </Card.Header>
+        <div className="overflow-x-auto">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID du lot</th>
+                <th>Période</th>
+                <th>Statut</th>
+                <th>Créateurs</th>
+                <th>Montant</th>
+                <th>Créé le</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[...Array(5)].map((_, i) => (
+                <SkeletonTableRow key={i} columns={7} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
     )
   }
