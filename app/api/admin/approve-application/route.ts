@@ -50,51 +50,30 @@ export async function POST(req: NextRequest) {
   }
 
   const results = {
-    approvalEmail: { success: false, error: null as string | null },
+    welcomeEmail: { success: false, error: null as string | null },
     supabaseInvite: { success: false, error: null as string | null, userId: null as string | null },
   }
 
-  // 1. Send approval email via Resend
-  if (resend) {
-    try {
-      const { data, error } = await resend.emails.send({
-        from: FROM_EMAIL,
-        to: email,
-        replyTo: REPLY_TO,
-        subject: '🎉 Ta candidature Yeoskin a été approuvée !',
-        html: getApprovalEmailHtml({ firstName, tierName, commissionRate, discountCode }),
-      })
+  let passwordSetupLink: string | null = null
 
-      if (error) {
-        console.error('[Email] Approval email error:', error)
-        results.approvalEmail.error = error.message
-      } else {
-        results.approvalEmail.success = true
-        console.info('[Email] Approval email sent:', data?.id)
-      }
-    } catch (err) {
-      const error = err as Error
-      console.error('[Email] Approval email exception:', error)
-      results.approvalEmail.error = error.message
-    }
-  } else {
-    console.warn('[Email] Resend not configured')
-    results.approvalEmail.error = 'Email service not configured'
-  }
-
-  // 2. Send Supabase invite for password setup
+  // 1. Generate Supabase invite link first (we'll include it in our welcome email)
   try {
-    const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-      redirectTo: 'https://yeoskin.fr/auth/set-password',
+    const { data, error } = await supabase.auth.admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        redirectTo: 'https://yeoskin.fr/auth/set-password',
+      },
     })
 
     if (error) {
-      console.error('[Auth] Invite error:', error)
+      console.error('[Auth] Invite link generation error:', error)
       results.supabaseInvite.error = error.message
     } else {
       results.supabaseInvite.success = true
       results.supabaseInvite.userId = data.user.id
-      console.info('[Auth] Invite sent, user:', data.user.id)
+      passwordSetupLink = data.properties.action_link
+      console.info('[Auth] Invite link generated for user:', data.user.id)
 
       // Link the auth user to the creator
       if (data.user.id) {
@@ -110,19 +89,47 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     const error = err as Error
-    console.error('[Auth] Invite exception:', error)
+    console.error('[Auth] Invite link exception:', error)
     results.supabaseInvite.error = error.message
   }
 
+  // 2. Send welcome email with password setup link
+  if (resend) {
+    try {
+      const { data, error } = await resend.emails.send({
+        from: FROM_EMAIL,
+        to: email,
+        replyTo: REPLY_TO,
+        subject: '🎉 Bienvenue chez Yeoskin - Configure ton mot de passe !',
+        html: getApprovalEmailHtml({ firstName, tierName, commissionRate, discountCode, passwordSetupLink }),
+      })
+
+      if (error) {
+        console.error('[Email] Welcome email error:', error)
+        results.welcomeEmail.error = error.message
+      } else {
+        results.welcomeEmail.success = true
+        console.info('[Email] Welcome email sent:', data?.id)
+      }
+    } catch (err) {
+      const error = err as Error
+      console.error('[Email] Welcome email exception:', error)
+      results.welcomeEmail.error = error.message
+    }
+  } else {
+    console.warn('[Email] Resend not configured')
+    results.welcomeEmail.error = 'Email service not configured'
+  }
+
   // Return combined results
-  const success = results.approvalEmail.success || results.supabaseInvite.success
+  const success = results.welcomeEmail.success && results.supabaseInvite.success
 
   return NextResponse.json({
     success,
     results,
     message: success
-      ? 'Emails envoyés'
-      : 'Erreur lors de l\'envoi des emails',
+      ? 'Email de bienvenue envoyé'
+      : 'Erreur lors de l\'envoi de l\'email',
   })
 }
 
@@ -132,6 +139,7 @@ function getApprovalEmailHtml(data: {
   tierName?: string
   commissionRate?: number
   discountCode?: string
+  passwordSetupLink?: string | null
 }): string {
   const tierColors: Record<string, { bg: string; text: string; accent: string }> = {
     'Bronze': { bg: '#fef3e2', text: '#92400e', accent: '#cd7f32' },
@@ -206,31 +214,48 @@ function getApprovalEmailHtml(data: {
                           <div style="background: white; display: inline-block; padding: 16px 32px; border-radius: 12px; border: 2px dashed #d97706;">
                             <span style="color: #b45309; font-size: 28px; font-weight: 800; font-family: 'SF Mono', Monaco, monospace; letter-spacing: 2px;">${data.discountCode}</span>
                           </div>
-                          <p style="color: #a16207; margin: 16px 0 0; font-size: 13px;">Partage ce code avec ta communauté pour leur offrir une réduction</p>
+                          <p style="color: #a16207; margin: 16px 0 0; font-size: 13px;">Ce code sera automatiquement appliqué sur ta page créateur</p>
+                          <p style="color: #92400e; margin: 10px 0 0; font-size: 12px;">Tu pourras personnaliser l'URL de ta page dans ton dashboard (ex: yeoskin.fr/c/tonnom)</p>
                         </td>
                       </tr>
                     </table>
                     ` : ''}
 
-                    <!-- Info Box -->
-                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: #f0f9ff; border-radius: 12px; border-left: 4px solid #0ea5e9; margin-bottom: 30px;">
+                    <!-- Password Setup CTA -->
+                    ${data.passwordSetupLink ? `
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 16px; margin-bottom: 24px;">
                       <tr>
-                        <td style="padding: 20px 24px;">
-                          <p style="color: #0369a1; margin: 0 0 6px; font-size: 15px; font-weight: 600;">📧 Prochaine étape</p>
-                          <p style="color: #0c4a6e; margin: 0; font-size: 14px; line-height: 1.6;">Tu vas recevoir un email pour définir ton mot de passe et accéder à ton dashboard créateur.</p>
+                        <td style="padding: 30px; text-align: center;">
+                          <div style="font-size: 40px; margin-bottom: 12px;">🔐</div>
+                          <h3 style="color: #065f46; margin: 0 0 12px; font-size: 20px; font-weight: 700;">Configure ton mot de passe</h3>
+                          <p style="color: #047857; margin: 0 0 20px; font-size: 14px; line-height: 1.6;">
+                            Clique sur le bouton ci-dessous pour créer ton mot de passe et accéder à ton espace créateur.
+                          </p>
+                          <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+                            <tr>
+                              <td align="center" bgcolor="#059669" style="border-radius: 50px;">
+                                <a href="${data.passwordSetupLink}" target="_blank" style="display: inline-block; color: #ffffff; text-decoration: none; padding: 16px 40px; font-weight: 600; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                                  Créer mon mot de passe
+                                </a>
+                              </td>
+                            </tr>
+                          </table>
+                          <p style="color: #6b7280; margin: 16px 0 0; font-size: 12px;">Ce lien expire dans 24 heures</p>
                         </td>
                       </tr>
                     </table>
+                    ` : ''}
 
-                    <!-- CTA Button -->
+                    <!-- Secondary CTA - Dashboard -->
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <td align="center" style="padding: 10px 0 30px;">
+                          <p style="color: #6b7280; margin: 0 0 12px; font-size: 14px;">Une fois ton mot de passe créé :</p>
                           <table role="presentation" cellspacing="0" cellpadding="0">
                             <tr>
                               <td align="center" bgcolor="#ec4899" style="border-radius: 50px;">
-                                <a href="https://yeoskin.fr/dashboard" target="_blank" style="display: inline-block; color: #ffffff; text-decoration: none; padding: 18px 48px; font-weight: 600; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-                            Accéder à mon dashboard →
+                                <a href="https://yeoskin.fr/c/creator" target="_blank" style="display: inline-block; color: #ffffff; text-decoration: none; padding: 18px 48px; font-weight: 600; font-size: 16px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+                                  Accéder à mon dashboard
                                 </a>
                               </td>
                             </tr>
