@@ -14,7 +14,7 @@ import {
   PayoutStatusCard,
   RoutineBreakdownCard,
 } from '../components'
-import { Sparkles, ExternalLink, Copy, Check } from 'lucide-react'
+import { Sparkles, ExternalLink, Copy, Check, Package, ChevronRight, Loader2 } from 'lucide-react'
 
 /**
  * Creator Dashboard - Main page showing balance, forecast, and recent activity
@@ -33,6 +33,9 @@ export const CreatorDashboard = () => {
   } = useCreatorDashboard(creator?.id)
 
   const [assignedRoutine, setAssignedRoutine] = useState(null)
+  const [availableRoutines, setAvailableRoutines] = useState([])
+  const [loadingRoutines, setLoadingRoutines] = useState(true)
+  const [assigningRoutine, setAssigningRoutine] = useState(false)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -42,6 +45,7 @@ export const CreatorDashboard = () => {
   }, [creator?.id])
 
   const fetchAssignedRoutine = async () => {
+    setLoadingRoutines(true)
     const { data } = await supabase
       .from('creator_routines')
       .select('routine_id, routines(id, title, slug, objective, base_price)')
@@ -51,6 +55,44 @@ export const CreatorDashboard = () => {
 
     if (data?.routines) {
       setAssignedRoutine(data.routines)
+      setLoadingRoutines(false)
+    } else {
+      // Pas de routine assignée, charger les routines disponibles
+      await fetchAvailableRoutines()
+    }
+  }
+
+  const fetchAvailableRoutines = async () => {
+    const { data } = await supabase
+      .from('routines')
+      .select('id, title, slug, objective, base_price, image_url')
+      .eq('is_active', true)
+      .order('title')
+
+    setAvailableRoutines(data || [])
+    setLoadingRoutines(false)
+  }
+
+  const handleSelectRoutine = async (routine) => {
+    setAssigningRoutine(true)
+    try {
+      const response = await fetch('/api/routines/assignments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          creator_id: creator.id,
+          routine_id: routine.id,
+        }),
+      })
+
+      if (response.ok) {
+        setAssignedRoutine(routine)
+        setAvailableRoutines([])
+      }
+    } catch (error) {
+      console.error('Error assigning routine:', error)
+    } finally {
+      setAssigningRoutine(false)
     }
   }
 
@@ -100,6 +142,71 @@ export const CreatorDashboard = () => {
         {/* VIP Tier Card */}
         {creator?.id && <TierCard creatorId={creator.id} />}
 
+        {/* Routine Selection (First time setup) */}
+        {!loadingRoutines && !assignedRoutine && availableRoutines.length > 0 && (
+          <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-indigo-50 dark:from-pink-900/20 dark:via-purple-900/20 dark:to-indigo-900/20 rounded-xl p-4 sm:p-6 border-2 border-dashed border-pink-300 dark:border-pink-700">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-pink-500 to-purple-600 flex items-center justify-center mb-4">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Bienvenue ! Choisis ta routine
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Sélectionne la routine que tu souhaites promouvoir. Tu pourras la partager avec ta communauté.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {availableRoutines.map((routine) => (
+                <button
+                  key={routine.id}
+                  onClick={() => handleSelectRoutine(routine)}
+                  disabled={assigningRoutine}
+                  className="group relative bg-white dark:bg-gray-800 rounded-xl p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-pink-400 dark:hover:border-pink-500 transition-all hover:shadow-lg text-left disabled:opacity-50"
+                >
+                  {routine.image_url && (
+                    <div className="w-full h-32 rounded-lg overflow-hidden mb-3 bg-gray-100 dark:bg-gray-700">
+                      <img
+                        src={routine.image_url}
+                        alt={routine.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  )}
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors">
+                    {routine.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 line-clamp-2">
+                    {routine.objective}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-bold text-pink-600 dark:text-pink-400">
+                      {routine.base_price?.toFixed(2)} €
+                    </span>
+                    <span className="text-sm text-pink-600 dark:text-pink-400 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Choisir <ChevronRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                  {assigningRoutine && (
+                    <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 rounded-xl flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 text-pink-600 animate-spin" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Loading state for routines */}
+        {loadingRoutines && !assignedRoutine && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-pink-600 animate-spin mr-3" />
+            <span className="text-gray-600 dark:text-gray-300">Chargement des routines...</span>
+          </div>
+        )}
+
         {/* Assigned Routine Card */}
         {assignedRoutine && (
           <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-6 border border-violet-200 dark:border-violet-800">
@@ -146,17 +253,39 @@ export const CreatorDashboard = () => {
         {creator?.id && <PayoutStatusCard creatorId={creator.id} />}
 
         {/* Quick Stats - Commission Status Breakdown */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Code promo</p>
-            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
-              {creator?.discount_code || '-'}
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Statut</p>
+            <p className={`text-base sm:text-lg font-semibold ${
+              creator?.status === 'active'
+                ? 'text-green-600 dark:text-green-400'
+                : 'text-gray-500 dark:text-gray-400'
+            }`}>
+              {creator?.status === 'active' ? 'Actif' : creator?.status === 'inactive' ? 'Inactif' : '-'}
+            </p>
+          </div>
+          <div
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4"
+            style={creator?.tier?.color ? { borderColor: creator.tier.color, borderWidth: '2px' } : {}}
+          >
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Tier</p>
+            <p
+              className="text-base sm:text-lg font-semibold"
+              style={{ color: creator?.tier?.color || 'inherit' }}
+            >
+              {creator?.tier?.display_name || '-'}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Taux commission</p>
             <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
               {creator?.commission_rate ? `${(creator.commission_rate * 100).toFixed(0)}%` : '-'}
+            </p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Code promo</p>
+            <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+              {creator?.discount_code || '-'}
             </p>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4">
