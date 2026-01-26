@@ -62,35 +62,35 @@ export const Header = ({ title, subtitle, onMenuClick }) => {
     <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
         {/* Left side - Menu + Title */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden flex-shrink-0"
           >
             <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white truncate">
               {title}
             </h1>
-          {subtitle && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {subtitle}
-            </p>
-          )}
+            {subtitle && (
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {/* Global Search */}
-          <div className="hidden md:block">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
+          {/* Global Search - Hidden on mobile */}
+          <div className="hidden lg:block">
             <GlobalSearch />
           </div>
 
-          {/* Connection Status */}
+          {/* Connection Status - Hidden on small screens */}
           <div className={clsx(
-            'hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
+            'hidden md:flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium',
             connected
               ? 'bg-success-50 text-success-600 dark:bg-success-500/20'
               : 'bg-danger-50 text-danger-600 dark:bg-danger-500/20'
@@ -100,19 +100,19 @@ export const Header = ({ title, subtitle, onMenuClick }) => {
             ) : (
               <WifiOff key="wifi-off" className="w-3.5 h-3.5" />
             )}
-            <span>{connected ? `Sync ${getTimeSinceSync()}` : 'Hors ligne'}</span>
+            <span className="hidden sm:inline">{connected ? `Sync ${getTimeSinceSync()}` : 'Hors ligne'}</span>
           </div>
 
-          {/* Refresh Button */}
+          {/* Refresh Button - Hidden on very small screens */}
           <button
             onClick={() => window.location.reload()}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="hidden sm:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Actualiser"
           >
             <RefreshCw className="w-5 h-5 text-gray-500" />
           </button>
 
-          {/* Notifications */}
+          {/* Notifications - Always visible */}
           <NotificationCenter />
 
           {/* Dark Mode Toggle */}

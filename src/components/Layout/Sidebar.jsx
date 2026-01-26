@@ -113,17 +113,39 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
       {/* Mobile sidebar */}
       <aside
         className={clsx(
-          'fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-300 lg:hidden',
+          'fixed left-0 top-0 h-full w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-300 lg:hidden flex flex-col',
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {sidebarContent(true)}
 
-        {/* Mobile Main Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navigation
-            .filter(item => !item.adminOnly || isAdmin)
-            .map((item) => (
+        {/* Mobile Main Navigation - Scrollable area */}
+        <div className="flex-1 overflow-y-auto pb-32">
+          <nav className="px-3 py-4 space-y-1">
+            {navigation
+              .filter(item => !item.adminOnly || isAdmin)
+              .map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.href}
+                  className={({ isActive }) => clsx(
+                    'sidebar-link',
+                    isActive && 'active'
+                  )}
+                  onClick={onMobileClose}
+                >
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">{item.name}</span>
+                </NavLink>
+              ))}
+          </nav>
+
+          <div className="px-3">
+            <div className="border-t border-gray-200 dark:border-gray-800" />
+          </div>
+
+          <nav className="px-3 py-4 space-y-1">
+            {secondaryNavigation.map((item) => (
               <NavLink
                 key={item.name}
                 to={item.href}
@@ -134,55 +156,35 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
                 onClick={onMobileClose}
               >
                 <item.icon className="w-5 h-5 flex-shrink-0" />
-                <span>{item.name}</span>
+                <span className="text-sm">{item.name}</span>
               </NavLink>
             ))}
-        </nav>
-
-        <div className="px-3">
-          <div className="border-t border-gray-200 dark:border-gray-800" />
+            {showAdminLink && (
+              <>
+                <NavLink to="/admins" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
+                  <Shield className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">Administrateurs</span>
+                </NavLink>
+                <NavLink to="/audit-logs" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
+                  <ClipboardList className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm">Audit Logs</span>
+                </NavLink>
+              </>
+            )}
+          </nav>
         </div>
 
-        <nav className="px-3 py-4 space-y-1">
-          {secondaryNavigation.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={({ isActive }) => clsx(
-                'sidebar-link',
-                isActive && 'active'
-              )}
-              onClick={onMobileClose}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              <span>{item.name}</span>
-            </NavLink>
-          ))}
-          {showAdminLink && (
-            <>
-              <NavLink to="/admins" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
-                <Shield className="w-5 h-5 flex-shrink-0" />
-                <span>Administrateurs</span>
-              </NavLink>
-              <NavLink to="/audit-logs" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
-                <ClipboardList className="w-5 h-5 flex-shrink-0" />
-                <span>Audit Logs</span>
-              </NavLink>
-            </>
-          )}
-        </nav>
-
-        {/* Mobile User Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200 dark:border-gray-800">
+        {/* Mobile User Section - Fixed at bottom */}
+        <div className="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
           <NavLink
             to="/profile"
             className={({ isActive }) => clsx(
-              'flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer',
+              'flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer',
               isActive ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
             )}
             onClick={onMobileClose}
           >
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
               <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{initials}</span>
             </div>
             <div className="flex-1 min-w-0">
