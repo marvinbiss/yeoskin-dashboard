@@ -238,27 +238,39 @@ export const NotificationCenter = () => {
 
       {/* Dropdown Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white">
-              Notifications
-            </h3>
-            <div className="flex items-center gap-2">
-              {unreadCount > 0 && (
+        <>
+          {/* Mobile backdrop */}
+          <div
+            className="fixed inset-0 bg-black/20 z-40 sm:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in max-h-[80vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                Notifications
+              </h3>
+              <div className="flex items-center gap-2">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllAsRead}
+                    className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                  >
+                    <CheckCheck className="w-3 h-3" />
+                    Tout marquer lu
+                  </button>
+                )}
                 <button
-                  onClick={markAllAsRead}
-                  className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                  onClick={() => setIsOpen(false)}
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 sm:hidden"
                 >
-                  <CheckCheck className="w-3 h-3" />
-                  Tout marquer lu
+                  <X className="w-4 h-4 text-gray-500" />
                 </button>
-              )}
+              </div>
             </div>
-          </div>
 
           {/* Notifications List */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center text-gray-500">
                 <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -324,13 +336,14 @@ export const NotificationCenter = () => {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center">
+            <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 text-center flex-shrink-0">
               <button className="text-xs text-primary-600 hover:text-primary-700">
                 Voir toutes les notifications
               </button>
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
