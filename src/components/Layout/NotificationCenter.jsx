@@ -244,7 +244,7 @@ export const NotificationCenter = () => {
             className="fixed inset-0 bg-black/20 z-40 sm:hidden"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in max-h-[80vh] flex flex-col">
+          <div className="fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in max-h-[80vh] flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
               <h3 className="font-semibold text-gray-900 dark:text-white">
