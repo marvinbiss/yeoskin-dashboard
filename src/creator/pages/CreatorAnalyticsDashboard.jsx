@@ -61,29 +61,31 @@ export default function CreatorAnalyticsDashboard() {
       const startDate = new Date()
       startDate.setDate(startDate.getDate() - parseInt(period))
 
-      // Fetch views
-      const { data: views, error: viewsError } = await supabase
-        .from('profile_views')
-        .select('viewed_at, device_type, referrer, utm_source')
-        .eq('profile_id', profileData.id)
-        .gte('viewed_at', startDate.toISOString())
-        .order('viewed_at', { ascending: true })
+      // Fetch views and clicks in parallel
+      const [viewsResult, clicksResult] = await Promise.all([
+        supabase
+          .from('profile_views')
+          .select('viewed_at, device_type, referrer, utm_source')
+          .eq('profile_id', profileData.id)
+          .gte('viewed_at', startDate.toISOString())
+          .order('viewed_at', { ascending: true }),
+        supabase
+          .from('profile_clicks')
+          .select('clicked_at, product_id, converted, conversion_value')
+          .eq('profile_id', profileData.id)
+          .gte('clicked_at', startDate.toISOString())
+          .order('clicked_at', { ascending: true })
+      ])
 
-      if (viewsError) {
-        console.error('Error fetching views:', viewsError)
+      if (viewsResult.error) {
+        console.error('Error fetching views:', viewsResult.error)
+      }
+      if (clicksResult.error) {
+        console.error('Error fetching clicks:', clicksResult.error)
       }
 
-      // Fetch clicks
-      const { data: clicks, error: clicksError } = await supabase
-        .from('profile_clicks')
-        .select('clicked_at, product_id, converted, conversion_value')
-        .eq('profile_id', profileData.id)
-        .gte('clicked_at', startDate.toISOString())
-        .order('clicked_at', { ascending: true })
-
-      if (clicksError) {
-        console.error('Error fetching clicks:', clicksError)
-      }
+      const views = viewsResult.data
+      const clicks = clicksResult.data
 
       // Process data
       const processedAnalytics = processAnalytics(views || [], clicks || [], parseInt(period))

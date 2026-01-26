@@ -59,16 +59,15 @@ export function usePayoutStatus(creatorId) {
 
   useEffect(() => {
     fetchPayoutStatus()
+  }, [fetchPayoutStatus])
 
-    // Refetch every 30 seconds if there's a processing payout
-    const interval = setInterval(() => {
-      if (data.current?.status === 'processing') {
-        fetchPayoutStatus()
-      }
-    }, 30000)
+  // Separate effect for polling - only when there's a processing payout
+  useEffect(() => {
+    if (data.current?.status !== 'processing') return
 
+    const interval = setInterval(fetchPayoutStatus, 30000)
     return () => clearInterval(interval)
-  }, [fetchPayoutStatus, data.current?.status])
+  }, [data.current?.status, fetchPayoutStatus])
 
   return {
     ...data,

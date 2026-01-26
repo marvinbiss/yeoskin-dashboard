@@ -92,10 +92,12 @@ export const useCreatorDashboard = (creatorId = null) => {
     }
   }, [creatorId])
 
-  // Initial fetch
+  // Initial fetch - parallel execution
   useEffect(() => {
-    fetchDashboard()
-    fetchForecast()
+    const fetchAll = async () => {
+      await Promise.all([fetchDashboard(), fetchForecast()])
+    }
+    fetchAll()
   }, [fetchDashboard, fetchForecast])
 
   // Debounced refresh to avoid rapid consecutive fetches

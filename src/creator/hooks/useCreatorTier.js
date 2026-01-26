@@ -22,34 +22,35 @@ export function useCreatorTier(creatorId) {
     }
 
     try {
-      // Get all tiers
-      const { data: tiers, error: tiersError } = await supabase
-        .from('creator_tiers')
-        .select('*')
-        .order('min_monthly_revenue', { ascending: true })
-
-      if (tiersError) throw tiersError
-
-      // Get creator with tier
-      const { data: creator, error: creatorError } = await supabase
-        .from('creators')
-        .select('current_tier_id')
-        .eq('id', creatorId)
-        .single()
-
-      if (creatorError) throw creatorError
-
-      // Calculate monthly revenue
       const startOfMonth = new Date()
       startOfMonth.setDate(1)
       startOfMonth.setHours(0, 0, 0, 0)
 
-      const { data: commissions } = await supabase
-        .from('commissions')
-        .select('commission_amount')
-        .eq('creator_id', creatorId)
-        .gte('created_at', startOfMonth.toISOString())
-        .neq('status', 'canceled')
+      // Parallel fetch: tiers, creator, and commissions
+      const [tiersResult, creatorResult, commissionsResult] = await Promise.all([
+        supabase
+          .from('creator_tiers')
+          .select('*')
+          .order('min_monthly_revenue', { ascending: true }),
+        supabase
+          .from('creators')
+          .select('current_tier_id')
+          .eq('id', creatorId)
+          .single(),
+        supabase
+          .from('commissions')
+          .select('commission_amount')
+          .eq('creator_id', creatorId)
+          .gte('created_at', startOfMonth.toISOString())
+          .neq('status', 'canceled')
+      ])
+
+      if (tiersResult.error) throw tiersResult.error
+      if (creatorResult.error) throw creatorResult.error
+
+      const tiers = tiersResult.data
+      const creator = creatorResult.data
+      const commissions = commissionsResult.data
 
       const monthlyRevenue = (commissions || []).reduce(
         (sum, c) => sum + Number(c.commission_amount),
