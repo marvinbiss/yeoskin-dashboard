@@ -36,4 +36,5 @@ export {
   CreatorAnalytics,
   CreatorProducts,
   CreatorAnalyticsDashboard,
+  CreatorOnboarding,
 } from './pages'

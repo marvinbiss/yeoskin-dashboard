@@ -326,16 +326,16 @@ export const CreatorDashboard = () => {
 
         {/* Help Section */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 sm:p-6 border border-blue-100 dark:border-blue-800">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
             Besoin d'aide ?
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mb-3 sm:mb-4">
             Si vous avez des questions sur vos commissions ou paiements, n'hesitez pas a nous contacter.
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <a
               href="mailto:support@yeoskin.com"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 bg-white dark:bg-gray-800 rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20"
+              className="inline-flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-primary-600 bg-white dark:bg-gray-800 rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20"
             >
               Contacter le support
             </a>

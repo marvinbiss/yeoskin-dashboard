@@ -1,7 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Navigate, useLocation, useNavigate } from '@/lib/navigation'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
+import { supabase } from '../../lib/supabase'
 import { Loader2, UserX } from 'lucide-react'
 
 /**
@@ -57,11 +59,47 @@ const NotLinkedScreen = ({ onLogout, userEmail }) => (
 /**
  * Protected route for creator pages
  * Requires authenticated user with linked creator profile
+ * Redirects to onboarding if no routine assigned
  */
 export const CreatorProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isCreator, loading, signOut, user } = useCreatorAuth()
+  const { isAuthenticated, isCreator, loading, signOut, user, creator } = useCreatorAuth()
   const location = useLocation()
   const navigate = useNavigate()
+
+  const [checkingRoutine, setCheckingRoutine] = useState(true)
+  const [hasRoutine, setHasRoutine] = useState(false)
+
+  // Check if creator has a routine assigned
+  useEffect(() => {
+    const checkRoutineAssignment = async () => {
+      if (!creator?.id) {
+        setCheckingRoutine(false)
+        return
+      }
+
+      try {
+        const { data } = await supabase
+          .from('creator_routines')
+          .select('id')
+          .eq('creator_id', creator.id)
+          .eq('is_active', true)
+          .maybeSingle()
+
+        setHasRoutine(!!data)
+      } catch (err) {
+        console.error('Error checking routine:', err)
+        setHasRoutine(false)
+      } finally {
+        setCheckingRoutine(false)
+      }
+    }
+
+    if (isCreator && creator?.id) {
+      checkRoutineAssignment()
+    } else {
+      setCheckingRoutine(false)
+    }
+  }, [isCreator, creator?.id])
 
   const handleLogout = async () => {
     await signOut()
@@ -81,6 +119,22 @@ export const CreatorProtectedRoute = ({ children }) => {
   // Show not linked screen if authenticated but no creator profile
   if (!isCreator) {
     return <NotLinkedScreen onLogout={handleLogout} userEmail={user?.email} />
+  }
+
+  // Still checking routine assignment
+  if (checkingRoutine) {
+    return <LoadingScreen />
+  }
+
+  // Redirect to onboarding if no routine assigned (except if already on onboarding page)
+  const isOnboardingPage = location.pathname === '/c/creator/onboarding'
+  if (!hasRoutine && !isOnboardingPage) {
+    return <Navigate to="/c/creator/onboarding" replace />
+  }
+
+  // If on onboarding but already has routine, redirect to dashboard
+  if (hasRoutine && isOnboardingPage) {
+    return <Navigate to="/c/creator" replace />
   }
 
   return children

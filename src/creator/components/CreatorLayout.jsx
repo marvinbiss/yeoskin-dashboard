@@ -162,12 +162,12 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
               >
                 <Menu className="w-5 h-5" />
               </button>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
                   {title}
                 </h1>
                 {subtitle && (
-                  <p className="text-sm text-gray-500">{subtitle}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 truncate">{subtitle}</p>
                 )}
               </div>
             </div>

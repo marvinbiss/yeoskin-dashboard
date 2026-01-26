@@ -28,7 +28,10 @@ export const CreatorAuthProvider = ({ children }) => {
     try {
       const { data, error: fetchError } = await supabase
         .from('creators')
-        .select('id, email, discount_code, commission_rate, status, user_id')
+        .select(`
+          id, email, discount_code, commission_rate, status, user_id, tier_id,
+          tier:commission_tiers(id, name, display_name, color, commission_rate)
+        `)
         .or(`user_id.eq.${authUser.id},email.ilike.${authUser.email}`)
         .limit(1)
         .maybeSingle()
