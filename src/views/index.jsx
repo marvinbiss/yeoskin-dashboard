@@ -379,6 +379,31 @@ export const CreatorsPage = () => {
     }
   }
 
+  // Renvoyer l'invitation (email de bienvenue avec lien mot de passe)
+  const handleResendInvite = async (email) => {
+    setActionLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const response = await fetch('/api/admin/resend-invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ email }),
+      })
+      const result = await response.json()
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de l\'envoi')
+      }
+      toast.success('Email de bienvenue renvoyé avec succès')
+    } catch (error) {
+      toast.error(error.message || 'Erreur lors de l\'envoi de l\'invitation')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   // ===== HANDLERS EXPORT & BULK =====
 
   const handleExport = async () => {
@@ -527,6 +552,7 @@ export const CreatorsPage = () => {
           onDelete={handleDeleteClick}
           onToggleStatus={handleToggleStatus}
           onVerifyBank={handleVerifyBank}
+          onResendInvite={handleResendInvite}
           loading={actionLoading}
         />
 

@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   DollarSign,
   TrendingUp,
+  Send,
 } from 'lucide-react'
 import { Modal, Button, Badge, StatusBadge } from '../Common'
 
@@ -37,6 +38,7 @@ export const CreatorDetailModal = ({
   onDelete,
   onToggleStatus,
   onVerifyBank,
+  onResendInvite,
   loading = false,
 }) => {
   if (!creator) return null
@@ -322,6 +324,17 @@ export const CreatorDetailModal = ({
           </Button>
 
           <div className="flex gap-3">
+            {creator.status === 'active' && onResendInvite && (
+              <Button
+                variant="secondary"
+                onClick={() => onResendInvite(creator.email)}
+                disabled={loading}
+                title="Renvoyer l'email de bienvenue avec le lien de configuration du mot de passe"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Renvoyer l'invitation
+              </Button>
+            )}
             <Button
               variant="secondary"
               onClick={onClose}
