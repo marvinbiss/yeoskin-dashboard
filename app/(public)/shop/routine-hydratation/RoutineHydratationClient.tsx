@@ -905,9 +905,26 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                   <span className="inline-block bg-pink text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
                     {upsell.badge}
                   </span>
-                  <h3 className="font-bold text-gray-950 mb-1">{upsell.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4">{upsell.benefit}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{upsell.price}€</p>
+
+                  {/* Product Image */}
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
+                    {upsell.image ? (
+                      <img
+                        src={upsell.image}
+                        alt={upsell.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Package className="w-8 h-8 text-pink/40" />
+                      </div>
+                    )}
+                  </div>
+
+                  <h3 className="font-bold text-gray-950 mb-1 text-sm sm:text-base">{upsell.name}</h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mb-1">{upsell.brand}</p>
+                  <p className="text-xs sm:text-sm text-pink font-medium mb-3">{upsell.benefit}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-1">{upsell.price}€</p>
                   <p className="text-gray-400 line-through text-sm">au lieu de {upsell.originalPrice}€</p>
                 </div>
                 {selectedVariant === upsell.id && (
