@@ -115,6 +115,8 @@ const CreatorProfileSettings = () => {
     const result = await updateProfile(formData)
     if (result.success) {
       setSaveSuccess(true)
+      // Force refresh to sync UI with saved data
+      await refresh()
       setTimeout(() => setSaveSuccess(false), 3000)
     } else {
       setSaveError(result.error || 'Erreur lors de la sauvegarde')
@@ -126,14 +128,19 @@ const CreatorProfileSettings = () => {
   const handleSlugSave = async () => {
     setSlugError('')
     const result = await updateSlug(slugValue)
-    if (!result.success) {
+    if (result.success) {
+      await refresh()
+    } else {
       setSlugError(result.error)
     }
   }
 
   // Handle publish toggle
   const handlePublishToggle = async () => {
-    await togglePublish()
+    const result = await togglePublish()
+    if (result.success) {
+      await refresh()
+    }
   }
 
   // Handle image upload
