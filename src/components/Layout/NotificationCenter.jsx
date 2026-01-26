@@ -239,12 +239,12 @@ export const NotificationCenter = () => {
       {/* Dropdown Panel */}
       {isOpen && (
         <>
-          {/* Mobile backdrop */}
+          {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/20 z-40 sm:hidden"
+            className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="fixed right-2 left-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in max-h-[80vh] flex flex-col">
+          <div className="absolute right-0 mt-2 w-[calc(100vw-32px)] sm:w-96 max-w-96 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 animate-fade-in max-h-[70vh] flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
               <h3 className="font-semibold text-gray-900 dark:text-white">
@@ -257,12 +257,12 @@ export const NotificationCenter = () => {
                     className="text-xs text-primary-600 hover:text-primary-700 flex items-center gap-1"
                   >
                     <CheckCheck className="w-3 h-3" />
-                    Tout marquer lu
+                    Tout lire
                   </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 sm:hidden"
+                  className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
                 >
                   <X className="w-4 h-4 text-gray-500" />
                 </button>
