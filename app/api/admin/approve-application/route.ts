@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import {
+  createShopifyDiscountCodeBasic,
+  isShopifyAdminConfigured,
+} from '@/lib/shopify-admin'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,6 +17,9 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM_EMAIL = process.env.EMAIL_FROM || 'Yeoskin <creators@yeoskin.com>'
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'creators@yeoskin.com'
+
+// Default discount percentage for creator codes
+const CREATOR_DISCOUNT_PERCENT = parseInt(process.env.CREATOR_DISCOUNT_PERCENT || '10', 10)
 
 // Verify admin session
 async function verifyAdmin(req: NextRequest) {
@@ -37,7 +44,7 @@ async function verifyAdmin(req: NextRequest) {
   return !!admin
 }
 
-// POST: Send approval email + Supabase invite
+// POST: Send approval email + Supabase invite + Create Shopify discount code
 export async function POST(req: NextRequest) {
   if (!await verifyAdmin(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -52,9 +59,47 @@ export async function POST(req: NextRequest) {
   const results = {
     welcomeEmail: { success: false, error: null as string | null },
     supabaseInvite: { success: false, error: null as string | null, userId: null as string | null },
+    shopifyDiscount: { success: false, error: null as string | null, shopifyCodeId: null as string | null },
   }
 
   let passwordSetupLink: string | null = null
+
+  // 0. Create discount code on Shopify
+  if (discountCode && isShopifyAdminConfigured()) {
+    try {
+      console.info('[Shopify] Creating discount code:', discountCode)
+      const shopifyResult = await createShopifyDiscountCodeBasic({
+        code: discountCode,
+        discountPercent: CREATOR_DISCOUNT_PERCENT,
+        title: `Créateur ${firstName} - ${discountCode}`,
+        creatorEmail: email,
+      })
+
+      if (shopifyResult.success) {
+        results.shopifyDiscount.success = true
+        results.shopifyDiscount.shopifyCodeId = shopifyResult.shopifyCodeId || null
+        console.info('[Shopify] Discount code created successfully:', discountCode)
+
+        // Update creator with Shopify code ID for tracking
+        if (shopifyResult.shopifyCodeId) {
+          await supabase
+            .from('creators')
+            .update({ shopify_discount_id: shopifyResult.shopifyCodeId })
+            .eq('email', email.toLowerCase())
+        }
+      } else {
+        results.shopifyDiscount.error = shopifyResult.errors?.join(', ') || 'Unknown error'
+        console.error('[Shopify] Failed to create discount code:', results.shopifyDiscount.error)
+      }
+    } catch (err) {
+      const error = err as Error
+      console.error('[Shopify] Discount creation exception:', error)
+      results.shopifyDiscount.error = error.message
+    }
+  } else if (discountCode && !isShopifyAdminConfigured()) {
+    console.warn('[Shopify] Admin API not configured, skipping discount code creation')
+    results.shopifyDiscount.error = 'Shopify Admin API not configured'
+  }
 
   // 1. Generate Supabase invite link first (we'll include it in our welcome email)
   try {
@@ -122,13 +167,17 @@ export async function POST(req: NextRequest) {
   }
 
   // Return combined results
+  // Note: Shopify discount creation failure doesn't block the approval
   const success = results.welcomeEmail.success && results.supabaseInvite.success
+  const shopifySuccess = results.shopifyDiscount.success
 
   return NextResponse.json({
     success,
     results,
     message: success
-      ? 'Email de bienvenue envoyé'
+      ? shopifySuccess
+        ? 'Email de bienvenue envoyé et code promo Shopify créé'
+        : 'Email de bienvenue envoyé (code promo Shopify non créé)'
       : 'Erreur lors de l\'envoi de l\'email',
   })
 }
