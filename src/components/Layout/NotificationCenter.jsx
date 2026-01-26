@@ -244,17 +244,16 @@ export const NotificationCenter = () => {
             className="fixed inset-0 z-40 bg-black/20"
             onClick={() => setIsOpen(false)}
           />
-          {/* Panel */}
+          {/* Panel - centered on screen */}
           <div
-            className="z-50 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in max-h-[70vh] flex flex-col"
+            className="fixed z-50 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in flex flex-col overflow-hidden"
             style={{
-              position: 'fixed',
-              left: '16px',
-              right: '16px',
-              top: '80px',
-              maxWidth: '400px',
-              marginLeft: 'auto',
-              marginRight: 'auto',
+              top: '70px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 'calc(100% - 32px)',
+              maxWidth: '384px',
+              maxHeight: '70vh',
             }}
           >
             {/* Header */}
