@@ -60,14 +60,36 @@ export async function verifyAdminAuth(
       return { authenticated: false, error: 'Invalid token' }
     }
 
-    // Check if user is an active admin
+    // Check if user is an active admin (try admin_profiles first, then admin_users)
     const supabase = getServiceClient()
-    const { data: admin, error: adminError } = await supabase
+
+    // Try admin_profiles table first
+    let admin = null
+    let adminError = null
+
+    const { data: profileData, error: profileError } = await supabase
       .from('admin_profiles')
       .select('id, role, is_active')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .maybeSingle()
+
+    if (profileData) {
+      admin = profileData
+    } else {
+      // Fallback to admin_users table
+      const { data: userData, error: userError } = await supabase
+        .from('admin_users')
+        .select('user_id, is_active')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (userData) {
+        admin = { id: userData.user_id, role: 'admin', is_active: true }
+      }
+      adminError = userError
+    }
 
     if (adminError) {
       console.error('[Auth] Admin lookup error:', adminError)

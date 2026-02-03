@@ -118,6 +118,15 @@ export default function RoutinesPage() {
     setDeleteConfirm({ open: false, routine: null })
   }
 
+  // Get auth token for API calls
+  const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token || ''}`
+    }
+  }
+
   // === Creator assignment ===
   const handleManageCreators = async (routine) => {
     setCreatorsModal({ open: true, routine })
@@ -131,7 +140,8 @@ export default function RoutinesPage() {
         .order('email')
 
       // Fetch all assignments via API route (uses service_role)
-      const res = await fetch('/api/routines/assignments')
+      const headers = await getAuthHeaders()
+      const res = await fetch('/api/routines/assignments', { headers })
       const { assignments } = await res.json()
 
       setAllCreators(creators || [])
@@ -152,13 +162,14 @@ export default function RoutinesPage() {
   const handleToggleCreator = async (creatorId) => {
     const routine = creatorsModal.routine
     const isAssigned = assignedCreatorIds.includes(creatorId)
+    const headers = await getAuthHeaders()
 
     try {
       if (isAssigned) {
         // Unassign via API route
         const res = await fetch('/api/routines/assignments', {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ creator_id: creatorId, routine_id: routine.id })
         })
         const data = await res.json()
@@ -171,7 +182,7 @@ export default function RoutinesPage() {
         // Assign via API route (upsert handles UNIQUE constraint)
         const res = await fetch('/api/routines/assignments', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ creator_id: creatorId, routine_id: routine.id })
         })
         const data = await res.json()
