@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from '@/lib/navigation'
-import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, Loader2, Mail, Lock } from 'lucide-react'
+import clsx from 'clsx'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { useCreatorAuthActions } from '../hooks/useCreatorAuth'
 
 /**
- * Creator Login Page
+ * Creator Login Page - Premium Brand Style
  */
 export const CreatorLogin = () => {
   const navigate = useNavigate()
@@ -40,39 +41,52 @@ export const CreatorLogin = () => {
   // Show loading while checking auth
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      <div className="min-h-screen bg-gradient-brand-subtle flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-brand-500" />
+          <p className="text-neutral-500 text-sm">Chargement...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-brand-subtle flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-200/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-lavender-200/30 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo/Brand */}
         <div className="text-center mb-8">
-          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-12 w-auto mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Portail Createurs</p>
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-brand flex items-center justify-center shadow-brand-glow">
+            <span className="text-white font-bold text-2xl">Y</span>
+          </div>
+          <h1 className="text-2xl font-bold text-neutral-900">Yeoskin</h1>
+          <p className="text-neutral-500 mt-1">Portail Créateurs</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Connexion
+        <div className="bg-white rounded-2xl shadow-soft-xl p-8 border border-neutral-100">
+          <div className="text-center mb-8">
+            <h2 className="text-xl font-semibold text-neutral-900">
+              Bienvenue
             </h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              Accedez a votre espace createur
+            <p className="text-neutral-500 mt-1 text-sm">
+              Connectez-vous à votre espace créateur
             </p>
           </div>
 
           {/* Error message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-              </div>
+            <div className={clsx(
+              'mb-6 p-4 rounded-xl flex items-start gap-3',
+              'bg-error-50 border border-error-200'
+            )}>
+              <AlertCircle className="w-5 h-5 text-error-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-error-700">{error}</p>
             </div>
           )}
 
@@ -81,29 +95,43 @@ export const CreatorLogin = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-neutral-700 mb-2"
               >
                 Email
               </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre@email.com"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="w-5 h-5 text-neutral-400" />
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  required
+                  className={clsx(
+                    'w-full pl-11 pr-4 py-3 rounded-xl border bg-white',
+                    'text-neutral-900 placeholder-neutral-400',
+                    'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
+                    'transition-all duration-200',
+                    'border-neutral-200'
+                  )}
+                />
+              </div>
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-neutral-700 mb-2"
               >
                 Mot de passe
               </label>
               <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="w-5 h-5 text-neutral-400" />
+                </div>
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -111,12 +139,18 @@ export const CreatorLogin = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors pr-12"
+                  className={clsx(
+                    'w-full pl-11 pr-12 py-3 rounded-xl border bg-white',
+                    'text-neutral-900 placeholder-neutral-400',
+                    'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
+                    'transition-all duration-200',
+                    'border-neutral-200'
+                  )}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-600 transition-colors"
                 >
                   {showPassword ? (
                     <EyeOff key="eye-off" className="w-5 h-5" />
@@ -130,7 +164,16 @@ export const CreatorLogin = () => {
             <button
               type="submit"
               disabled={loading || !email || !password}
-              className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+              className={clsx(
+                'w-full py-3.5 px-4 rounded-xl font-medium',
+                'flex items-center justify-center gap-2',
+                'transition-all duration-200',
+                'bg-brand-500 text-white',
+                'hover:bg-brand-600 active:bg-brand-700',
+                'disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed',
+                'shadow-button hover:shadow-button-hover',
+                'disabled:shadow-none'
+              )}
             >
               {loading && (
                 <Loader2 key="loader" className="w-5 h-5 animate-spin" />
@@ -140,22 +183,29 @@ export const CreatorLogin = () => {
           </form>
 
           {/* Forgot password link */}
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <a
               href="/auth/forgot-password"
-              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              className="text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors"
             >
               Mot de passe oublié ?
             </a>
           </div>
 
+          {/* Divider */}
+          <div className="my-6 flex items-center gap-4">
+            <div className="flex-1 h-px bg-neutral-200" />
+            <span className="text-xs text-neutral-400 uppercase">ou</span>
+            <div className="flex-1 h-px bg-neutral-200" />
+          </div>
+
           {/* Help text */}
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Probleme de connexion ?{' '}
+          <div className="text-center">
+            <p className="text-sm text-neutral-500">
+              Problème de connexion ?{' '}
               <a
                 href="mailto:support@yeoskin.com"
-                className="text-primary-600 hover:text-primary-700"
+                className="text-brand-600 hover:text-brand-700 font-medium transition-colors"
               >
                 Contactez le support
               </a>
@@ -164,8 +214,8 @@ export const CreatorLogin = () => {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-8">
-          &copy; {new Date().getFullYear()} Yeoskin. Tous droits reserves.
+        <p className="text-center text-sm text-neutral-400 mt-8">
+          &copy; {new Date().getFullYear()} Yeoskin. Tous droits réservés.
         </p>
       </div>
     </div>

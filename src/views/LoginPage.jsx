@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useNavigate, useLocation, useSearchParams } from '@/lib/navigation'
-import { Zap, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react'
+import { Mail, Lock, AlertCircle, Loader2, Shield } from 'lucide-react'
+import clsx from 'clsx'
 import { useAuth } from '../contexts/AuthContext'
 
 export const LoginPage = () => {
@@ -16,7 +17,6 @@ export const LoginPage = () => {
   const location = useLocation()
   const searchParams = useSearchParams()
 
-  // Rediriger vers la page precedente ou le dashboard
   const from = searchParams.get('from') || '/'
 
   const handleSubmit = async (e) => {
@@ -28,7 +28,6 @@ export const LoginPage = () => {
       const { error } = await signIn(email, password)
 
       if (error) {
-        // Messages d'erreur en francais
         if (error.message.includes('Invalid login credentials')) {
           setError('Email ou mot de passe incorrect')
         } else if (error.message.includes('Email not confirmed')) {
@@ -39,7 +38,6 @@ export const LoginPage = () => {
         return
       }
 
-      // Redirection apres connexion reussie
       navigate(from, { replace: true })
     } catch (err) {
       setError('Une erreur est survenue. Veuillez réessayer.')
@@ -49,27 +47,47 @@ export const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-neutral-900 flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-lavender-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
         {/* Logo et titre */}
         <div className="text-center mb-8">
-          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-14 w-auto mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Dashboard
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-brand flex items-center justify-center shadow-brand-glow">
+            <Shield className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">
+            Yeoskin Admin
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Connectez-vous pour accéder au tableau de bord
+          <p className="text-neutral-400 mt-2">
+            Tableau de bord d'administration
           </p>
         </div>
 
         {/* Formulaire */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-white rounded-2xl shadow-soft-2xl p-8 border border-neutral-100">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold text-neutral-900">
+              Connexion
+            </h2>
+            <p className="text-neutral-500 mt-1 text-sm">
+              Accédez au panneau d'administration
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Message d'erreur */}
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-danger-50 dark:bg-danger-500/20 text-danger-600 dark:text-danger-400 text-sm">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <span>{error}</span>
+              <div className={clsx(
+                'flex items-center gap-3 p-4 rounded-xl',
+                'bg-error-50 border border-error-200'
+              )}>
+                <AlertCircle className="w-5 h-5 text-error-600 flex-shrink-0" />
+                <span className="text-sm text-error-700">{error}</span>
               </div>
             )}
 
@@ -77,12 +95,14 @@ export const LoginPage = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-neutral-700 mb-2"
               >
                 Adresse email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Mail className="w-5 h-5 text-neutral-400" />
+                </div>
                 <input
                   id="email"
                   type="email"
@@ -91,8 +111,15 @@ export const LoginPage = () => {
                   placeholder="admin@yeoskin.com"
                   required
                   disabled={loading}
-                  className="input pl-10"
                   autoComplete="email"
+                  className={clsx(
+                    'w-full pl-11 pr-4 py-3 rounded-xl border bg-white',
+                    'text-neutral-900 placeholder-neutral-400',
+                    'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
+                    'transition-all duration-200',
+                    'border-neutral-200',
+                    'disabled:bg-neutral-50 disabled:cursor-not-allowed'
+                  )}
                 />
               </div>
             </div>
@@ -101,12 +128,14 @@ export const LoginPage = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                className="block text-sm font-medium text-neutral-700 mb-2"
               >
                 Mot de passe
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Lock className="w-5 h-5 text-neutral-400" />
+                </div>
                 <input
                   id="password"
                   type="password"
@@ -115,8 +144,15 @@ export const LoginPage = () => {
                   placeholder="••••••••"
                   required
                   disabled={loading}
-                  className="input pl-10"
                   autoComplete="current-password"
+                  className={clsx(
+                    'w-full pl-11 pr-4 py-3 rounded-xl border bg-white',
+                    'text-neutral-900 placeholder-neutral-400',
+                    'focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500',
+                    'transition-all duration-200',
+                    'border-neutral-200',
+                    'disabled:bg-neutral-50 disabled:cursor-not-allowed'
+                  )}
                 />
               </div>
             </div>
@@ -125,19 +161,38 @@ export const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full py-3 flex items-center justify-center"
+              className={clsx(
+                'w-full py-3.5 px-4 rounded-xl font-medium',
+                'flex items-center justify-center gap-2',
+                'transition-all duration-200',
+                'bg-brand-500 text-white',
+                'hover:bg-brand-600 active:bg-brand-700',
+                'disabled:bg-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed',
+                'shadow-button hover:shadow-button-hover',
+                'disabled:shadow-none'
+              )}
             >
               {loading && (
-                <Loader2 key="loader" className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 key="loader" className="w-5 h-5 animate-spin" />
               )}
-              <span key="text">{loading ? 'Connexion en cours...' : 'Se connecter'}</span>
+              <span key="text">{loading ? 'Connexion...' : 'Se connecter'}</span>
             </button>
           </form>
+
+          {/* Forgot password */}
+          <div className="mt-6 text-center">
+            <a
+              href="/auth/forgot-password"
+              className="text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors"
+            >
+              Mot de passe oublié ?
+            </a>
+          </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-          Yeoskin Operations Dashboard v1.0
+        <p className="text-center text-sm text-neutral-500 mt-8">
+          Yeoskin Operations Dashboard &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

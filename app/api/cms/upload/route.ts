@@ -1,10 +1,11 @@
 /**
  * POST /api/cms/upload
- * Upload images to Supabase Storage for CMS
+ * Upload images to Supabase Storage for CMS (Admin only)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdminAuth, unauthorizedResponse } from '@/lib/auth-middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -14,7 +15,22 @@ const supabase = createClient(
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
+// Sanitize path to prevent directory traversal
+function sanitizePath(input: string): string {
+  return input
+    .replace(/\.\./g, '') // Remove ..
+    .replace(/[^a-zA-Z0-9-_]/g, '-') // Only allow safe characters
+    .toLowerCase()
+    .substring(0, 50) // Limit length
+}
+
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
@@ -27,6 +43,10 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // Sanitize inputs to prevent path traversal
+    const safePageSlug = sanitizePath(pageSlug)
+    const safeImageKey = sanitizePath(imageKey)
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -44,10 +64,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate storage path
-    const ext = file.name.split('.').pop() || 'jpg'
+    // Generate storage path with sanitized inputs
+    const ext = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg'
     const timestamp = Date.now()
-    const storagePath = `pages/${pageSlug}/${imageKey}-${timestamp}.${ext}`
+    const storagePath = `pages/${safePageSlug}/${safeImageKey}-${timestamp}.${ext}`
 
     // Upload to Supabase Storage
     const buffer = await file.arrayBuffer()
@@ -71,11 +91,11 @@ export async function POST(request: NextRequest) {
       .from('cms-images')
       .getPublicUrl(storagePath)
 
-    // Save to database
+    // Save to database (use original slugs for lookup, safe for storage)
     const { data: imageData, error: dbError } = await supabase
       .from('page_images')
       .upsert({
-        page_slug: pageSlug,
+        page_slug: pageSlug, // Keep original for DB lookup
         image_key: imageKey,
         storage_path: storagePath,
         url: publicUrl,
@@ -91,6 +111,8 @@ export async function POST(request: NextRequest) {
     if (dbError) {
       console.error('DB error:', dbError)
     }
+
+    console.info(`[CMS] Image uploaded by ${auth.email}: ${storagePath}`)
 
     return NextResponse.json({
       success: true,

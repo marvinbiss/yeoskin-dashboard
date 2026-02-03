@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { logger } from '@/lib/logger'
 import { checkoutRatelimit, getClientIp, rateLimitResponse } from '@/lib/ratelimit'
 import { createCart, validateVariantIds, getShopifyCircuitStats, CircuitOpenError } from '@/lib/shopify'
+import { verifyAdminAuth } from '@/lib/auth-middleware'
 
 // Initialize Supabase client with service role for this API route
 const supabase = createClient(
@@ -11,13 +12,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// GET method for testing and health check
+// GET method for health check (public) and debug (admin only)
 export async function GET(request: NextRequest) {
   const circuitStats = getShopifyCircuitStats()
 
-  // Debug mode with ?debug=emma
+  // Debug mode requires admin authentication
   const debugSlug = request.nextUrl.searchParams.get('debug')
   if (debugSlug) {
+    // Verify admin auth for debug access
+    const auth = await verifyAdminAuth(request)
+    if (!auth.authenticated) {
+      return NextResponse.json({ error: 'Unauthorized - Admin access required for debug' }, { status: 401 })
+    }
+
     try {
       const { data: creator, error: creatorErr } = await supabase
         .from('creators')
@@ -58,6 +65,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         status: 'debug_ok',
+        admin: auth.email,
         creator,
         creatorRoutine,
         routine,
@@ -68,6 +76,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Public health check (no sensitive data)
   return NextResponse.json({
     status: 'ok',
     endpoint: '/api/routines/checkout',

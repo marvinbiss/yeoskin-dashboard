@@ -1,12 +1,13 @@
 /**
  * /api/routines/assignments
- * GET: fetch assignments for a routine
- * POST: assign creator to routine (upsert)
- * DELETE: unassign creator from routine
+ * GET: fetch assignments for a routine (admin only)
+ * POST: assign creator to routine (admin only)
+ * DELETE: unassign creator from routine (admin only)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdminAuth, unauthorizedResponse } from '@/lib/auth-middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -14,14 +15,25 @@ const supabase = createClient(
 )
 
 export async function GET(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const routineId = searchParams.get('routine_id')
 
-    // Fetch all assignments
-    const { data, error } = await supabase
+    let query = supabase
       .from('creator_routines')
       .select('creator_id, routine_id')
+
+    if (routineId) {
+      query = query.eq('routine_id', routineId)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -35,6 +47,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const { creator_id, routine_id } = await request.json()
 
@@ -62,6 +80,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const { creator_id, routine_id } = await request.json()
 

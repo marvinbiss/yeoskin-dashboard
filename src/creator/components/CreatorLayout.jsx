@@ -5,7 +5,6 @@ import { Link, useLocation, useNavigate } from '@/lib/navigation'
 import {
   LayoutDashboard,
   History,
-  Bell,
   LogOut,
   Menu,
   X,
@@ -18,6 +17,7 @@ import {
   ShoppingBag,
   TrendingUp
 } from 'lucide-react'
+import clsx from 'clsx'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
 import { NotificationBell } from './NotificationBell'
 
@@ -29,8 +29,8 @@ const navigation = [
   { name: 'Analytics Avancés', href: '/c/creator/analytics-dashboard', icon: TrendingUp },
   { name: 'Historique', href: '/c/creator/history', icon: History },
   { name: 'Mon profil', href: '/c/creator/profile', icon: User },
-  { name: 'Coordonnees bancaires', href: '/c/creator/bank', icon: CreditCard },
-  { name: 'Parametres', href: '/c/creator/settings', icon: Settings },
+  { name: 'Coordonnées bancaires', href: '/c/creator/bank', icon: CreditCard },
+  { name: 'Paramètres', href: '/c/creator/settings', icon: Settings },
 ]
 
 export const CreatorLayout = ({ children, title, subtitle }) => {
@@ -52,95 +52,132 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
     return location.pathname.startsWith(href)
   }
 
+  const NavItem = ({ item, onClick }) => {
+    const Icon = item.icon
+    const active = isActive(item.href)
+
+    return (
+      <Link
+        to={item.href}
+        onClick={onClick}
+        className={clsx(
+          'flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm',
+          'transition-all duration-200',
+          active
+            ? 'bg-brand-50 text-brand-600 shadow-soft-sm'
+            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
+        )}
+      >
+        <Icon className="w-5 h-5" />
+        {item.name}
+      </Link>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-neutral-50">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Mobile sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 transform transition-transform lg:hidden
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-700">
-          <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-8 w-auto" />
+      <div className={clsx(
+        'fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-neutral-100',
+        'transform transition-transform duration-300 ease-smooth lg:hidden',
+        'shadow-soft-2xl',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        <div className="flex items-center justify-between h-16 px-4 border-b border-neutral-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center shadow-brand-glow/30">
+              <span className="text-white font-bold text-lg">Y</span>
+            </div>
+            <div>
+              <p className="font-semibold text-neutral-900">Yeoskin</p>
+              <p className="text-xs text-neutral-500">Portail Créateur</p>
+            </div>
+          </div>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="p-2 rounded-xl hover:bg-neutral-100 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-neutral-500" />
           </button>
         </div>
         <nav className="p-4 space-y-1">
-          {navigation.map((item) => {
-            const Icon = item.icon
-            return (
-              <Link
-                key={item.name}
-                to={item.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`
-                  flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
-                  ${isActive(item.href)
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }
-                `}
-              >
-                <Icon className="w-5 h-5" />
-                {item.name}
-              </Link>
-            )
-          })}
+          {navigation.map((item) => (
+            <NavItem key={item.name} item={item} onClick={() => setSidebarOpen(false)} />
+          ))}
         </nav>
+
+        {/* Mobile user info */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-neutral-100">
+          <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-xl">
+            <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shadow-soft-sm">
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-neutral-900 truncate">
+                {creator?.email || user?.email || 'Creator'}
+              </p>
+              {creator?.discount_code && (
+                <p className="text-xs text-neutral-500 truncate">
+                  Code: {creator.discount_code}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className={clsx(
+              'mt-3 w-full flex items-center justify-center gap-2 p-2.5 rounded-xl',
+              'text-error-600 hover:bg-error-50 transition-all duration-200',
+              'text-sm font-medium'
+            )}
+          >
+            <LogOut className="w-4 h-4" />
+            Se déconnecter
+          </button>
+        </div>
       </div>
 
       {/* Desktop sidebar */}
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-1 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-          <div className="flex items-center h-16 px-6 border-b border-gray-200 dark:border-gray-700">
-            <img src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138" alt="Yeoskin" className="h-8 w-auto" />
-            <span className="ml-2 text-sm text-gray-500">Creator</span>
+        <div className="flex flex-col flex-1 bg-white border-r border-neutral-100">
+          <div className="flex items-center h-16 px-6 border-b border-neutral-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center shadow-brand-glow/30">
+                <span className="text-white font-bold text-lg">Y</span>
+              </div>
+              <div>
+                <p className="font-semibold text-neutral-900">Yeoskin</p>
+                <p className="text-xs text-neutral-500">Portail Créateur</p>
+              </div>
+            </div>
           </div>
-          <nav className="flex-1 p-4 space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`
-                    flex items-center gap-3 px-3 py-2 rounded-lg transition-colors
-                    ${isActive(item.href)
-                      ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                  {item.name}
-                </Link>
-              )
-            })}
+
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {navigation.map((item) => (
+              <NavItem key={item.name} item={item} />
+            ))}
           </nav>
 
           {/* User info at bottom */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                <User className="w-5 h-5 text-primary-600" />
+          <div className="p-4 border-t border-neutral-100">
+            <div className="flex items-center gap-3 p-3 bg-neutral-50 rounded-xl">
+              <div className="w-10 h-10 rounded-full bg-gradient-brand flex items-center justify-center shadow-soft-sm">
+                <User className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <p className="text-sm font-medium text-neutral-900 truncate">
                   {creator?.email || user?.email || 'Creator'}
                 </p>
                 {creator?.discount_code && (
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-neutral-500 truncate">
                     Code: {creator.discount_code}
                   </p>
                 )}
@@ -153,21 +190,21 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Top header */}
-        <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-100">
           <div className="flex items-center justify-between h-16 px-4 sm:px-6">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 lg:hidden"
+                className="p-2 rounded-xl hover:bg-neutral-100 transition-colors lg:hidden"
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-5 h-5 text-neutral-600" />
               </button>
               <div className="min-w-0 flex-1">
-                <h1 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white truncate">
+                <h1 className="text-lg font-semibold text-neutral-900 truncate">
                   {title}
                 </h1>
                 {subtitle && (
-                  <p className="text-xs sm:text-sm text-gray-500 truncate">{subtitle}</p>
+                  <p className="text-sm text-neutral-500 truncate">{subtitle}</p>
                 )}
               </div>
             </div>
@@ -180,12 +217,19 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
               <div className="relative">
                 <button
                   onClick={() => setProfileDropdown(!profileDropdown)}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className={clsx(
+                    'flex items-center gap-2 p-2 rounded-xl',
+                    'hover:bg-neutral-100 transition-all duration-200',
+                    profileDropdown && 'bg-neutral-100'
+                  )}
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                    <User className="w-4 h-4 text-primary-600" />
+                  <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center shadow-soft-sm">
+                    <User className="w-4 h-4 text-white" />
                   </div>
-                  <ChevronDown className="w-4 h-4 text-gray-500" />
+                  <ChevronDown className={clsx(
+                    'w-4 h-4 text-neutral-500 transition-transform duration-200',
+                    profileDropdown && 'rotate-180'
+                  )} />
                 </button>
 
                 {profileDropdown && (
@@ -194,24 +238,45 @@ export const CreatorLayout = ({ children, title, subtitle }) => {
                       className="fixed inset-0 z-40"
                       onClick={() => setProfileDropdown(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-                      <div className="p-3 border-b border-gray-200 dark:border-gray-700">
-                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <div className={clsx(
+                      'absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-soft-xl',
+                      'border border-neutral-100 z-50 animate-scale-in',
+                      'overflow-hidden'
+                    )}>
+                      <div className="p-4 border-b border-neutral-100 bg-neutral-50/50">
+                        <p className="text-sm font-medium text-neutral-900 truncate">
                           {creator?.email || user?.email}
                         </p>
                         {creator?.discount_code && (
-                          <p className="text-xs text-gray-500">
-                            Code: {creator.discount_code}
+                          <p className="text-xs text-neutral-500 mt-1">
+                            Code promo: <span className="font-mono font-medium text-brand-600">{creator.discount_code}</span>
                           </p>
                         )}
                       </div>
-                      <div className="p-1">
+                      <div className="p-2">
+                        <Link
+                          to="/c/creator/profile"
+                          onClick={() => setProfileDropdown(false)}
+                          className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
+                        >
+                          <User className="w-4 h-4" />
+                          Mon profil
+                        </Link>
+                        <Link
+                          to="/c/creator/settings"
+                          onClick={() => setProfileDropdown(false)}
+                          className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Paramètres
+                        </Link>
+                        <div className="my-1 border-t border-neutral-100" />
                         <button
                           onClick={handleSignOut}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                          className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-error-600 hover:bg-error-50 rounded-lg transition-colors"
                         >
                           <LogOut className="w-4 h-4" />
-                          Se deconnecter
+                          Se déconnecter
                         </button>
                       </div>
                     </div>

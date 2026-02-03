@@ -8,6 +8,9 @@ import { SessionTimeoutWarning } from '@/components/Auth'
 import { useSession } from '@/hooks/useSession'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { swrConfig } from '@/hooks/useSWROptimized'
+import { AnalyticsProvider } from '@/components/Analytics'
+import { VercelAnalytics } from '@/components/Analytics'
+import { InstallPrompt, OfflineIndicator, UpdateBanner } from '@/components/PWA'
 
 // Session manager component
 const SessionManager = ({ children }) => {
@@ -42,16 +45,31 @@ const SessionManager = ({ children }) => {
   )
 }
 
+// PWA components wrapper
+const PWAComponents = () => {
+  return (
+    <>
+      <OfflineIndicator />
+      <InstallPrompt />
+      <UpdateBanner />
+    </>
+  )
+}
+
 export function AdminProviders({ children }) {
   return (
     <ErrorBoundary>
       <SWRConfig value={swrConfig}>
         <AuthProvider>
-          <ToastProvider>
-            <SessionManager>
-              {children}
-            </SessionManager>
-          </ToastProvider>
+          <AnalyticsProvider>
+            <ToastProvider>
+              <SessionManager>
+                {children}
+                <PWAComponents />
+                <VercelAnalytics />
+              </SessionManager>
+            </ToastProvider>
+          </AnalyticsProvider>
         </AuthProvider>
       </SWRConfig>
     </ErrorBoundary>
@@ -61,11 +79,17 @@ export function AdminProviders({ children }) {
 export function CreatorProviders({ children }) {
   return (
     <ErrorBoundary>
-      <CreatorAuthProvider>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
-      </CreatorAuthProvider>
+      <SWRConfig value={swrConfig}>
+        <CreatorAuthProvider>
+          <AnalyticsProvider>
+            <ToastProvider>
+              {children}
+              <PWAComponents />
+              <VercelAnalytics />
+            </ToastProvider>
+          </AnalyticsProvider>
+        </CreatorAuthProvider>
+      </SWRConfig>
     </ErrorBoundary>
   )
 }
@@ -73,9 +97,13 @@ export function CreatorProviders({ children }) {
 export function PublicProviders({ children }) {
   return (
     <ErrorBoundary>
-      <ToastProvider>
-        {children}
-      </ToastProvider>
+      <AnalyticsProvider>
+        <ToastProvider>
+          {children}
+          <OfflineIndicator />
+          <VercelAnalytics />
+        </ToastProvider>
+      </AnalyticsProvider>
     </ErrorBoundary>
   )
 }

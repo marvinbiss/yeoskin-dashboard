@@ -59,22 +59,26 @@ export const Header = ({ title, subtitle, onMenuClick }) => {
   }
 
   return (
-    <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-neutral-100">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6">
         {/* Left side - Menu + Title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors lg:hidden flex-shrink-0"
+            className={clsx(
+              'p-2 rounded-xl lg:hidden flex-shrink-0',
+              'text-neutral-500 hover:text-neutral-700',
+              'hover:bg-neutral-100 transition-all duration-200'
+            )}
           >
-            <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+            <Menu className="w-5 h-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <h1 className="text-sm sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white truncate">
+            <h1 className="text-lg md:text-xl font-semibold text-neutral-900 truncate">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate hidden sm:block">
+              <p className="text-sm text-neutral-500 truncate hidden sm:block">
                 {subtitle}
               </p>
             )}
@@ -82,7 +86,7 @@ export const Header = ({ title, subtitle, onMenuClick }) => {
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 md:gap-4 flex-shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-3 flex-shrink-0">
           {/* Global Search - Hidden on mobile */}
           <div className="hidden lg:block">
             <GlobalSearch />
@@ -90,41 +94,52 @@ export const Header = ({ title, subtitle, onMenuClick }) => {
 
           {/* Connection Status - Hidden on small screens */}
           <div className={clsx(
-            'hidden md:flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium',
+            'hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium',
+            'transition-all duration-200',
             connected
-              ? 'bg-success-50 text-success-600 dark:bg-success-500/20'
-              : 'bg-danger-50 text-danger-600 dark:bg-danger-500/20'
+              ? 'bg-mint-50 text-mint-600'
+              : 'bg-error-50 text-error-600'
           )}>
             {connected ? (
               <Wifi key="wifi-on" className="w-3.5 h-3.5" />
             ) : (
               <WifiOff key="wifi-off" className="w-3.5 h-3.5" />
             )}
-            <span className="hidden sm:inline">{connected ? `Sync ${getTimeSinceSync()}` : 'Hors ligne'}</span>
+            <span className="hidden sm:inline">
+              {connected ? `Sync ${getTimeSinceSync()}` : 'Hors ligne'}
+            </span>
           </div>
 
-          {/* Refresh Button - Hidden on very small screens */}
+          {/* Refresh Button */}
           <button
             onClick={() => window.location.reload()}
-            className="hidden sm:block p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className={clsx(
+              'hidden sm:flex p-2.5 rounded-xl',
+              'text-neutral-400 hover:text-neutral-600',
+              'hover:bg-neutral-100 transition-all duration-200'
+            )}
             title="Actualiser"
           >
-            <RefreshCw className="w-5 h-5 text-gray-500" />
+            <RefreshCw className="w-5 h-5" />
           </button>
 
-          {/* Notifications - Always visible */}
+          {/* Notifications */}
           <NotificationCenter />
 
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className={clsx(
+              'p-2.5 rounded-xl',
+              'text-neutral-400 hover:text-neutral-600',
+              'hover:bg-neutral-100 transition-all duration-200'
+            )}
             title={darkMode ? 'Mode clair' : 'Mode sombre'}
           >
             {darkMode ? (
-              <Sun key="sun" className="w-5 h-5 text-gray-500" />
+              <Sun key="sun" className="w-5 h-5" />
             ) : (
-              <Moon key="moon" className="w-5 h-5 text-gray-500" />
+              <Moon key="moon" className="w-5 h-5" />
             )}
           </button>
         </div>

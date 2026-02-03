@@ -7,7 +7,10 @@ export default function AdminLayout({ children }) {
   return (
     <AdminProviders>
       <ProtectedRoute>
-        {children}
+        {/* Main content wrapper for skip link navigation */}
+        <div id="main-content" tabIndex={-1} className="outline-none">
+          {children}
+        </div>
       </ProtectedRoute>
     </AdminProviders>
   )

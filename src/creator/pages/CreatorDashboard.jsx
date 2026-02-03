@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@/lib/navigation'
 import { useCreatorAuth } from '../contexts/CreatorAuthContext'
-import { useCreatorDashboard } from '../hooks/useCreatorDashboard'
-import { supabase } from '../../lib/supabase'
+import {
+  useCreatorDashboardSWR,
+  useCreatorRoutineSWR,
+  useAvailableRoutinesSWR,
+} from '../hooks/useCreatorSWR'
 import {
   CreatorLayout,
   BalanceCard,
@@ -13,16 +16,19 @@ import {
   TierCard,
   PayoutStatusCard,
   RoutineBreakdownCard,
+  SkeletonDashboard,
 } from '../components'
 import { Sparkles, ExternalLink, Copy, Check, Package, ChevronRight, Loader2 } from 'lucide-react'
 
 /**
  * Creator Dashboard - Main page showing balance, forecast, and recent activity
+ * Optimized with SWR for instant cached loading
  */
 export const CreatorDashboard = () => {
   const navigate = useNavigate()
   const { creator } = useCreatorAuth()
 
+  // SWR hooks for cached data
   const {
     loading,
     error,
@@ -30,48 +36,23 @@ export const CreatorDashboard = () => {
     forecast,
     balance,
     recentActivity,
-  } = useCreatorDashboard(creator?.id)
+  } = useCreatorDashboardSWR(creator?.id)
 
-  const [assignedRoutine, setAssignedRoutine] = useState(null)
-  const [availableRoutines, setAvailableRoutines] = useState([])
-  const [loadingRoutines, setLoadingRoutines] = useState(true)
+  const {
+    routine: assignedRoutine,
+    loading: loadingRoutine,
+    mutate: mutateRoutine,
+  } = useCreatorRoutineSWR(creator?.id)
+
+  const {
+    routines: availableRoutines,
+    loading: loadingAvailable,
+  } = useAvailableRoutinesSWR(!assignedRoutine && !loadingRoutine)
+
   const [assigningRoutine, setAssigningRoutine] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    if (creator?.id) {
-      fetchAssignedRoutine()
-    }
-  }, [creator?.id])
-
-  const fetchAssignedRoutine = async () => {
-    setLoadingRoutines(true)
-    const { data } = await supabase
-      .from('creator_routines')
-      .select('routine_id, routines(id, title, slug, objective, base_price)')
-      .eq('creator_id', creator.id)
-      .eq('is_active', true)
-      .maybeSingle()
-
-    if (data?.routines) {
-      setAssignedRoutine(data.routines)
-      setLoadingRoutines(false)
-    } else {
-      // Pas de routine assignée, charger les routines disponibles
-      await fetchAvailableRoutines()
-    }
-  }
-
-  const fetchAvailableRoutines = async () => {
-    const { data } = await supabase
-      .from('routines')
-      .select('id, title, slug, objective, base_price, image_url')
-      .eq('is_active', true)
-      .order('title')
-
-    setAvailableRoutines(data || [])
-    setLoadingRoutines(false)
-  }
+  const loadingRoutines = loadingRoutine || loadingAvailable
 
   const handleSelectRoutine = async (routine) => {
     setAssigningRoutine(true)
@@ -86,8 +67,8 @@ export const CreatorDashboard = () => {
       })
 
       if (response.ok) {
-        setAssignedRoutine(routine)
-        setAvailableRoutines([])
+        // Update SWR cache with the new routine
+        mutateRoutine(routine, false)
       }
     } catch (error) {
       console.error('Error assigning routine:', error)
@@ -199,11 +180,21 @@ export const CreatorDashboard = () => {
           </div>
         )}
 
-        {/* Loading state for routines */}
+        {/* Loading state for routines - show skeleton */}
         {loadingRoutines && !assignedRoutine && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-8 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-pink-600 animate-spin mr-3" />
-            <span className="text-gray-600 dark:text-gray-300">Chargement des routines...</span>
+          <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-6 border border-violet-200 dark:border-violet-800 animate-pulse">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg bg-violet-200 dark:bg-violet-800" />
+              <div>
+                <div className="h-5 w-24 bg-violet-200 dark:bg-violet-800 rounded mb-1" />
+                <div className="h-4 w-32 bg-violet-200 dark:bg-violet-800 rounded" />
+              </div>
+            </div>
+            <div className="h-6 w-48 bg-violet-200 dark:bg-violet-800 rounded mb-4" />
+            <div className="flex gap-3">
+              <div className="h-10 w-36 bg-violet-200 dark:bg-violet-800 rounded-lg" />
+              <div className="h-10 w-28 bg-violet-200 dark:bg-violet-800 rounded-lg" />
+            </div>
           </div>
         )}
 

@@ -5,8 +5,13 @@
 require('dotenv').config({ path: '.env.local' })
 const fs = require('fs')
 
-const SUPABASE_URL = 'https://juqlogfujiagtpvxmeux.supabase.co'
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+if (!SUPABASE_URL) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or VITE_SUPABASE_URL in .env.local')
+  process.exit(1)
+}
 
 if (!SERVICE_ROLE_KEY) {
   console.error('Missing SUPABASE_SERVICE_ROLE_KEY in .env.local')
@@ -72,7 +77,11 @@ async function runSQLWithPg() {
   const { Client } = require('pg')
 
   // Supabase connection string format
-  const connectionString = `postgresql://postgres.juqlogfujiagtpvxmeux:${process.env.SUPABASE_DB_PASSWORD || 'Lovemusic59;'}@aws-0-eu-west-3.pooler.supabase.com:6543/postgres`
+  const connectionString = process.env.DATABASE_URL
+  if (!connectionString) {
+    console.error('Missing DATABASE_URL in .env.local')
+    process.exit(1)
+  }
 
   const client = new Client({ connectionString })
 

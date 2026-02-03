@@ -1,23 +1,35 @@
 /**
- * GET/PUT /api/cms/content
+ * GET/PUT/POST/DELETE /api/cms/content
  * Manage page content for CMS
+ *
+ * GET: Public (for displaying content)
+ * PUT/POST/DELETE: Admin only (for editing)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdminAuth, unauthorizedResponse } from '@/lib/auth-middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
   process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 )
 
-// GET - Fetch page content
+// GET - Fetch page content (public for published, admin for unpublished)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const pageSlug = searchParams.get('page_slug')
     const sectionKey = searchParams.get('section_key')
     const includeUnpublished = searchParams.get('include_unpublished') === 'true'
+
+    // If requesting unpublished content, require admin auth
+    if (includeUnpublished) {
+      const auth = await verifyAdminAuth(request)
+      if (!auth.authenticated) {
+        return unauthorizedResponse('Admin access required for unpublished content')
+      }
+    }
 
     let query = supabase
       .from('page_content')
@@ -66,8 +78,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// PUT - Update page content
+// PUT - Update page content (admin only)
 export async function PUT(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const body = await request.json()
     const { page_slug, section_key, content, is_published } = body
@@ -99,7 +117,7 @@ export async function PUT(request: NextRequest) {
     let data, error
 
     if (existing) {
-      // Update existing - avoid triggering upsert issues
+      // Update existing
       const result = await supabase
         .from('page_content')
         .update(updateData)
@@ -138,8 +156,14 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// POST - Create new section
+// POST - Create new section (admin only)
 export async function POST(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const body = await request.json()
     const { page_slug, section_key, content, sort_order } = body
@@ -175,8 +199,14 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Remove section
+// DELETE - Remove section (admin only)
 export async function DELETE(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

@@ -1,154 +1,154 @@
-# 🏦 Yeoskin Ops Dashboard
+# Yeoskin Dashboard
 
-> Enterprise-grade admin dashboard for managing creator payouts.
+**Enterprise-grade creator management platform** built with Next.js 15, Supabase, and TypeScript.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![React](https://img.shields.io/badge/React-18.2-61dafb)
-![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
+[![CI](https://github.com/yeoskin/dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/yeoskin/dashboard/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
 
 ---
 
-## 🚀 Quick Start
+## Overview
+
+Yeoskin Dashboard is a comprehensive platform for managing creator partnerships, commissions, payouts, and e-commerce integrations.
+
+### Key Features
+
+- **Creator Management** - Onboard, track, and manage creator partnerships
+- **Commission Tracking** - Automatic commission calculation from Shopify orders
+- **Payout System** - Batch payouts with Wise integration
+- **Financial Ledger** - Enterprise-grade accounting with audit trails
+- **CMS** - Content management for creator pages
+- **Multi-tenant** - Separate admin, creator, and public portals
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
+- Node.js 20+
+- npm 9+
 - Supabase account
-- n8n workflows deployed
+- Shopify store (for e-commerce features)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/yeoskin-dashboard.git
-cd yeoskin-dashboard
+git clone https://github.com/yeoskin/dashboard.git
+cd dashboard
 
 # Install dependencies
 npm install
 
-# Copy environment variables
-cp .env.example .env
+# Setup environment
+cp .env.example .env.local
+# Edit .env.local with your credentials
 
-# Edit .env with your values
-# - VITE_SUPABASE_URL
-# - VITE_SUPABASE_ANON_KEY
-# - VITE_N8N_BASE_URL
-# - VITE_PAYOUT_SECRET
-
-# Start development server
+# Run development server
 npm run dev
 ```
 
-### Build for Production
-
-```bash
-npm run build
-```
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## 📁 Project Structure
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [Onboarding Guide](docs/ONBOARDING.md) | New developer setup |
+| [Architecture](docs/ARCHITECTURE.md) | System design & patterns |
+| [API Reference](docs/API.md) | All API endpoints |
+| [Database Schema](docs/DATABASE.md) | Tables & relationships |
+| [Security](docs/SECURITY.md) | Security guidelines |
+| [Monitoring](docs/MONITORING.md) | Observability setup |
+| [CI/CD Setup](docs/CI_CD_SETUP.md) | GitHub Actions & Vercel |
+| [Contributing](CONTRIBUTING.md) | How to contribute |
+
+---
+
+## Project Structure
 
 ```
 yeoskin-dashboard/
+├── app/                    # Next.js App Router
+│   ├── (admin)/           # Admin dashboard routes
+│   ├── (public)/          # Public pages
+│   ├── api/               # API routes
+│   ├── auth/              # Authentication pages
+│   └── c/                 # Creator portal
 ├── src/
-│   ├── components/
-│   │   ├── Common/         # Shared UI components
-│   │   ├── Layout/         # Sidebar, Header, Layout
-│   │   ├── Dashboard/      # KPIs, Charts, Activity
-│   │   ├── Batches/        # Batch management
-│   │   └── Creators/       # Creator management
-│   ├── hooks/
-│   │   └── useSupabase.js  # Data fetching hooks
-│   ├── lib/
-│   │   ├── supabase.js     # Supabase client
-│   │   └── api.js          # n8n API calls
-│   ├── pages/
-│   │   └── index.jsx       # All page components
-│   ├── styles/
-│   │   └── globals.css     # Tailwind styles
-│   ├── App.jsx             # Routes
-│   └── main.jsx            # Entry point
-├── .env.example
-├── package.json
-├── tailwind.config.js
-└── vite.config.js
+│   ├── components/        # React components
+│   ├── contexts/          # React contexts
+│   ├── hooks/             # Custom hooks
+│   ├── lib/               # Utilities & services
+│   └── views/             # Page-level components
+├── supabase/              # Database migrations
+├── docs/                  # Documentation
+└── scripts/               # Utility scripts
 ```
 
 ---
 
-## 🎨 Features
+## Tech Stack
 
-### Dashboard
-- 📊 Real-time KPIs (Total Paid, Active Creators, Success Rate)
-- 📈 Payout trend charts
-- 🥧 Status distribution pie chart
-- ⚡ Recent transfer activity (live updates)
-- 🎯 Quick actions
-
-### Payout Management
-- 📋 Batch list with filtering
-- ✅ Approve batches (draft → approved)
-- 🚀 Execute batches (trigger payments)
-- 👁️ Batch detail view
-- 📊 Batch statistics
-
-### Creator Management
-- 👥 Creator list with search
-- 💰 Earnings tracking (total, pending)
-- 🏦 Bank account status
-- 📧 Creator details modal
-
-### Settings
-- 🔧 API configuration
-- 🔔 Notification preferences
-- 🗄️ Database status
+| Category | Technology |
+|----------|------------|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript 5.9 |
+| Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth |
+| Styling | Tailwind CSS |
+| State | SWR + React Context |
+| Email | Resend |
+| Payments | Wise API |
+| E-commerce | Shopify Storefront/Admin API |
+| Rate Limiting | Upstash Redis |
+| Monitoring | Pino, Sentry (optional) |
+| CI/CD | GitHub Actions + Vercel |
 
 ---
 
-## 🔌 API Integration
+## Scripts
 
-### Supabase Tables
+```bash
+# Development
+npm run dev           # Start dev server
+npm run build         # Production build
+npm run start         # Start production server
 
-The dashboard connects to these Supabase tables:
-- `creators` - Creator profiles
-- `commissions` - Commission records
-- `payout_batches` - Batch headers
-- `payout_items` - Individual payouts
-- `wise_transfers` - Wise transfer logs
+# Quality
+npm run lint          # ESLint
+npm run typecheck     # TypeScript check
+npm run test          # Jest tests
+npm run test:coverage # Tests with coverage
+npm run validate      # Full validation (lint + typecheck + test)
 
-### n8n Webhooks
+# Security
+npm run security:check # Scan for secrets
 
-The dashboard calls these n8n endpoints:
-
-```
-POST /webhook/payout/daily     # Trigger daily batch
-POST /webhook/payout/execute   # Execute batch payments
+# Database
+npm run migrate       # Run migrations
 ```
 
 ---
 
-## 🛠️ Configuration
+## Environment Variables
 
-### Environment Variables
+See [.env.example](.env.example) for all required variables.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_SUPABASE_URL` | ✅ | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | ✅ | Supabase anonymous key |
-| `VITE_N8N_BASE_URL` | ✅ | n8n instance URL |
-| `VITE_PAYOUT_SECRET` | ✅ | Webhook authentication secret |
-
-### Supabase Setup
-
-1. Enable Row Level Security (RLS)
-2. Create policies for authenticated users
-3. Enable Realtime for `payout_batches` and `wise_transfers`
+**Required:**
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
+- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
+- `SHOPIFY_STOREFRONT_TOKEN` - Shopify Storefront API token
+- `RESEND_API_KEY` - Email service API key
 
 ---
 
-## 🚀 Deployment
+## Deployment
 
 ### Vercel (Recommended)
 
@@ -158,57 +158,44 @@ npm i -g vercel
 
 # Deploy
 vercel
-
-# Set environment variables in Vercel dashboard
 ```
 
 ### Docker
 
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "run", "preview"]
+```bash
+docker build -t yeoskin-dashboard .
+docker run -p 3000:3000 yeoskin-dashboard
 ```
 
 ---
 
-## 🎨 Customization
+## Contributing
 
-### Theme Colors
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-Edit `tailwind.config.js` to customize colors:
+```bash
+# Create feature branch
+git checkout -b feature/my-feature
 
-```javascript
-theme: {
-  extend: {
-    colors: {
-      primary: {
-        500: '#0ea5e9', // Your brand color
-      }
-    }
-  }
-}
+# Make changes, then validate
+npm run validate
+
+# Commit with conventional format
+git commit -m "feat: add new feature"
+
+# Push and create PR
+git push origin feature/my-feature
 ```
-
-### Dark Mode
-
-Dark mode is supported out of the box. Toggle via the header button or system preference.
 
 ---
 
-## 📝 License
+## License
 
 Proprietary - Yeoskin © 2026
 
 ---
 
-## 🤝 Support
+## Support
 
-- Documentation: See `/docs` folder
-- Issues: GitHub Issues
-- Email: support@yeoskin.com
+- **Issues**: [GitHub Issues](https://github.com/yeoskin/dashboard/issues)
+- **Email**: tech@yeoskin.com

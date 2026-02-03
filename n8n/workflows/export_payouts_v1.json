@@ -27,7 +27,7 @@
             {
               "id": "auth-check",
               "leftValue": "={{ $json.headers['x-secret'] }}",
-              "rightValue": "cf53dc2846b3b673c72ae864dba8b7f3c2c5e860a1e0ff17a514af66af48ed5b",
+              "rightValue": "{{FINANCE_WEBHOOK_SECRET}}",
               "operator": {
                 "type": "string",
                 "operation": "equals"

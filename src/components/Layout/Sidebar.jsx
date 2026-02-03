@@ -10,7 +10,6 @@ import {
   HelpCircle,
   LogOut,
   ChevronLeft,
-  Zap,
   Shield,
   ClipboardList,
   Landmark,
@@ -55,11 +54,11 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
     const { error } = await signOut()
 
     if (error) {
-      toast.error('Erreur lors de la déconnexion')
+      toast.error('Erreur', 'Erreur lors de la déconnexion')
       return
     }
 
-    toast.success('Déconnexion réussie')
+    toast.success('Déconnexion', 'À bientôt !')
     navigate('/login', { replace: true })
   }
 
@@ -67,31 +66,51 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
   const email = getUserEmail() || ''
   const initials = getUserInitials() || 'U'
   const showAdminLink = isSuperAdmin()
-  const isAdmin = showAdminLink // For now, same check - could be expanded
+  const isAdmin = showAdminLink
+
+  const NavItem = ({ item, collapsed: isCollapsed, onClick }) => (
+    <NavLink
+      to={item.href}
+      className={({ isActive }) => clsx(
+        'flex items-center gap-3 px-3 py-2.5 rounded-xl font-medium text-sm',
+        'transition-all duration-200',
+        isActive
+          ? 'bg-brand-50 text-brand-600 shadow-soft-sm'
+          : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900',
+        isCollapsed && 'justify-center px-3'
+      )}
+      onClick={onClick}
+    >
+      <item.icon className="w-5 h-5 flex-shrink-0" />
+      {!isCollapsed && <span>{item.name}</span>}
+    </NavLink>
+  )
 
   const sidebarContent = (isMobile = false) => (
     <>
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-neutral-100">
         <div className="flex items-center gap-3">
-          <img
-            src="https://cdn.shopify.com/s/files/1/0870/9573/8716/files/Copie_de_LogoOK_1.png?v=1742078138"
-            alt="Yeoskin"
-            className={clsx(collapsed && !isMobile ? 'h-8 w-8 object-contain' : 'h-10 w-auto')}
-          />
+          <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center shadow-brand-glow/30">
+            <span className="text-white font-bold text-lg">Y</span>
+          </div>
           {(isMobile || !collapsed) && (
             <div>
-              <p className="text-xs text-gray-500">Tableau de bord</p>
+              <p className="font-semibold text-neutral-900">Yeoskin</p>
+              <p className="text-xs text-neutral-500">Dashboard</p>
             </div>
           )}
         </div>
         {!isMobile && (
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className={clsx(
+              'p-2 rounded-xl transition-all duration-200',
+              'text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100'
+            )}
           >
             <ChevronLeft className={clsx(
-              'w-5 h-5 text-gray-500 transition-transform',
+              'w-5 h-5 transition-transform duration-200',
               collapsed && 'rotate-180'
             )} />
           </button>
@@ -100,12 +119,53 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
     </>
   )
 
+  const UserSection = ({ isCollapsed, isMobile = false }) => (
+    <div className={clsx(
+      'p-3 border-t border-neutral-100',
+      !isMobile && 'absolute bottom-0 left-0 right-0'
+    )}>
+      <NavLink
+        to="/profile"
+        className={({ isActive }) => clsx(
+          'flex items-center gap-3 p-3 rounded-xl transition-all duration-200 cursor-pointer',
+          isActive
+            ? 'bg-brand-50 ring-1 ring-brand-200'
+            : 'bg-neutral-50 hover:bg-neutral-100',
+          isCollapsed && 'justify-center'
+        )}
+        onClick={isMobile ? onMobileClose : undefined}
+      >
+        <div className="w-9 h-9 rounded-full bg-gradient-brand flex items-center justify-center shadow-soft-sm">
+          <span className="text-sm font-semibold text-white">{initials}</span>
+        </div>
+        {!isCollapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-neutral-900 truncate">{displayName}</p>
+            <p className="text-xs text-neutral-500 truncate">{email}</p>
+          </div>
+        )}
+      </NavLink>
+      <button
+        onClick={handleLogout}
+        className={clsx(
+          'mt-2 w-full p-2.5 rounded-xl transition-all duration-200 flex items-center gap-2',
+          'text-neutral-500 hover:text-error-600 hover:bg-error-50',
+          isCollapsed ? 'justify-center' : 'justify-start px-3'
+        )}
+        title="Se déconnecter"
+      >
+        <LogOut className="w-4 h-4" />
+        {!isCollapsed && <span className="text-sm font-medium">Déconnexion</span>}
+      </button>
+    </div>
+  )
+
   return (
     <>
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
           onClick={onMobileClose}
         />
       )}
@@ -113,187 +173,84 @@ export const Sidebar = ({ collapsed, onToggle, mobileOpen, onMobileClose }) => {
       {/* Mobile sidebar */}
       <aside
         className={clsx(
-          'fixed left-0 top-0 h-full w-72 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 z-50 transform transition-transform duration-300 lg:hidden flex flex-col',
+          'fixed left-0 top-0 h-full w-72 bg-white border-r border-neutral-100 z-50',
+          'transform transition-transform duration-300 ease-smooth lg:hidden flex flex-col',
+          'shadow-soft-2xl',
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {sidebarContent(true)}
 
-        {/* Mobile Main Navigation - Scrollable area */}
+        {/* Mobile Main Navigation */}
         <div className="flex-1 overflow-y-auto pb-32">
           <nav className="px-3 py-4 space-y-1">
             {navigation
               .filter(item => !item.adminOnly || isAdmin)
               .map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  className={({ isActive }) => clsx(
-                    'sidebar-link',
-                    isActive && 'active'
-                  )}
-                  onClick={onMobileClose}
-                >
-                  <item.icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">{item.name}</span>
-                </NavLink>
+                <NavItem key={item.name} item={item} collapsed={false} onClick={onMobileClose} />
               ))}
           </nav>
 
-          <div className="px-3">
-            <div className="border-t border-gray-200 dark:border-gray-800" />
+          <div className="px-4 my-2">
+            <div className="border-t border-neutral-100" />
           </div>
 
-          <nav className="px-3 py-4 space-y-1">
+          <nav className="px-3 py-2 space-y-1">
             {secondaryNavigation.map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) => clsx(
-                  'sidebar-link',
-                  isActive && 'active'
-                )}
-                onClick={onMobileClose}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                <span className="text-sm">{item.name}</span>
-              </NavLink>
+              <NavItem key={item.name} item={item} collapsed={false} onClick={onMobileClose} />
             ))}
             {showAdminLink && (
               <>
-                <NavLink to="/admins" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
-                  <Shield className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">Administrateurs</span>
-                </NavLink>
-                <NavLink to="/audit-logs" className={({ isActive }) => clsx('sidebar-link', isActive && 'active')} onClick={onMobileClose}>
-                  <ClipboardList className="w-5 h-5 flex-shrink-0" />
-                  <span className="text-sm">Audit Logs</span>
-                </NavLink>
+                <NavItem item={{ name: 'Administrateurs', href: '/admins', icon: Shield }} collapsed={false} onClick={onMobileClose} />
+                <NavItem item={{ name: 'Audit Logs', href: '/audit-logs', icon: ClipboardList }} collapsed={false} onClick={onMobileClose} />
               </>
             )}
           </nav>
         </div>
 
-        {/* Mobile User Section - Fixed at bottom */}
-        <div className="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-          <NavLink
-            to="/profile"
-            className={({ isActive }) => clsx(
-              'flex items-center gap-3 p-2 rounded-lg transition-colors cursor-pointer',
-              isActive ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
-            )}
-            onClick={onMobileClose}
-          >
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{initials}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{displayName}</p>
-              <p className="text-xs text-gray-500 truncate">{email}</p>
-            </div>
-          </NavLink>
-          <button onClick={handleLogout} className="mt-2 w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-2 justify-start px-3" title="Se déconnecter">
-            <LogOut className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">Déconnexion</span>
-          </button>
-        </div>
+        {/* Mobile User Section */}
+        <UserSection isCollapsed={false} isMobile={true} />
       </aside>
 
       {/* Desktop sidebar */}
       <aside
         className={clsx(
-          'hidden lg:block fixed left-0 top-0 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 z-40',
+          'hidden lg:flex lg:flex-col fixed left-0 top-0 h-screen bg-white border-r border-neutral-100',
+          'transition-all duration-300 ease-smooth z-40',
           collapsed ? 'w-20' : 'w-64'
         )}
       >
         {sidebarContent(false)}
 
         {/* Desktop Main Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navigation
-            .filter(item => !item.adminOnly || isAdmin)
-            .map((item) => (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                className={({ isActive }) => clsx(
-                  'sidebar-link',
-                  isActive && 'active',
-                  collapsed && 'justify-center px-3'
-                )}
-              >
-                <item.icon className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && <span>{item.name}</span>}
-              </NavLink>
+        <div className="flex-1 overflow-y-auto pb-40">
+          <nav className="px-3 py-4 space-y-1">
+            {navigation
+              .filter(item => !item.adminOnly || isAdmin)
+              .map((item) => (
+                <NavItem key={item.name} item={item} collapsed={collapsed} />
+              ))}
+          </nav>
+
+          <div className="px-4 my-2">
+            <div className="border-t border-neutral-100" />
+          </div>
+
+          <nav className="px-3 py-2 space-y-1">
+            {secondaryNavigation.map((item) => (
+              <NavItem key={item.name} item={item} collapsed={collapsed} />
             ))}
-        </nav>
-
-        <div className="px-3">
-          <div className="border-t border-gray-200 dark:border-gray-800" />
+            {showAdminLink && (
+              <>
+                <NavItem item={{ name: 'Administrateurs', href: '/admins', icon: Shield }} collapsed={collapsed} />
+                <NavItem item={{ name: 'Audit Logs', href: '/audit-logs', icon: ClipboardList }} collapsed={collapsed} />
+              </>
+            )}
+          </nav>
         </div>
-
-        <nav className="px-3 py-4 space-y-1">
-          {secondaryNavigation.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.href}
-              className={({ isActive }) => clsx(
-                'sidebar-link',
-                isActive && 'active',
-                collapsed && 'justify-center px-3'
-              )}
-            >
-              <item.icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{item.name}</span>}
-            </NavLink>
-          ))}
-          {showAdminLink && (
-            <>
-              <NavLink to="/admins" className={({ isActive }) => clsx('sidebar-link', isActive && 'active', collapsed && 'justify-center px-3')}>
-                <Shield className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && <span>Administrateurs</span>}
-              </NavLink>
-              <NavLink to="/audit-logs" className={({ isActive }) => clsx('sidebar-link', isActive && 'active', collapsed && 'justify-center px-3')}>
-                <ClipboardList className="w-5 h-5 flex-shrink-0" />
-                {!collapsed && <span>Audit Logs</span>}
-              </NavLink>
-            </>
-          )}
-        </nav>
 
         {/* Desktop User Section */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-gray-200 dark:border-gray-800">
-          <NavLink
-            to="/profile"
-            className={({ isActive }) => clsx(
-              'flex items-center gap-3 p-3 rounded-lg transition-colors cursor-pointer',
-              isActive ? 'bg-primary-50 dark:bg-primary-900/30' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700',
-              collapsed && 'justify-center'
-            )}
-            title="Mon profil"
-          >
-            <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-              <span className="text-sm font-medium text-primary-600 dark:text-primary-400">{initials}</span>
-            </div>
-            {!collapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{displayName}</p>
-                <p className="text-xs text-gray-500 truncate">{email}</p>
-              </div>
-            )}
-          </NavLink>
-          <button
-            onClick={handleLogout}
-            className={clsx(
-              'mt-2 w-full p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
-              collapsed ? 'justify-center' : 'justify-start px-3'
-            )}
-            title="Se déconnecter"
-          >
-            <LogOut className="w-4 h-4 text-gray-500" />
-            {!collapsed && <span className="text-sm text-gray-600 dark:text-gray-400">Déconnexion</span>}
-          </button>
-        </div>
+        <UserSection isCollapsed={collapsed} />
       </aside>
     </>
   )

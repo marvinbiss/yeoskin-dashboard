@@ -50,7 +50,7 @@ export async function GET(request: Request): Promise<Response> {
           getAll() {
             return cookieStore.getAll();
           },
-          setAll(cookiesToSet) {
+          setAll(cookiesToSet: { name: string; value: string }[]) {
             // Read-only in route handlers for GET requests
           },
         },
