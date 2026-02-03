@@ -278,6 +278,88 @@
   .glass-dark {
     @apply bg-neutral-900/80 backdrop-blur-md;
   }
+
+  /* ============================================================================
+     LUXURY STYLES - Kylie/Sephora Level Premium
+     ============================================================================ */
+
+  /* Premium card with gold border */
+  .premium-card {
+    @apply bg-white rounded-3xl p-8 sm:p-12;
+    @apply shadow-luxury-md hover:shadow-luxury-lg;
+    @apply border border-luxury-gold-500/10;
+    @apply transition-all duration-300;
+  }
+
+  /* Luxury badge with gold accent */
+  .premium-badge {
+    @apply inline-flex items-center gap-2;
+    @apply bg-luxury-gold-500/10 text-luxury-gold-700;
+    @apply px-4 py-2 rounded-full text-sm font-semibold;
+    @apply uppercase tracking-wider;
+    @apply border border-luxury-gold-500/20;
+  }
+
+  /* Gold divider line */
+  .luxury-divider {
+    @apply h-px bg-gradient-to-r from-transparent via-luxury-gold-500/30 to-transparent;
+  }
+
+  /* Section title pattern - Luxury */
+  .section-title-luxury {
+    @apply text-center mb-12 sm:mb-16;
+  }
+
+  .section-title-luxury h2 {
+    @apply text-3xl sm:text-4xl lg:text-5xl;
+    @apply font-serif font-bold;
+    @apply text-luxury-black mb-4;
+  }
+
+  .section-title-luxury p {
+    @apply text-base sm:text-lg text-neutral-600;
+    @apply max-w-2xl mx-auto font-light;
+  }
+
+  /* Premium CTA button */
+  .cta-luxury {
+    @apply bg-luxury-black text-white;
+    @apply px-8 sm:px-12 py-4 sm:py-5;
+    @apply rounded-full font-semibold;
+    @apply transition-all duration-300;
+    @apply hover:bg-luxury-rose-500 hover:shadow-luxury-lg;
+    @apply active:scale-95;
+    @apply uppercase tracking-wide text-sm;
+  }
+
+  /* Gold outline button */
+  .btn-gold-outline {
+    @apply bg-transparent text-luxury-black;
+    @apply border-2 border-luxury-gold-500;
+    @apply px-8 py-4 rounded-full;
+    @apply font-semibold uppercase tracking-wide text-sm;
+    @apply transition-all duration-300;
+    @apply hover:bg-luxury-gold-500 hover:text-luxury-black;
+  }
+
+  /* Gold text gradient */
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #D4AF37 0%, #F7E7CE 50%, #D4AF37 100%);
+  }
+
+  /* Luxury hover lift effect */
+  .hover-lift {
+    @apply transition-all duration-300;
+    @apply hover:-translate-y-2 hover:shadow-luxury-lg;
+  }
+
+  /* Gold shimmer animation */
+  .shimmer-gold {
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
 }
 
 /* ============================================================================

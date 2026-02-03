@@ -66,6 +66,13 @@ import {
 
 // Re-export LoginPage
 export { LoginPage } from './LoginPage'
+export { default as ProductsPage } from './ProductsPage'
+export { default as RoutinesPage } from './RoutinesPage'
+export { default as CategoriesPage } from './CategoriesPage'
+export { default as OrdersPage } from './OrdersPage'
+export { default as PacksPage } from './PacksPage'
+export { default as ProfilePage } from './ProfilePage'
+export { CreatorDetailPage } from './CreatorDetailPage'
 
 // Re-export AdminPayoutsPage and AnalyticsPage
 export { AdminPayoutsPage } from './AdminPayoutsPage'

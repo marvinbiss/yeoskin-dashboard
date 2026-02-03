@@ -83,7 +83,7 @@ export async function GET(request: Request): Promise<Response> {
     let isAdmin = false;
     if (!isOwner) {
       const { data: adminUser } = await supabase
-        .from('admin_users')
+        .from('admin_profiles')
         .select('role')
         .eq('user_id', user.id)
         .single();

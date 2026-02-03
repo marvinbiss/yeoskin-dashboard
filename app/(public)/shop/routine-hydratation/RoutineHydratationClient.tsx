@@ -404,28 +404,31 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-luxury-cream">
       {/* ================================================================== */}
-      {/* HERO SECTION */}
+      {/* HERO SECTION - LUXURY REDESIGN */}
       {/* ================================================================== */}
       <section ref={heroRef} className="relative min-h-0 lg:min-h-screen flex items-center overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-light via-white to-lavender-light opacity-50" />
+        {/* Background - Premium cream gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-luxury-cream via-white to-luxury-champagne" />
 
-        {/* Floating elements */}
-        <div className="absolute top-20 left-10 w-40 sm:w-64 h-40 sm:h-64 bg-pink/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-60 sm:w-96 h-60 sm:h-96 bg-lavender/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        {/* Subtle gold accent line */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-luxury-gold-500 to-transparent opacity-30" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-20 lg:py-0">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Image */}
+        {/* Floating luxury elements */}
+        <div className="absolute top-20 left-10 w-40 sm:w-64 h-40 sm:h-64 bg-luxury-gold-500/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-60 sm:w-96 h-60 sm:h-96 bg-luxury-rose-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 py-16 sm:py-24 lg:py-0">
+          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+            {/* Left: Image with luxury frame */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               className="relative order-2 lg:order-1"
             >
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
+              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-luxury-cream to-luxury-taupe/20 shadow-luxury-xl border border-luxury-gold-500/10">
                 {routine?.image_url ? (
                   <img
                     src={routine.image_url}
@@ -433,73 +436,74 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-luxury-cream to-luxury-champagne">
                     <div className="text-center">
-                      <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
-                      <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
+                      <Sparkles className="w-24 h-24 text-luxury-gold-500 mx-auto mb-4" />
+                      <p className="text-luxury-taupe text-sm font-medium tracking-wide">YEOSKIN COLLECTION</p>
                     </div>
                   </div>
                 )}
 
-                {/* Floating badges */}
+                {/* Luxury floating badge - Gold accent */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg"
+                  className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-luxury-black text-white rounded-full px-4 sm:px-5 py-2 sm:py-2.5 shadow-luxury-lg"
                 >
-                  <span className="text-xs sm:text-sm font-semibold text-pink">-15%</span>
+                  <span className="text-xs sm:text-sm font-semibold tracking-wider">-15%</span>
                 </motion.div>
 
+                {/* Rating badge - Premium gold stars */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 }}
-                  className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-lg flex items-center gap-1.5 sm:gap-2"
+                  className="absolute bottom-4 left-4 sm:bottom-6 sm:left-6 bg-white/95 backdrop-blur-sm rounded-2xl p-3 sm:p-4 shadow-luxury-lg border border-luxury-gold-500/20 flex items-center gap-2 sm:gap-3"
                 >
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 fill-luxury-gold-500 text-luxury-gold-500" />
                     ))}
                   </div>
-                  <span className="text-xs sm:text-sm font-medium">{heroRating}</span>
+                  <span className="text-sm sm:text-base font-semibold text-luxury-black">{heroRating}</span>
                 </motion.div>
               </div>
             </motion.div>
 
-            {/* Right: Content */}
+            {/* Right: Content - Luxury typography */}
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               className="order-1 lg:order-2"
             >
-              {/* Eyebrow */}
+              {/* Eyebrow - Gold accent */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 bg-pink-light text-pink px-4 py-2 rounded-full text-sm font-medium mb-6"
+                className="inline-flex items-center gap-2 bg-luxury-gold-500/10 text-luxury-gold-600 px-5 py-2.5 rounded-full text-sm font-semibold tracking-widest uppercase mb-8"
               >
                 <Sparkles className="w-4 h-4" />
                 {heroBadge}
               </motion.div>
 
-              {/* Title */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-4 sm:mb-6">
+              {/* Title - Serif luxury font */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-bold text-luxury-black tracking-tight leading-[1.1] mb-6 sm:mb-8">
                 {heroTitle}
                 <br />
-                <span className="text-pink">{heroSubtitle}</span>
+                <span className="text-luxury-rose-500 italic">{heroSubtitle}</span>
               </h1>
 
-              {/* Description */}
-              <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-4 sm:mb-6 max-w-lg">
+              {/* Description - Refined */}
+              <p className="text-lg sm:text-xl text-neutral-600 leading-relaxed mb-6 sm:mb-8 max-w-lg font-light">
                 La routine K-beauty minimaliste qui transforme ta peau en 4 semaines.
-                3 produits iconiques, 1 geste matin & soir.
+                <span className="font-medium text-luxury-black"> 3 produits iconiques, 1 geste matin & soir.</span>
               </p>
 
-              {/* Trust badges */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+              {/* Trust badges - Luxury styling */}
+              <div className="flex flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10">
                 {[
                   { icon: Leaf, label: 'Vegan' },
                   { icon: Heart, label: 'Cruelty-free' },
@@ -507,31 +511,31 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 ].map((badge, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-100 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm"
+                    className="inline-flex items-center gap-2 bg-white border border-luxury-gold-500/20 text-luxury-black px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium shadow-luxury-xs hover:shadow-luxury-sm hover:border-luxury-gold-500/40 transition-all"
                   >
-                    <badge.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <badge.icon className="w-4 h-4 text-luxury-gold-600" />
                     {badge.label}
                   </span>
                 ))}
               </div>
 
-              {/* Price */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
-                  <span className="text-3xl sm:text-5xl font-bold text-gray-950">{currentPrices[selectedVariant]}€</span>
-                  <span className="text-base sm:text-xl text-gray-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
-                  <span className="bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                    Économise {(currentOriginalPrices[selectedVariant] - currentPrices[selectedVariant]).toFixed(0)}€
+              {/* Price - Premium display */}
+              <div className="mb-8 sm:mb-10 p-6 bg-white rounded-2xl shadow-luxury-sm border border-luxury-gold-500/10">
+                <div className="flex flex-wrap items-baseline gap-3 sm:gap-4">
+                  <span className="text-4xl sm:text-5xl font-serif font-bold text-luxury-black">{currentPrices[selectedVariant]}€</span>
+                  <span className="text-lg sm:text-xl text-neutral-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
+                  <span className="bg-luxury-gold-500/10 text-luxury-gold-700 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold tracking-wide">
+                    ÉCONOMISEZ {(currentOriginalPrices[selectedVariant] - currentPrices[selectedVariant]).toFixed(0)}€
                   </span>
                 </div>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              {/* CTA Buttons - Luxury treatment */}
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
                 <button
                   onClick={handleCheckout}
                   disabled={isLoading}
-                  className="group bg-pink hover:bg-pink-dark text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-lg tracking-tight flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="group bg-luxury-black hover:bg-luxury-rose-500 text-white font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-luxury-xl active:scale-95 text-base sm:text-lg tracking-wide uppercase flex items-center justify-center gap-3 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -545,28 +549,28 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
 
                 <a
                   href="#products"
-                  className="bg-white border-2 border-gray-900 text-gray-900 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 hover:bg-gray-900 hover:text-white text-base sm:text-lg text-center"
+                  className="bg-transparent border-2 border-luxury-black text-luxury-black font-semibold px-8 sm:px-10 py-4 sm:py-5 rounded-full transition-all duration-300 hover:bg-luxury-black hover:text-white text-base sm:text-lg text-center tracking-wide uppercase"
                 >
-                  Voir les produits
+                  Découvrir
                 </a>
               </div>
 
-              {/* Micro-trust */}
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 sm:mt-6 text-xs sm:text-sm text-gray-500">
+              {/* Micro-trust - Refined */}
+              <div className="flex flex-wrap items-center gap-6 sm:gap-8 mt-6 sm:mt-8 text-sm text-neutral-500">
                 <span className="flex items-center gap-2">
-                  <Truck className="w-4 h-4" />
+                  <Truck className="w-4 h-4 text-luxury-gold-500" />
                   Livraison offerte
                 </span>
                 <span className="flex items-center gap-2">
-                  <RefreshCw className="w-4 h-4" />
-                  30j remboursé
+                  <RefreshCw className="w-4 h-4 text-luxury-gold-500" />
+                  30 jours satisfait ou remboursé
                 </span>
               </div>
             </motion.div>
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicator - Gold */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -576,7 +580,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           <motion.div
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
-            className="text-gray-400"
+            className="text-luxury-gold-500"
           >
             <ChevronDown className="w-6 h-6" />
           </motion.div>
@@ -584,11 +588,11 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       </section>
 
       {/* ================================================================== */}
-      {/* SOCIAL PROOF BAR */}
+      {/* SOCIAL PROOF BAR - LUXURY BLACK & GOLD */}
       {/* ================================================================== */}
-      <section className="bg-gray-950 py-4 sm:py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+      <section className="bg-luxury-black py-6 sm:py-8 border-y border-luxury-gold-500/20">
+        <div className="max-w-7xl mx-auto px-6 sm:px-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-12">
             {STATS.map((stat, i) => (
               <motion.div
                 key={i}
@@ -598,9 +602,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-pink mx-auto mb-1 sm:mb-2" />
-                <p className="text-lg sm:text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-gray-400">{stat.label}</p>
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-luxury-gold-500 mx-auto mb-2 sm:mb-3" />
+                <p className="text-xl sm:text-3xl font-serif font-bold text-white">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-neutral-400 tracking-wide uppercase mt-1">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -608,36 +612,38 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       </section>
 
       {/* ================================================================== */}
-      {/* PRODUCTS SECTION */}
+      {/* PRODUCTS SECTION - LUXURY */}
       {/* ================================================================== */}
-      <section id="products" className="py-12 sm:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          {/* Section header */}
+      <section id="products" className="py-16 sm:py-32 bg-white">
+        <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
+          {/* Section header - Luxury typography */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-12 sm:mb-20"
           >
-            <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
-              Ce qui est inclus
+            <span className="text-luxury-gold-600 font-semibold text-sm tracking-[0.2em] uppercase mb-6 block">
+              La Collection
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
-              3 Produits. 3 Étapes. Résultats Garantis.
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-luxury-black mb-4 sm:mb-6">
+              3 Produits. 3 Étapes.
+              <br />
+              <span className="text-luxury-rose-500 italic">Résultats Garantis.</span>
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto font-light">
               Chaque produit a été sélectionné pour sa qualité exceptionnelle et son efficacité prouvée.
             </p>
           </motion.div>
 
-          {/* Products grid */}
+          {/* Products grid - Luxury cards */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-4 sm:gap-8"
+            className="grid md:grid-cols-3 gap-6 sm:gap-10"
           >
             {displayProducts.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />
@@ -647,29 +653,29 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       </section>
 
       {/* ================================================================== */}
-      {/* HOW TO USE SECTION */}
+      {/* HOW TO USE SECTION - LUXURY */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8">
+      <section className="py-16 sm:py-32 bg-gradient-to-b from-luxury-cream to-white">
+        <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-12 sm:mb-20"
           >
-            <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
-              Mode d'emploi
+            <span className="text-luxury-gold-600 font-semibold text-sm tracking-[0.2em] uppercase mb-6 block">
+              Le Rituel
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
-              2 Minutes Matin & Soir
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-luxury-black mb-4 sm:mb-6">
+              2 Minutes <span className="text-luxury-rose-500 italic">Matin & Soir</span>
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              Une routine simple qui s'intègre facilement dans ton quotidien.
+            <p className="text-lg sm:text-xl text-neutral-600 max-w-2xl mx-auto font-light">
+              Un rituel de beauté simple qui s'intègre naturellement dans votre quotidien.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-4 sm:gap-8">
+          <div className="grid md:grid-cols-3 gap-8 sm:gap-12">
             {displayProducts.map((product, i) => (
               <motion.div
                 key={product.id}
@@ -680,20 +686,20 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-pink text-white rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6">
+                <div className="w-16 h-16 sm:w-24 sm:h-24 bg-luxury-black text-white rounded-full flex items-center justify-center text-2xl sm:text-4xl font-serif font-bold mx-auto mb-6 sm:mb-8 shadow-luxury-lg">
                   {i + 1}
                 </div>
-                <h3 className="text-base sm:text-xl font-bold text-gray-950 mb-1 sm:mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-1 sm:mb-2">{product.brand}</p>
-                <p className="text-xs sm:text-sm text-pink font-medium">{product.time}</p>
+                <h3 className="text-lg sm:text-2xl font-serif font-bold text-luxury-black mb-2 sm:mb-3">{product.name.split(' ').slice(-2).join(' ')}</h3>
+                <p className="text-sm sm:text-base text-neutral-600 mb-2 sm:mb-3">{product.brand}</p>
+                <p className="text-xs sm:text-sm text-luxury-gold-600 font-semibold tracking-wider uppercase">{product.time}</p>
               </motion.div>
             ))}
           </div>
 
-          {/* Timeline visual */}
-          <div className="hidden md:block relative mt-8">
-            <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-pink/20 -translate-y-1/2" />
-            <div className="absolute top-1/2 left-0 w-1/3 h-0.5 bg-pink -translate-y-1/2" />
+          {/* Timeline visual - Gold accent */}
+          <div className="hidden md:block relative mt-12">
+            <div className="absolute top-1/2 left-0 right-0 h-px bg-luxury-gold-500/30 -translate-y-1/2" />
+            <div className="absolute top-1/2 left-0 w-1/3 h-px bg-gradient-to-r from-luxury-gold-500 to-luxury-gold-500/50 -translate-y-1/2" />
           </div>
         </div>
       </section>
@@ -1132,61 +1138,61 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 border border-gray-100"
+      className="group bg-white rounded-3xl overflow-hidden shadow-luxury-sm hover:shadow-luxury-xl transition-all duration-500 border border-luxury-gold-500/10 hover:border-luxury-gold-500/30"
     >
-      {/* Image */}
-      <div className={`aspect-[4/3] sm:aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
+      {/* Image - Luxury treatment */}
+      <div className="aspect-square bg-gradient-to-br from-luxury-cream to-luxury-champagne relative overflow-hidden">
         {product.image ? (
           <img
             src={product.image}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
-            <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
+            <Droplets className="w-20 h-20 text-luxury-gold-500/20" />
           </div>
         )}
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex gap-2">
-          <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
+        <div className="absolute top-4 left-4 flex gap-2">
+          <span className="bg-luxury-black text-white px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider">
             ÉTAPE {product.step}
           </span>
-          <span className="bg-pink/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white">
+          <span className="bg-luxury-gold-500 text-luxury-black px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider">
             {product.time}
           </span>
         </div>
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+        {/* Hover overlay - Subtle gold shimmer */}
+        <div className="absolute inset-0 bg-gradient-to-t from-luxury-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
-      {/* Content */}
-      <div className="p-4 sm:p-6">
-        <p className="text-sm text-pink font-semibold mb-1">{product.brand}</p>
-        <h3 className="text-lg sm:text-xl font-bold text-gray-950 mb-2 sm:mb-3">{product.name}</h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed">{product.description}</p>
+      {/* Content - Luxury typography */}
+      <div className="p-6 sm:p-8">
+        <p className="text-sm text-luxury-gold-600 font-semibold tracking-wider uppercase mb-2">{product.brand}</p>
+        <h3 className="text-xl sm:text-2xl font-serif font-bold text-luxury-black mb-3">{product.name}</h3>
+        <p className="text-neutral-600 text-sm leading-relaxed mb-4">{product.description}</p>
 
-        {/* Ingredients */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+        {/* Ingredients - Gold accent */}
+        <div className="flex flex-wrap gap-2 mb-5">
           {product.ingredients.map((ing, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1 bg-lavender/20 text-gray-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium"
+              className="inline-flex items-center gap-1.5 bg-luxury-gold-500/10 text-luxury-gold-700 px-3 py-1.5 rounded-full text-xs font-medium border border-luxury-gold-500/20"
             >
-              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <Sparkles className="w-3 h-3" />
               {ing}
             </span>
           ))}
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs sm:text-sm font-semibold text-gray-900">{product.stats.satisfaction}%</span>
-            <span className="text-xs sm:text-sm text-gray-500">satisfaites</span>
+        {/* Stats - Luxury divider */}
+        <div className="flex items-center justify-between pt-5 border-t border-luxury-gold-500/20">
+          <div className="flex items-center gap-1.5">
+            <Star className="w-4 h-4 fill-luxury-gold-500 text-luxury-gold-500" />
+            <span className="text-sm font-semibold text-luxury-black">{product.stats.satisfaction}%</span>
+            <span className="text-sm text-neutral-500">satisfaites</span>
           </div>
-          <span className="text-xs sm:text-sm text-gray-500">{product.stats.duration}</span>
+          <span className="text-sm text-neutral-500">{product.stats.duration}</span>
         </div>
       </div>
     </motion.article>
@@ -1201,47 +1207,47 @@ function ReviewCard({ review, index }: { review: { id?: number; name: string; ag
   return (
     <motion.div
       variants={fadeInUp}
-      className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
+      className="bg-white rounded-2xl p-6 sm:p-8 shadow-luxury-sm border border-luxury-gold-500/10 hover:border-luxury-gold-500/30 hover:shadow-luxury-md transition-all duration-300"
     >
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-light to-lavender flex items-center justify-center text-lg">
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-luxury-cream to-luxury-champagne flex items-center justify-center text-xl border border-luxury-gold-500/20">
             {review.avatar}
           </div>
           <div>
-            <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
-            <p className="text-xs text-gray-500">{review.skinType || review.skin_type} • {review.age} ans</p>
+            <p className="font-semibold text-luxury-black text-sm">{review.name}</p>
+            <p className="text-xs text-neutral-500">{review.skinType || review.skin_type} • {review.age} ans</p>
           </div>
         </div>
         {review.verified && (
-          <span className="flex items-center gap-1 text-xs text-green-600">
+          <span className="flex items-center gap-1 text-xs text-luxury-gold-600 font-medium">
             <Check className="w-3 h-3" />
             Vérifié
           </span>
         )}
       </div>
 
-      {/* Rating */}
-      <div className="flex gap-1 mb-3">
+      {/* Rating - Gold stars */}
+      <div className="flex gap-1 mb-4">
         {[...Array(5)].map((_, i) => (
           <Star
             key={i}
             className={`w-4 h-4 ${
-              i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'
+              i < review.rating ? 'fill-luxury-gold-500 text-luxury-gold-500' : 'text-neutral-200'
             }`}
           />
         ))}
       </div>
 
-      {/* Content */}
-      <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
-      <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content || review.text}</p>
+      {/* Content - Luxury typography */}
+      <h4 className="font-serif font-semibold text-luxury-black mb-2 text-lg">{review.title}</h4>
+      <p className="text-neutral-600 text-sm leading-relaxed mb-5">{review.content || review.text}</p>
 
-      {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-400 gap-2">
+      {/* Footer - Gold accent */}
+      <div className="flex items-center justify-between text-xs text-neutral-400 gap-2 pt-4 border-t border-luxury-gold-500/10">
         <span className="shrink-0">{review.date}</span>
-        <span className="truncate">{review.helpful} utile</span>
+        <span className="truncate text-luxury-gold-600">{review.helpful} utile</span>
       </div>
     </motion.div>
   )

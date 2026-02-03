@@ -1,11 +1,12 @@
 /**
  * PUT /api/cms/publish
  * Toggle publish status for a page (all sections + linked routine)
- * Uses service_role to bypass RLS and trigger permission issues
+ * Uses service_role to bypass RLS - requires admin authentication
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdminAuth, unauthorizedResponse } from '@/lib/auth-middleware'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -13,6 +14,12 @@ const supabase = createClient(
 )
 
 export async function PUT(request: NextRequest) {
+  // Verify admin authentication
+  const auth = await verifyAdminAuth(request)
+  if (!auth.authenticated) {
+    return unauthorizedResponse(auth.error)
+  }
+
   try {
     const body = await request.json()
     const { page_slug, is_published } = body

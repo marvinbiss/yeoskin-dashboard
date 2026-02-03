@@ -12,6 +12,43 @@ module.exports = {
       // Premium K-Beauty inspired palette
       // ============================================
       colors: {
+        // ============================================
+        // LUXURY COLORS (Kylie/Sephora inspired)
+        // ============================================
+        luxury: {
+          black: '#000000',
+          white: '#FFFFFF',
+          cream: '#FAF8F5',
+          gold: {
+            50: '#FFFBEB',
+            100: '#FEF3C7',
+            200: '#FDE68A',
+            300: '#FCD34D',
+            400: '#FBBF24',
+            500: '#D4AF37',  // Primary gold
+            600: '#B8860B',
+            700: '#92400E',
+            800: '#78350F',
+            900: '#451A03',
+          },
+          rose: {
+            50: '#FFF1F2',
+            100: '#FFE4E6',
+            200: '#FECDD3',
+            300: '#FDA4AF',
+            400: '#FB7185',
+            500: '#C1121F',  // Deep rose
+            600: '#9F1239',
+            700: '#881337',
+            800: '#5C0A1D',
+            900: '#4C0519',
+          },
+          navy: '#001F3F',
+          forest: '#0B3D2C',
+          burgundy: '#800020',
+          taupe: '#B38B8B',
+          champagne: '#F7E7CE',
+        },
         // Primary Brand - Rose Gold / Soft Pink
         brand: {
           50: '#FFF5F7',
@@ -130,6 +167,9 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['Playfair Display', 'Georgia', 'Cambria', 'serif'],
+        headline: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif'],
+        accent: ['Montserrat', 'Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       fontSize: {
@@ -173,6 +213,23 @@ module.exports = {
         // Button shadows
         'button': '0 1px 2px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05)',
         'button-hover': '0 4px 8px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+        // Luxury shadows (Kylie/Sephora level)
+        'luxury-xs': '0 1px 3px rgba(0, 0, 0, 0.08)',
+        'luxury-sm': '0 2px 8px rgba(0, 0, 0, 0.1)',
+        'luxury-md': '0 4px 16px rgba(0, 0, 0, 0.12)',
+        'luxury-lg': '0 8px 32px rgba(0, 0, 0, 0.16)',
+        'luxury-xl': '0 16px 48px rgba(0, 0, 0, 0.18)',
+        'luxury-2xl': '0 24px 64px rgba(0, 0, 0, 0.2)',
+        // Gold glow accents
+        'gold-glow': '0 0 20px rgba(212, 175, 55, 0.3)',
+        'gold-glow-lg': '0 0 40px rgba(212, 175, 55, 0.4)',
+        'gold-glow-xl': '0 0 60px rgba(212, 175, 55, 0.5)',
+        // Rose glow
+        'rose-glow': '0 0 20px rgba(193, 18, 31, 0.2)',
+        'rose-glow-lg': '0 0 40px rgba(193, 18, 31, 0.3)',
+        // Premium inset
+        'inset-gold': 'inset 0 1px 0 rgba(212, 175, 55, 0.2)',
+        'inset-luxury': 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
       },
       // ============================================
       // BORDER RADIUS - Refined curves
@@ -206,6 +263,12 @@ module.exports = {
         // Loading
         'spin-slow': 'spin 2s linear infinite',
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        // Luxury animations
+        'lift': 'lift 0.3s ease-out forwards',
+        'shimmer-gold': 'shimmerGold 3s linear infinite',
+        'glow-gold': 'glowGold 2s ease-in-out infinite',
+        'border-shine': 'borderShine 3s linear infinite',
+        'luxury-pulse': 'luxuryPulse 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -261,6 +324,28 @@ module.exports = {
           '25%': { transform: 'rotate(-3deg)' },
           '75%': { transform: 'rotate(3deg)' },
         },
+        // Luxury keyframes
+        lift: {
+          '0%': { transform: 'translateY(0)', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' },
+          '100%': { transform: 'translateY(-8px)', boxShadow: '0 12px 24px rgba(0,0,0,0.15)' },
+        },
+        shimmerGold: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        glowGold: {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(212, 175, 55, 0.2)' },
+          '50%': { boxShadow: '0 0 40px rgba(212, 175, 55, 0.4)' },
+        },
+        borderShine: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        luxuryPulse: {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.9', transform: 'scale(1.02)' },
+        },
       },
       // ============================================
       // TRANSITIONS
@@ -290,6 +375,16 @@ module.exports = {
         'gradient-glow': 'radial-gradient(circle at center, rgba(255,107,157,0.15) 0%, transparent 70%)',
         'gradient-mesh': 'radial-gradient(at 40% 20%, #FFF5F7 0px, transparent 50%), radial-gradient(at 80% 0%, #FAF5FF 0px, transparent 50%), radial-gradient(at 0% 50%, #ECFDF5 0px, transparent 50%)',
         'shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+        // Luxury gradients (Kylie/Sephora level)
+        'gradient-luxury': 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%)',
+        'gradient-gold': 'linear-gradient(135deg, #D4AF37 0%, #F7E7CE 50%, #D4AF37 100%)',
+        'gradient-rose-gold': 'linear-gradient(135deg, #B76E79 0%, #F7E7CE 50%, #D4AF37 100%)',
+        'gradient-cream': 'linear-gradient(135deg, #FAF8F5 0%, #FFFFFF 50%, #FAF8F5 100%)',
+        'gradient-noir': 'linear-gradient(180deg, #000000 0%, #1a1a1a 100%)',
+        'gradient-luxury-radial': 'radial-gradient(ellipse at center, #1a1a1a 0%, #000000 100%)',
+        'shimmer-gold': 'linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent)',
+        'shimmer-rose': 'linear-gradient(90deg, transparent, rgba(193,18,31,0.2), transparent)',
+        'border-gradient-gold': 'linear-gradient(90deg, transparent, #D4AF37, transparent)',
       },
     },
   },
