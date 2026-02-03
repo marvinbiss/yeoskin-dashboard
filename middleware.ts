@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Handle yeoskin.fr - serve /c/ routes + /auth/ routes, redirect everything else to yeoskin.com
+  // Handle yeoskin.fr - serve /c/ routes + /auth/ routes + /shop/ routes, redirect everything else to yeoskin.com
   if (CREATOR_DOMAINS.includes(hostname.replace(':443', '').replace(':80', ''))) {
     const path = url.pathname
 
@@ -38,6 +38,11 @@ export function middleware(request: NextRequest) {
 
     // /auth/* routes for password setup
     if (path.startsWith('/auth')) {
+      return NextResponse.next()
+    }
+
+    // /shop/* routes for public sales pages
+    if (path.startsWith('/shop')) {
       return NextResponse.next()
     }
 
