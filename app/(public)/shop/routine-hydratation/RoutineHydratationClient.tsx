@@ -22,8 +22,7 @@ import {
   Leaf,
   Award,
   Users,
-  Package,
-  Tag
+  Package
 } from 'lucide-react'
 
 // ============================================================================
@@ -33,52 +32,52 @@ import {
 type VariantType = 'base' | 'upsell_1' | 'upsell_2'
 
 const PRICES: Record<VariantType, number> = {
-  base: 59.90,
-  upsell_1: 69.90,
-  upsell_2: 79.90,
+  base: 79,
+  upsell_1: 99,
+  upsell_2: 119,
 }
 
 const ORIGINAL_PRICES: Record<VariantType, number> = {
-  base: 70.85,
-  upsell_1: 89.80,
-  upsell_2: 111.75,
+  base: 110,
+  upsell_1: 140,
+  upsell_2: 170,
 }
 
 const PRODUCTS = [
   {
     id: 1,
-    name: 'Advanced Snail 96 Mucin Essence',
+    name: 'Low pH Good Morning Gel Cleanser',
     brand: 'COSRX',
     step: 1,
     time: 'MATIN & SOIR',
-    description: 'Essence légère à 96% de mucine d\'escargot. Hydrate en profondeur, répare la barrière cutanée et lisse la texture de la peau.',
-    ingredients: ['Snail Mucin 96%', 'Hyaluronic Acid', 'Allantoin'],
-    stats: { satisfaction: 97, duration: '100ml • 3 mois' },
-    image: '/images/shop/cosrx-snail-essence.jpg',
+    description: 'Nettoie en douceur sans décaper. Formule pH 5.5 qui respecte la barrière cutanée. Parfait pour les peaux sensibles.',
+    ingredients: ['Tea Tree Oil', 'BHA 0.5%', 'Betaine Salicylate'],
+    stats: { satisfaction: 94, duration: '150ml • 4 mois' },
+    image: '/images/shop/cosrx-cleanser.jpg',
     color: 'from-green-50 to-mint',
   },
   {
     id: 2,
-    name: 'Advanced Snail 92 All In One Cream',
-    brand: 'COSRX',
+    name: 'Glow Deep Serum',
+    brand: 'Beauty of Joseon',
     step: 2,
     time: 'MATIN & SOIR',
-    description: 'Crème tout-en-un enrichie en mucine d\'escargot. Nourrit, répare et protège la peau. Texture fondante non grasse.',
-    ingredients: ['Snail Secretion 92%', 'Betaine', 'Allantoin'],
-    stats: { satisfaction: 94, duration: '100ml • 3 mois' },
-    image: '/images/shop/cosrx-snail-cream.jpg',
+    description: 'Essence concentrée à base de propolis et niacinamide. Pénètre instantanément, booste l\'éclat et unifie le teint.',
+    ingredients: ['Propolis 60%', 'Niacinamide 2%', 'Probiotics'],
+    stats: { satisfaction: 97, duration: '30ml • 3 mois' },
+    image: '/images/shop/boj-serum.jpg',
     color: 'from-amber-50 to-peach',
   },
   {
     id: 3,
-    name: 'Oil-Free Ultra-Moisturizing Lotion',
+    name: 'Advanced Snail 92 Cream',
     brand: 'COSRX',
     step: 3,
     time: 'MATIN & SOIR',
-    description: 'Lotion hydratante sans huile à base de sève de bouleau. Hydratation longue durée, fini mat. Idéale peaux mixtes à grasses.',
-    ingredients: ['Birch Sap 70%', 'Hyaluronic Acid', 'Betaine'],
-    stats: { satisfaction: 91, duration: '100ml • 3 mois' },
-    image: '/images/shop/cosrx-lotion.jpg',
+    description: 'Nourrit et protège toute la journée. Texture légère non grasse, absorption rapide. Répare et régénère.',
+    ingredients: ['Snail Secretion 92%', 'Betaine', 'Allantoin'],
+    stats: { satisfaction: 89, duration: '100ml • 3 mois' },
+    image: '/images/shop/cosrx-cream.jpg',
     color: 'from-purple-50 to-lavender',
   },
 ]
@@ -86,25 +85,25 @@ const PRODUCTS = [
 const UPSELLS = [
   {
     id: 'upsell_1',
-    name: 'Revive Serum Ginseng+Snail Mucin',
+    name: 'Plum Skin Refining Toner',
     brand: 'Beauty of Joseon',
     badge: '+1 PRODUIT',
-    benefit: 'Éclat + Régénération',
-    description: 'Anti-âge naturel',
-    price: 69.90,
-    originalPrice: 89.80,
-    image: '/images/shop/boj-revive-serum.jpg',
+    benefit: 'Équilibre le pH',
+    description: 'Prépare la peau',
+    price: 99,
+    originalPrice: 140,
+    image: '/images/shop/boj-toner.jpg',
   },
   {
     id: 'upsell_2',
-    name: 'Glow Deep Serum + Relief Sun',
+    name: 'Revive Eye Serum',
     brand: 'Beauty of Joseon',
     badge: '+2 PRODUITS',
-    benefit: 'Éclat + Protection SPF',
-    description: 'Routine complète',
-    price: 79.90,
-    originalPrice: 111.75,
-    image: '/images/shop/boj-glow-sun.jpg',
+    benefit: 'Anti-âge intensif',
+    description: 'Éclat instantané',
+    price: 119,
+    originalPrice: 170,
+    image: '/images/shop/boj-eye.jpg',
   },
 ]
 
@@ -223,109 +222,11 @@ const scaleIn: Variants = {
 // MAIN COMPONENT
 // ============================================================================
 
-interface RoutineData {
-  id?: string
-  title?: string
-  slug?: string
-  objective?: string
-  description?: string
-  base_products?: { name: string; brand: string; image_url?: string; description?: string }[]
-  base_price?: number
-  upsell_1_product?: { name: string; brand: string; image_url?: string; description?: string }
-  upsell_1_price?: number
-  upsell_1_original_price?: number
-  upsell_2_products?: { name: string; brand: string; image_url?: string; description?: string }[]
-  upsell_2_price?: number
-  upsell_2_original_price?: number
-  image_url?: string
-  before_after_1_before_url?: string
-  before_after_1_after_url?: string
-  before_after_2_before_url?: string
-  before_after_2_after_url?: string
-  is_active?: boolean
-}
-
-interface Props {
-  cms?: {
-    hero?: { badge?: string; title?: string; subtitle?: string; stats?: { rating?: number; reviews?: number } }
-    pricing?: { base?: { price?: number; original_price?: number }; upsell_1?: { price?: number; original_price?: number }; upsell_2?: { price?: number; original_price?: number } }
-    products?: { section_title?: string; items?: any[] }
-    reviews?: { section_title?: string; items?: any[] }
-    faq?: { section_title?: string; items?: any[] }
-    cta?: { title?: string; button_text?: string }
-  }
-  routine?: RoutineData | null
-}
-
-export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
-  // Use CMS data if available, otherwise defaults
-  const cmsHero = cms.hero || {}
-  const cmsFaq = cms.faq || {}
-  const cmsCta = cms.cta || {}
-  const reviews = cms.reviews?.items?.length ? cms.reviews.items : REVIEWS
-
-  // PRICING: routine table is source of truth, fallback to CMS, then hardcoded
-  const cmsPricing = cms.pricing || {}
-  const currentPrices = {
-    base: routine?.base_price ?? cmsPricing.base?.price ?? PRICES.base,
-    upsell_1: routine?.upsell_1_price ?? cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
-    upsell_2: routine?.upsell_2_price ?? cmsPricing.upsell_2?.price ?? PRICES.upsell_2,
-  }
-  const currentOriginalPrices = {
-    base: cmsPricing.base?.original_price ?? ORIGINAL_PRICES.base,
-    upsell_1: routine?.upsell_1_original_price ?? cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
-    upsell_2: routine?.upsell_2_original_price ?? cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
-  }
-
-  // PRODUCTS: routine table is source of truth, fallback to hardcoded
-  const displayProducts = routine?.base_products?.length === 3
-    ? routine.base_products.map((p, i) => ({
-        ...PRODUCTS[i],
-        name: p.name || PRODUCTS[i].name,
-        brand: p.brand || PRODUCTS[i].brand,
-        description: p.description || PRODUCTS[i].description,
-        image: p.image_url || PRODUCTS[i].image,
-      }))
-    : PRODUCTS
-
-  const displayUpsells = [
-    routine?.upsell_1_product ? {
-      ...UPSELLS[0],
-      name: routine.upsell_1_product.name || UPSELLS[0].name,
-      brand: routine.upsell_1_product.brand || UPSELLS[0].brand,
-      image: routine.upsell_1_product.image_url || UPSELLS[0].image,
-      price: currentPrices.upsell_1,
-      originalPrice: currentOriginalPrices.upsell_1,
-    } : UPSELLS[0],
-    routine?.upsell_2_products?.[0] ? {
-      ...UPSELLS[1],
-      name: routine.upsell_2_products.map(p => p.name).join(' + ') || UPSELLS[1].name,
-      brand: routine.upsell_2_products[0].brand || UPSELLS[1].brand,
-      image: routine.upsell_2_products[0].image_url || UPSELLS[1].image,
-      price: currentPrices.upsell_2,
-      originalPrice: currentOriginalPrices.upsell_2,
-    } : UPSELLS[1],
-  ]
-
-  // CMS Hero content
-  const heroTitle = cmsHero.title || routine?.title || 'Routine Hydratation'
-  const heroSubtitle = cmsHero.subtitle || 'en 3 Gestes'
-  const heroBadge = cmsHero.badge || 'BEST-SELLER'
-  const heroRating = cmsHero.stats?.rating || 4.9
-  const heroReviews = cmsHero.stats?.reviews || 2847
-
-  // CMS FAQ content
-  const faqItems = cmsFaq.items?.length ? cmsFaq.items : FAQS
-
-  // CMS CTA content
-  const ctaTitle = cmsCta.title || 'Prête à Transformer Ta Peau ?'
-  const ctaButton = cmsCta.button_text || 'Ajouter au panier'
-
+export default function RoutineHydratationClient() {
   const [selectedVariant, setSelectedVariant] = useState<VariantType>('base')
   const [isLoading, setIsLoading] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
   const [showStickyBar, setShowStickyBar] = useState(false)
-  const [creatorCode, setCreatorCode] = useState<string | null>(null)
 
   // Refs for scroll detection
   const heroRef = useRef<HTMLDivElement>(null)
@@ -342,12 +243,6 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
 
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  // Read creator discount code from sessionStorage
-  useEffect(() => {
-    const code = sessionStorage.getItem('yeoskin_creator_code')
-    if (code) setCreatorCode(code)
   }, [])
 
   // Get creator slug from URL params or sessionStorage
@@ -384,7 +279,6 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
         body: JSON.stringify({
           creator_slug: creatorSlug,
           variant: selectedVariant,
-          routine_slug: 'routine-hydratation',
         }),
       })
 
@@ -408,15 +302,15 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* HERO SECTION */}
       {/* ================================================================== */}
-      <section ref={heroRef} className="relative min-h-0 lg:min-h-screen flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex items-center overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-pink-light via-white to-lavender-light opacity-50" />
 
         {/* Floating elements */}
-        <div className="absolute top-20 left-10 w-40 sm:w-64 h-40 sm:h-64 bg-pink/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-10 w-60 sm:w-96 h-60 sm:h-96 bg-lavender/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-20 left-10 w-64 h-64 bg-pink/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-lavender/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-20 lg:py-0">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-20 lg:py-0">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: Image */}
             <motion.div
@@ -425,44 +319,37 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               transition={{ duration: 0.8 }}
               className="relative order-2 lg:order-1"
             >
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
-                {routine?.image_url ? (
-                  <img
-                    src={routine.image_url}
-                    alt={heroTitle}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
-                      <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
-                    </div>
+              <div className="relative aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light p-8">
+                {/* Product image placeholder */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <Sparkles className="w-24 h-24 text-pink mx-auto mb-4" />
+                    <p className="text-gray-600 text-sm">Image Routine Hydratation</p>
                   </div>
-                )}
+                </div>
 
                 {/* Floating badges */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white rounded-full px-3 sm:px-4 py-1.5 sm:py-2 shadow-lg"
+                  className="absolute top-4 right-4 bg-white rounded-full px-4 py-2 shadow-lg"
                 >
-                  <span className="text-xs sm:text-sm font-semibold text-pink">-15%</span>
+                  <span className="text-sm font-semibold text-pink">-28%</span>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.7 }}
-                  className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-lg flex items-center gap-1.5 sm:gap-2"
+                  className="absolute bottom-4 left-4 bg-white rounded-2xl p-3 shadow-lg flex items-center gap-2"
                 >
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <span className="text-xs sm:text-sm font-medium">{heroRating}</span>
+                  <span className="text-sm font-medium">4.9 (2,847)</span>
                 </motion.div>
               </div>
             </motion.div>
@@ -482,24 +369,24 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 className="inline-flex items-center gap-2 bg-pink-light text-pink px-4 py-2 rounded-full text-sm font-medium mb-6"
               >
                 <Sparkles className="w-4 h-4" />
-                {heroBadge}
+                Routine Best-seller 2024
               </motion.div>
 
               {/* Title */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-4 sm:mb-6">
-                {heroTitle}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-950 tracking-tight leading-tight mb-6">
+                Routine Hydratation
                 <br />
-                <span className="text-pink">{heroSubtitle}</span>
+                <span className="text-pink">en 3 Gestes</span>
               </h1>
 
               {/* Description */}
-              <p className="text-base sm:text-xl text-gray-600 leading-relaxed mb-4 sm:mb-6 max-w-lg">
+              <p className="text-xl text-gray-600 leading-relaxed mb-6 max-w-lg">
                 La routine K-beauty minimaliste qui transforme ta peau en 4 semaines.
                 3 produits iconiques, 1 geste matin & soir.
               </p>
 
               {/* Trust badges */}
-              <div className="flex flex-wrap gap-2 sm:gap-3 mb-6 sm:mb-8">
+              <div className="flex flex-wrap gap-3 mb-8">
                 {[
                   { icon: Leaf, label: 'Vegan' },
                   { icon: Heart, label: 'Cruelty-free' },
@@ -507,52 +394,52 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 ].map((badge, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1.5 sm:gap-2 bg-gray-100 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm"
+                    className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm"
                   >
-                    <badge.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <badge.icon className="w-4 h-4" />
                     {badge.label}
                   </span>
                 ))}
               </div>
 
               {/* Price */}
-              <div className="mb-6 sm:mb-8">
-                <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
-                  <span className="text-3xl sm:text-5xl font-bold text-gray-950">{currentPrices[selectedVariant]}€</span>
-                  <span className="text-base sm:text-xl text-gray-400 line-through">{currentOriginalPrices[selectedVariant]}€</span>
-                  <span className="bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold">
-                    Économise {(currentOriginalPrices[selectedVariant] - currentPrices[selectedVariant]).toFixed(0)}€
+              <div className="mb-8">
+                <div className="flex items-baseline gap-4">
+                  <span className="text-5xl font-bold text-gray-950">{PRICES[selectedVariant]}€</span>
+                  <span className="text-xl text-gray-400 line-through">{ORIGINAL_PRICES[selectedVariant]}€</span>
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                    Économise {ORIGINAL_PRICES[selectedVariant] - PRICES[selectedVariant]}€
                   </span>
                 </div>
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleCheckout}
                   disabled={isLoading}
-                  className="group bg-pink hover:bg-pink-dark text-white font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-lg tracking-tight flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="group bg-pink hover:bg-pink-dark text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-lg tracking-tight flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isLoading ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
                     <>
                       <ShoppingBag className="w-5 h-5" />
-                      Ajouter au panier • {currentPrices[selectedVariant]}€
+                      Ajouter au panier • {PRICES[selectedVariant]}€
                     </>
                   )}
                 </button>
 
                 <a
                   href="#products"
-                  className="bg-white border-2 border-gray-900 text-gray-900 font-semibold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full transition-all duration-300 hover:bg-gray-900 hover:text-white text-base sm:text-lg text-center"
+                  className="bg-white border-2 border-gray-900 text-gray-900 font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:bg-gray-900 hover:text-white text-lg text-center"
                 >
                   Voir les produits
                 </a>
               </div>
 
               {/* Micro-trust */}
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 sm:mt-6 text-xs sm:text-sm text-gray-500">
+              <div className="flex items-center gap-6 mt-6 text-sm text-gray-500">
                 <span className="flex items-center gap-2">
                   <Truck className="w-4 h-4" />
                   Livraison offerte
@@ -571,7 +458,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:block"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
           <motion.div
             animate={{ y: [0, 10, 0] }}
@@ -586,9 +473,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* SOCIAL PROOF BAR */}
       {/* ================================================================== */}
-      <section className="bg-gray-950 py-4 sm:py-6">
+      <section className="bg-gray-950 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {STATS.map((stat, i) => (
               <motion.div
                 key={i}
@@ -598,9 +485,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <stat.icon className="w-4 h-4 sm:w-5 sm:h-5 text-pink mx-auto mb-1 sm:mb-2" />
-                <p className="text-lg sm:text-2xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-gray-400">{stat.label}</p>
+                <stat.icon className="w-5 h-5 text-pink mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">{stat.value}</p>
+                <p className="text-sm text-gray-400">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -610,7 +497,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* PRODUCTS SECTION */}
       {/* ================================================================== */}
-      <section id="products" className="py-12 sm:py-24 bg-white">
+      <section id="products" className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           {/* Section header */}
           <motion.div
@@ -618,15 +505,15 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Ce qui est inclus
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               3 Produits. 3 Étapes. Résultats Garantis.
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Chaque produit a été sélectionné pour sa qualité exceptionnelle et son efficacité prouvée.
             </p>
           </motion.div>
@@ -637,9 +524,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid md:grid-cols-3 gap-4 sm:gap-8"
+            className="grid md:grid-cols-3 gap-8"
           >
-            {displayProducts.map((product, i) => (
+            {PRODUCTS.map((product, i) => (
               <ProductCard key={product.id} product={product} index={i} />
             ))}
           </motion.div>
@@ -649,28 +536,28 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* HOW TO USE SECTION */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Mode d'emploi
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               2 Minutes Matin & Soir
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Une routine simple qui s'intègre facilement dans ton quotidien.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-4 sm:gap-8">
-            {displayProducts.map((product, i) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {PRODUCTS.map((product, i) => (
               <motion.div
                 key={product.id}
                 initial="hidden"
@@ -680,12 +567,12 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 transition={{ delay: i * 0.1 }}
                 className="text-center"
               >
-                <div className="w-14 h-14 sm:w-20 sm:h-20 bg-pink text-white rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold mx-auto mb-4 sm:mb-6">
+                <div className="w-20 h-20 bg-pink text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto mb-6">
                   {i + 1}
                 </div>
-                <h3 className="text-base sm:text-xl font-bold text-gray-950 mb-1 sm:mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
-                <p className="text-sm sm:text-base text-gray-600 mb-1 sm:mb-2">{product.brand}</p>
-                <p className="text-xs sm:text-sm text-pink font-medium">{product.time}</p>
+                <h3 className="text-xl font-bold text-gray-950 mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
+                <p className="text-gray-600 mb-2">{product.brand}</p>
+                <p className="text-sm text-pink font-medium">{product.time}</p>
               </motion.div>
             ))}
           </div>
@@ -701,43 +588,39 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* BEFORE / AFTER SECTION */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-white">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Résultats réels
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               Transformations Vérifiées
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Des résultats visibles en 4 semaines, validés par notre communauté.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-4 sm:gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {[
               {
                 name: 'Claire, 26 ans',
                 issue: 'Pores dilatés, teint terne',
                 result: 'Pores resserrés, éclat retrouvé',
                 duration: '4 semaines',
-                beforeImage: routine?.before_after_1_before_url,
-                afterImage: routine?.before_after_1_after_url,
               },
               {
                 name: 'Julie, 32 ans',
                 issue: 'Déshydratation, ridules',
                 result: 'Peau repulpée, ridules atténuées',
                 duration: '6 semaines',
-                beforeImage: routine?.before_after_2_before_url,
-                afterImage: routine?.before_after_2_after_url,
               },
             ].map((testimonial, i) => (
               <motion.div
@@ -746,22 +629,14 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={scaleIn}
-                className="bg-gray-50 rounded-2xl sm:rounded-3xl p-5 sm:p-8"
+                className="bg-gray-50 rounded-3xl p-8"
               >
                 <div className="flex gap-4 mb-6">
-                  <div className="flex-1 aspect-square bg-gray-200 rounded-2xl overflow-hidden flex items-center justify-center">
-                    {testimonial.beforeImage ? (
-                      <img src={testimonial.beforeImage} alt="Avant" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-gray-400 text-sm">Avant</span>
-                    )}
+                  <div className="flex-1 aspect-square bg-gray-200 rounded-2xl flex items-center justify-center">
+                    <span className="text-gray-400 text-sm">Avant</span>
                   </div>
-                  <div className="flex-1 aspect-square bg-pink-light rounded-2xl overflow-hidden flex items-center justify-center">
-                    {testimonial.afterImage ? (
-                      <img src={testimonial.afterImage} alt="Après" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-pink text-sm">Après</span>
-                    )}
+                  <div className="flex-1 aspect-square bg-pink-light rounded-2xl flex items-center justify-center">
+                    <span className="text-pink text-sm">Après</span>
                   </div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-950 mb-2">{testimonial.name}</h3>
@@ -784,27 +659,27 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* REVIEWS SECTION */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Avis vérifiés
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               Ce Qu'Elles En Pensent
             </h2>
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-4">
+            <div className="flex items-center justify-center gap-2 mb-4">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 sm:w-6 sm:h-6 fill-yellow-400 text-yellow-400" />
+                <Star key={i} className="w-6 h-6 fill-yellow-400 text-yellow-400" />
               ))}
-              <span className="text-base sm:text-xl font-bold text-gray-950 ml-2">{heroRating}/5</span>
-              <span className="text-xs sm:text-base text-gray-600">({heroReviews.toLocaleString()} avis)</span>
+              <span className="text-xl font-bold text-gray-950 ml-2">4.9/5</span>
+              <span className="text-gray-600">(2,847 avis)</span>
             </div>
           </motion.div>
 
@@ -813,10 +688,10 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             whileInView="visible"
             viewport={{ once: true }}
             variants={staggerContainer}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6"
           >
-            {reviews.map((review, i) => (
-              <ReviewCard key={review.id || i} review={review} index={i} />
+            {REVIEWS.map((review, i) => (
+              <ReviewCard key={review.id} review={review} index={i} />
             ))}
           </motion.div>
         </div>
@@ -825,38 +700,27 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* UPSELLS SECTION */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-white">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
             <span className="text-pink font-semibold text-sm tracking-widest uppercase mb-4 block">
               Booste ta routine
             </span>
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               Ajoute un Booster
             </h2>
-            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               84% de nos clients ajoutent au moins 1 produit supplémentaire.
             </p>
           </motion.div>
 
-          {creatorCode && (
-            <div className="flex items-center justify-center mb-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-                <Tag className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">
-                  Code promo <strong>{creatorCode}</strong> appliqué automatiquement
-                </span>
-              </div>
-            </div>
-          )}
-
-          <div className="grid md:grid-cols-3 gap-3 sm:gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {/* Base option */}
             <motion.div
               initial="hidden"
@@ -864,7 +728,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               viewport={{ once: true }}
               variants={scaleIn}
               onClick={() => setSelectedVariant('base')}
-              className={`cursor-pointer p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
+              className={`cursor-pointer p-6 rounded-3xl border-2 transition-all duration-300 ${
                 selectedVariant === 'base'
                   ? 'border-pink bg-pink-light/30 shadow-lg'
                   : 'border-gray-200 hover:border-gray-300'
@@ -874,8 +738,8 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 <span className="inline-block bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
                   PACK DE BASE
                 </span>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-2">{currentPrices.base}€</p>
-                <p className="text-gray-400 line-through text-sm mb-4">{currentOriginalPrices.base}€</p>
+                <p className="text-3xl font-bold text-gray-950 mb-2">79€</p>
+                <p className="text-gray-400 line-through text-sm mb-4">110€</p>
                 <p className="text-gray-600 text-sm">3 produits essentiels</p>
               </div>
               {selectedVariant === 'base' && (
@@ -886,7 +750,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             </motion.div>
 
             {/* Upsells */}
-            {displayUpsells.map((upsell, i) => (
+            {UPSELLS.map((upsell, i) => (
               <motion.div
                 key={upsell.id}
                 initial="hidden"
@@ -895,7 +759,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 variants={scaleIn}
                 transition={{ delay: (i + 1) * 0.1 }}
                 onClick={() => setSelectedVariant(upsell.id as VariantType)}
-                className={`cursor-pointer p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 ${
+                className={`cursor-pointer p-6 rounded-3xl border-2 transition-all duration-300 ${
                   selectedVariant === upsell.id
                     ? 'border-pink bg-pink-light/30 shadow-lg'
                     : 'border-gray-200 hover:border-gray-300'
@@ -905,26 +769,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                   <span className="inline-block bg-pink text-white px-3 py-1 rounded-full text-sm font-medium mb-4">
                     {upsell.badge}
                   </span>
-
-                  {/* Product Image */}
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 rounded-xl overflow-hidden bg-gradient-to-br from-pink-light to-lavender-light">
-                    {upsell.image ? (
-                      <img
-                        src={upsell.image}
-                        alt={upsell.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-8 h-8 text-pink/40" />
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 className="font-bold text-gray-950 mb-1 text-sm sm:text-base">{upsell.name}</h3>
-                  <p className="text-xs sm:text-sm text-gray-500 mb-1">{upsell.brand}</p>
-                  <p className="text-xs sm:text-sm text-pink font-medium mb-3">{upsell.benefit}</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-950 mb-1">{upsell.price}€</p>
+                  <h3 className="font-bold text-gray-950 mb-1">{upsell.name}</h3>
+                  <p className="text-sm text-gray-600 mb-4">{upsell.benefit}</p>
+                  <p className="text-3xl font-bold text-gray-950 mb-2">{upsell.price}€</p>
                   <p className="text-gray-400 line-through text-sm">au lieu de {upsell.originalPrice}€</p>
                 </div>
                 {selectedVariant === upsell.id && (
@@ -937,19 +784,19 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           </div>
 
           {/* CTA */}
-          <div className="text-center mt-8 sm:mt-12">
+          <div className="text-center mt-12">
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="bg-pink hover:bg-pink-dark text-white font-semibold px-6 sm:px-12 py-4 sm:py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-xl tracking-tight inline-flex items-center gap-2 sm:gap-3 disabled:opacity-50"
+              className="bg-pink hover:bg-pink-dark text-white font-semibold px-12 py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-xl tracking-tight inline-flex items-center gap-3 disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
-                  Commander • {currentPrices[selectedVariant]}€
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <ShoppingBag className="w-6 h-6" />
+                  Commander ma routine • {PRICES[selectedVariant]}€
+                  <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </button>
@@ -960,16 +807,16 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FAQ SECTION */}
       {/* ================================================================== */}
-      <section className="py-12 sm:py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-8">
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
             variants={fadeInUp}
-            className="text-center mb-8 sm:mb-16"
+            className="text-center mb-16"
           >
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-gray-950 mb-3 sm:mb-4">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-950 mb-4">
               Questions Fréquentes
             </h2>
           </motion.div>
@@ -981,14 +828,14 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             variants={staggerContainer}
             className="space-y-4"
           >
-            {faqItems.map((faq: any, i: number) => (
+            {FAQS.map((faq, i) => (
               <motion.div key={i} variants={fadeInUp}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full text-left p-4 sm:p-6 bg-white rounded-xl sm:rounded-2xl border border-gray-200 hover:border-gray-300 transition-all"
+                  className="w-full text-left p-6 bg-white rounded-2xl border border-gray-200 hover:border-gray-300 transition-all"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-sm sm:text-base text-gray-950">{faq.question}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-950">{faq.question}</span>
                     <ChevronDown
                       className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
                         openFaq === i ? 'rotate-180' : ''
@@ -1004,7 +851,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <p className="pt-3 sm:pt-4 text-sm sm:text-base text-gray-600">{faq.answer}</p>
+                        <p className="pt-4 text-gray-600">{faq.answer}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -1025,7 +872,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FINAL CTA SECTION */}
       {/* ================================================================== */}
-      <section ref={ctaRef} className="py-12 sm:py-24 bg-gradient-to-br from-pink to-pink-dark">
+      <section ref={ctaRef} className="py-24 bg-gradient-to-br from-pink to-pink-dark">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
           <motion.div
             initial="hidden"
@@ -1033,43 +880,43 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             viewport={{ once: true }}
             variants={fadeInUp}
           >
-            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-              {ctaTitle}
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+              Prête à Transformer Ta Peau ?
             </h2>
-            <p className="text-base sm:text-xl text-white/80 mb-6 sm:mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
               Rejoins 15,234 personnes qui ont transformé leur peau avec cette routine K-beauty essentielle.
             </p>
 
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="bg-white text-pink hover:bg-gray-100 font-semibold px-6 sm:px-12 py-4 sm:py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-base sm:text-xl tracking-tight inline-flex items-center gap-2 sm:gap-3 disabled:opacity-50 mb-6 sm:mb-8"
+              className="bg-white text-pink hover:bg-gray-100 font-semibold px-12 py-5 rounded-full transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl active:scale-95 text-xl tracking-tight inline-flex items-center gap-3 disabled:opacity-50 mb-8"
             >
               {isLoading ? (
                 <div className="w-6 h-6 border-2 border-pink/30 border-t-pink rounded-full animate-spin" />
               ) : (
                 <>
-                  <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6" />
-                  Ajouter au panier • {currentPrices[selectedVariant]}€
+                  <ShoppingBag className="w-6 h-6" />
+                  Ajouter au panier • {PRICES[selectedVariant]}€
                 </>
               )}
             </button>
 
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 sm:gap-6 text-white/70 text-xs sm:text-sm">
-              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
-                <Truck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <div className="flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm">
+              <span className="flex items-center gap-2">
+                <Truck className="w-4 h-4" />
                 Livraison offerte
               </span>
-              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
-                <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                30j remboursé
+              <span className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4" />
+                30j satisfait ou remboursé
               </span>
-              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
-                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
                 Paiement sécurisé
               </span>
-              <span className="flex items-center justify-center gap-1.5 sm:gap-2">
-                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
                 Support 7j/7
               </span>
             </div>
@@ -1090,8 +937,8 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-bold text-gray-950">{currentPrices[selectedVariant]}€</p>
-                <p className="text-sm text-gray-500 line-through">{currentOriginalPrices[selectedVariant]}€</p>
+                <p className="font-bold text-gray-950">{PRICES[selectedVariant]}€</p>
+                <p className="text-sm text-gray-500 line-through">{ORIGINAL_PRICES[selectedVariant]}€</p>
               </div>
               <button
                 onClick={handleCheckout}
@@ -1132,22 +979,14 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
       initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ delay: index * 0.1, duration: 0.6 }}
-      className="group bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 border border-gray-100"
+      className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500 border border-gray-100"
     >
       {/* Image */}
-      <div className={`aspect-[4/3] sm:aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
-        {product.image ? (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Droplets className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400/30" />
-          </div>
-        )}
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 flex gap-2">
+      <div className={`aspect-square bg-gradient-to-br ${product.color} relative overflow-hidden`}>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Droplets className="w-20 h-20 text-gray-400/30" />
+        </div>
+        <div className="absolute top-4 left-4 flex gap-2">
           <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-gray-700">
             ÉTAPE {product.step}
           </span>
@@ -1161,32 +1000,32 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-6">
+      <div className="p-6">
         <p className="text-sm text-pink font-semibold mb-1">{product.brand}</p>
-        <h3 className="text-lg sm:text-xl font-bold text-gray-950 mb-2 sm:mb-3">{product.name}</h3>
-        <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 leading-relaxed">{product.description}</p>
+        <h3 className="text-xl font-bold text-gray-950 mb-3">{product.name}</h3>
+        <p className="text-gray-600 text-sm mb-4 leading-relaxed">{product.description}</p>
 
         {/* Ingredients */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           {product.ingredients.map((ing, i) => (
             <span
               key={i}
-              className="inline-flex items-center gap-1 bg-lavender/20 text-gray-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium"
+              className="inline-flex items-center gap-1 bg-lavender/20 text-gray-700 px-3 py-1 rounded-full text-xs font-medium"
             >
-              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+              <Sparkles className="w-3 h-3" />
               {ing}
             </span>
           ))}
         </div>
 
         {/* Stats */}
-        <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs sm:text-sm font-semibold text-gray-900">{product.stats.satisfaction}%</span>
-            <span className="text-xs sm:text-sm text-gray-500">satisfaites</span>
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-semibold text-gray-900">{product.stats.satisfaction}%</span>
+            <span className="text-sm text-gray-500">satisfaites</span>
           </div>
-          <span className="text-xs sm:text-sm text-gray-500">{product.stats.duration}</span>
+          <span className="text-sm text-gray-500">{product.stats.duration}</span>
         </div>
       </div>
     </motion.article>
@@ -1197,11 +1036,11 @@ function ProductCard({ product, index }: { product: typeof PRODUCTS[0]; index: n
 // REVIEW CARD COMPONENT
 // ============================================================================
 
-function ReviewCard({ review, index }: { review: { id?: number; name: string; age?: number; skinType?: string; skin_type?: string; rating: number; title: string; content?: string; text?: string; date?: string; verified?: boolean; helpful?: number; avatar?: string }; index: number }) {
+function ReviewCard({ review, index }: { review: typeof REVIEWS[0]; index: number }) {
   return (
     <motion.div
       variants={fadeInUp}
-      className="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100"
+      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
@@ -1211,7 +1050,7 @@ function ReviewCard({ review, index }: { review: { id?: number; name: string; ag
           </div>
           <div>
             <p className="font-semibold text-gray-900 text-sm">{review.name}</p>
-            <p className="text-xs text-gray-500">{review.skinType || review.skin_type} • {review.age} ans</p>
+            <p className="text-xs text-gray-500">{review.skinType} • {review.age} ans</p>
           </div>
         </div>
         {review.verified && (
@@ -1236,12 +1075,12 @@ function ReviewCard({ review, index }: { review: { id?: number; name: string; ag
 
       {/* Content */}
       <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
-      <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content || review.text}</p>
+      <p className="text-gray-600 text-sm leading-relaxed mb-4">{review.content}</p>
 
       {/* Footer */}
-      <div className="flex items-center justify-between text-xs text-gray-400 gap-2">
-        <span className="shrink-0">{review.date}</span>
-        <span className="truncate">{review.helpful} utile</span>
+      <div className="flex items-center justify-between text-xs text-gray-400">
+        <span>{review.date}</span>
+        <span>{review.helpful} personnes ont trouvé cet avis utile</span>
       </div>
     </motion.div>
   )
