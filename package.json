@@ -51,7 +51,7 @@
     "swr": "^2.3.8"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^15.0.0",
+    "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.42.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
