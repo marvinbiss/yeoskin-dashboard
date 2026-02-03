@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, useInView, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { motion, useInView, AnimatePresence } from 'framer-motion'
 import {
   Star,
   Check,
@@ -13,49 +13,46 @@ import {
   RefreshCw,
   Clock,
   Heart,
-  Plus,
-  Minus,
   ShoppingBag,
   ArrowRight,
   Leaf,
   Award,
-  Users,
   Package,
   Tag,
-  Play,
-  ChevronRight
+  Play
 } from 'lucide-react'
 
 // ============================================================================
-// WORLD-CLASS DESIGN SYSTEM - Inspired by Kylie, Glossier, Rare Beauty
+// LUXURY BRAND IDENTITY - YEOSKIN
+// Premium K-Beauty Aesthetic
 // ============================================================================
 
-// Premium color palette
-const COLORS = {
-  // Primary - Deep rose/burgundy (like Rare Beauty & Kylie)
-  primary: '#8B2252',
-  primaryLight: '#A8325F',
-  primaryDark: '#6B1A40',
+// Color tokens - Soft luxury palette
+const brand = {
+  // Primary - Soft rose/blush
+  rose: '#E8B4B8',
+  roseLight: '#F5D5D8',
+  roseDark: '#D49CA0',
 
-  // Accent - Soft blush
-  accent: '#F8E8E8',
-  accentDark: '#F0D4D4',
+  // Secondary - Warm neutrals
+  cream: '#FDF8F5',
+  sand: '#F5EDE8',
+
+  // Accent - Champagne gold
+  gold: '#C9A050',
+  goldLight: '#E8D5A8',
 
   // Neutrals
-  black: '#1A1A1A',
-  charcoal: '#2D2D2D',
-  gray: '#6B6B6B',
-  grayLight: '#9B9B9B',
-  cream: '#FDFBF9',
+  charcoal: '#1A1A1A',
+  graphite: '#3D3D3D',
+  slate: '#6B6B6B',
+  silver: '#9B9B9B',
+  pearl: '#F8F8F8',
   white: '#FFFFFF',
-
-  // Gold accents
-  gold: '#C9A96E',
-  goldLight: '#E8D5B5',
 }
 
 // ============================================================================
-// TYPES & DATA
+// DATA
 // ============================================================================
 
 type VariantType = 'base' | 'upsell_1' | 'upsell_2'
@@ -78,32 +75,32 @@ const PRODUCTS = [
     name: 'Advanced Snail 96 Mucin Essence',
     brand: 'COSRX',
     step: 1,
-    time: 'MATIN & SOIR',
-    description: 'Essence légère à 96% de mucine d\'escargot. Hydrate en profondeur, répare la barrière cutanée et lisse la texture.',
+    time: 'Matin & Soir',
+    description: 'Essence légère à 96% de mucine d\'escargot. Hydrate en profondeur et répare la barrière cutanée.',
     ingredients: ['Snail Mucin 96%', 'Hyaluronic Acid', 'Allantoin'],
-    stats: { satisfaction: 97, duration: '100ml • 3 mois' },
+    stats: { satisfaction: 97, duration: '100ml · 3 mois' },
     image: '/images/shop/cosrx-snail-essence.jpg',
   },
   {
     id: 2,
-    name: 'Advanced Snail 92 All In One Cream',
+    name: 'Advanced Snail 92 Cream',
     brand: 'COSRX',
     step: 2,
-    time: 'MATIN & SOIR',
-    description: 'Crème tout-en-un enrichie en mucine d\'escargot. Nourrit, répare et protège. Texture fondante non grasse.',
+    time: 'Matin & Soir',
+    description: 'Crème tout-en-un enrichie en mucine. Nourrit, répare et protège avec une texture fondante.',
     ingredients: ['Snail Secretion 92%', 'Betaine', 'Allantoin'],
-    stats: { satisfaction: 94, duration: '100ml • 3 mois' },
+    stats: { satisfaction: 94, duration: '100ml · 3 mois' },
     image: '/images/shop/cosrx-snail-cream.jpg',
   },
   {
     id: 3,
-    name: 'Oil-Free Ultra-Moisturizing Lotion',
+    name: 'Oil-Free Moisturizing Lotion',
     brand: 'COSRX',
     step: 3,
-    time: 'MATIN & SOIR',
-    description: 'Lotion hydratante sans huile à base de sève de bouleau. Hydratation longue durée, fini mat parfait.',
+    time: 'Matin & Soir',
+    description: 'Lotion légère à la sève de bouleau. Hydratation longue durée avec un fini mat parfait.',
     ingredients: ['Birch Sap 70%', 'Hyaluronic Acid', 'Betaine'],
-    stats: { satisfaction: 91, duration: '100ml • 3 mois' },
+    stats: { satisfaction: 91, duration: '100ml · 3 mois' },
     image: '/images/shop/cosrx-lotion.jpg',
   },
 ]
@@ -113,9 +110,8 @@ const UPSELLS = [
     id: 'upsell_1',
     name: 'Revive Serum Ginseng+Snail',
     brand: 'Beauty of Joseon',
-    badge: 'POPULAIRE',
-    benefit: 'Éclat + Régénération',
-    description: 'Sérum anti-âge naturel',
+    badge: 'Populaire',
+    benefit: 'Éclat & Régénération',
     price: 69.90,
     originalPrice: 89.80,
     image: '/images/shop/boj-revive-serum.jpg',
@@ -124,9 +120,8 @@ const UPSELLS = [
     id: 'upsell_2',
     name: 'Glow Serum + Relief Sun',
     brand: 'Beauty of Joseon',
-    badge: 'BEST VALUE',
-    benefit: 'Éclat + Protection SPF',
-    description: 'Routine complète',
+    badge: 'Meilleure valeur',
+    benefit: 'Éclat & Protection SPF',
     price: 79.90,
     originalPrice: 111.75,
     image: '/images/shop/boj-glow-sun.jpg',
@@ -141,10 +136,8 @@ const REVIEWS = [
     skinType: 'Mixte',
     rating: 5,
     title: 'Ma peau a changé en 2 semaines',
-    content: 'Je suis bluffée. Mes pores sont resserrés, mon teint est plus uniforme et j\'ai enfin trouvé une routine simple qui fonctionne.',
-    date: 'Il y a 3 jours',
+    content: 'Je suis bluffée. Mes pores sont resserrés, mon teint est uniforme. Une routine simple qui fonctionne.',
     verified: true,
-    helpful: 234,
     avatar: '👩🏻',
   },
   {
@@ -153,11 +146,9 @@ const REVIEWS = [
     age: 34,
     skinType: 'Sèche',
     rating: 5,
-    title: 'Bye bye tiraillements',
-    content: 'Enfin une crème qui hydrate vraiment sans laisser de film gras. Le sérum sent divinement bon.',
-    date: 'Il y a 1 semaine',
+    title: 'Adieu les tiraillements',
+    content: 'Enfin une crème qui hydrate vraiment sans film gras. Le sérum sent divinement bon.',
     verified: true,
-    helpful: 189,
     avatar: '👩🏼',
   },
   {
@@ -166,32 +157,18 @@ const REVIEWS = [
     age: 25,
     skinType: 'Grasse',
     rating: 5,
-    title: 'Routine game changer',
-    content: 'J\'avais peur que ce soit trop riche pour ma peau grasse mais pas du tout ! Matifié mais confortable.',
-    date: 'Il y a 2 semaines',
+    title: 'Game changer',
+    content: 'Parfait pour ma peau grasse. Matifié mais confortable. Je recommande à 100%.',
     verified: true,
-    helpful: 156,
     avatar: '👩🏽',
   },
 ]
 
 const FAQS = [
-  {
-    question: 'Pour quel type de peau ?',
-    answer: 'Tous types : grasse, sèche, mixte, sensible. Les formules sont non-comédogènes et hypoallergéniques.',
-  },
-  {
-    question: 'Combien de temps dure le pack ?',
-    answer: '3-4 mois avec utilisation quotidienne matin & soir. Un excellent rapport qualité-prix.',
-  },
-  {
-    question: 'Quand vais-je voir des résultats ?',
-    answer: 'Hydratation immédiate. Éclat visible en 1 semaine. Texture améliorée en 4 semaines.',
-  },
-  {
-    question: 'Livraison et retours ?',
-    answer: 'Livraison gratuite en France. 30 jours satisfait ou remboursé, même produits entamés.',
-  },
+  { q: 'Pour quel type de peau ?', a: 'Tous types : grasse, sèche, mixte, sensible. Formules hypoallergéniques testées dermatologiquement.' },
+  { q: 'Combien de temps dure le pack ?', a: '3-4 mois avec utilisation matin & soir. Excellent rapport qualité-prix.' },
+  { q: 'Quand voir des résultats ?', a: 'Hydratation immédiate. Éclat en 1 semaine. Texture améliorée en 4 semaines.' },
+  { q: 'Livraison et retours ?', a: 'Livraison gratuite en France. 30 jours satisfait ou remboursé.' },
 ]
 
 // ============================================================================
@@ -199,24 +176,16 @@ const FAQS = [
 // ============================================================================
 
 interface RoutineData {
-  id?: string
-  title?: string
-  slug?: string
-  objective?: string
-  description?: string
+  id?: string; title?: string; slug?: string; objective?: string; description?: string
   base_products?: { name: string; brand: string; image_url?: string; description?: string }[]
   base_price?: number
   upsell_1_product?: { name: string; brand: string; image_url?: string; description?: string }
-  upsell_1_price?: number
-  upsell_1_original_price?: number
+  upsell_1_price?: number; upsell_1_original_price?: number
   upsell_2_products?: { name: string; brand: string; image_url?: string; description?: string }[]
-  upsell_2_price?: number
-  upsell_2_original_price?: number
+  upsell_2_price?: number; upsell_2_original_price?: number
   image_url?: string
-  before_after_1_before_url?: string
-  before_after_1_after_url?: string
-  before_after_2_before_url?: string
-  before_after_2_after_url?: string
+  before_after_1_before_url?: string; before_after_1_after_url?: string
+  before_after_2_before_url?: string; before_after_2_after_url?: string
   is_active?: boolean
 }
 
@@ -224,302 +193,275 @@ interface Props {
   cms?: {
     hero?: { badge?: string; title?: string; subtitle?: string; stats?: { rating?: number; reviews?: number } }
     pricing?: { base?: { price?: number; original_price?: number }; upsell_1?: { price?: number; original_price?: number }; upsell_2?: { price?: number; original_price?: number } }
-    products?: { section_title?: string; items?: any[] }
-    reviews?: { section_title?: string; items?: any[] }
-    faq?: { section_title?: string; items?: any[] }
-    cta?: { title?: string; button_text?: string }
+    reviews?: { items?: any[] }
+    faq?: { items?: any[] }
   }
   routine?: RoutineData | null
 }
 
 // ============================================================================
-// MAIN COMPONENT
+// COMPONENT
 // ============================================================================
 
 export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
-  const cmsHero = cms.hero || {}
-  const cmsFaq = cms.faq || {}
-  const cmsCta = cms.cta || {}
   const reviews = cms.reviews?.items?.length ? cms.reviews.items : REVIEWS
   const cmsPricing = cms.pricing || {}
 
-  const currentPrices = {
+  const prices = {
     base: routine?.base_price ?? cmsPricing.base?.price ?? PRICES.base,
     upsell_1: routine?.upsell_1_price ?? cmsPricing.upsell_1?.price ?? PRICES.upsell_1,
     upsell_2: routine?.upsell_2_price ?? cmsPricing.upsell_2?.price ?? PRICES.upsell_2,
   }
-  const currentOriginalPrices = {
+  const originalPrices = {
     base: cmsPricing.base?.original_price ?? ORIGINAL_PRICES.base,
     upsell_1: routine?.upsell_1_original_price ?? cmsPricing.upsell_1?.original_price ?? ORIGINAL_PRICES.upsell_1,
     upsell_2: routine?.upsell_2_original_price ?? cmsPricing.upsell_2?.original_price ?? ORIGINAL_PRICES.upsell_2,
   }
 
-  const displayProducts = routine?.base_products?.length === 3
-    ? routine.base_products.map((p, i) => ({
-        ...PRODUCTS[i],
-        name: p.name || PRODUCTS[i].name,
-        brand: p.brand || PRODUCTS[i].brand,
-        description: p.description || PRODUCTS[i].description,
-        image: p.image_url || PRODUCTS[i].image,
-      }))
+  const products = routine?.base_products?.length === 3
+    ? routine.base_products.map((p, i) => ({ ...PRODUCTS[i], name: p.name || PRODUCTS[i].name, brand: p.brand || PRODUCTS[i].brand, description: p.description || PRODUCTS[i].description, image: p.image_url || PRODUCTS[i].image }))
     : PRODUCTS
 
-  const displayUpsells = [
-    routine?.upsell_1_product ? {
-      ...UPSELLS[0],
-      name: routine.upsell_1_product.name || UPSELLS[0].name,
-      brand: routine.upsell_1_product.brand || UPSELLS[0].brand,
-      image: routine.upsell_1_product.image_url || UPSELLS[0].image,
-      price: currentPrices.upsell_1,
-      originalPrice: currentOriginalPrices.upsell_1,
-    } : UPSELLS[0],
-    routine?.upsell_2_products?.[0] ? {
-      ...UPSELLS[1],
-      name: routine.upsell_2_products.map(p => p.name).join(' + ') || UPSELLS[1].name,
-      brand: routine.upsell_2_products[0].brand || UPSELLS[1].brand,
-      image: routine.upsell_2_products[0].image_url || UPSELLS[1].image,
-      price: currentPrices.upsell_2,
-      originalPrice: currentOriginalPrices.upsell_2,
-    } : UPSELLS[1],
+  const upsells = [
+    routine?.upsell_1_product ? { ...UPSELLS[0], name: routine.upsell_1_product.name || UPSELLS[0].name, brand: routine.upsell_1_product.brand || UPSELLS[0].brand, image: routine.upsell_1_product.image_url || UPSELLS[0].image, price: prices.upsell_1, originalPrice: originalPrices.upsell_1 } : UPSELLS[0],
+    routine?.upsell_2_products?.[0] ? { ...UPSELLS[1], name: routine.upsell_2_products.map(p => p.name).join(' + ') || UPSELLS[1].name, brand: routine.upsell_2_products[0].brand || UPSELLS[1].brand, image: routine.upsell_2_products[0].image_url || UPSELLS[1].image, price: prices.upsell_2, originalPrice: originalPrices.upsell_2 } : UPSELLS[1],
   ]
 
-  const heroTitle = cmsHero.title || routine?.title || 'Routine Hydratation'
-  const heroRating = cmsHero.stats?.rating || 4.9
-  const heroReviews = cmsHero.stats?.reviews || 2847
-  const faqItems = cmsFaq.items?.length ? cmsFaq.items : FAQS
+  const faqItems = cms.faq?.items?.length ? cms.faq.items : FAQS
+  const heroRating = cms.hero?.stats?.rating || 4.9
+  const heroReviews = cms.hero?.stats?.reviews || 2847
 
-  const [selectedVariant, setSelectedVariant] = useState<VariantType>('base')
-  const [isLoading, setIsLoading] = useState(false)
+  const [variant, setVariant] = useState<VariantType>('base')
+  const [loading, setLoading] = useState(false)
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [showStickyBar, setShowStickyBar] = useState(false)
-  const [creatorCode, setCreatorCode] = useState<string | null>(null)
+  const [sticky, setSticky] = useState(false)
+  const [code, setCode] = useState<string | null>(null)
 
   const heroRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (heroRef.current) {
-        const heroBottom = heroRef.current.getBoundingClientRect().bottom
-        setShowStickyBar(heroBottom < 0)
-      }
+    const onScroll = () => {
+      if (heroRef.current) setSticky(heroRef.current.getBoundingClientRect().bottom < 0)
     }
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
-    const code = sessionStorage.getItem('yeoskin_creator_code')
-    if (code) setCreatorCode(code)
+    const c = sessionStorage.getItem('yeoskin_creator_code')
+    if (c) setCode(c)
   }, [])
 
-  const getCreatorSlug = (): string => {
+  const getCreator = (): string => {
     if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const creatorParam = urlParams.get('creator')
-      if (creatorParam) {
-        sessionStorage.setItem('yeoskin_creator_slug', creatorParam)
-        return creatorParam
-      }
-      const storedCreator = sessionStorage.getItem('yeoskin_creator_slug')
-      if (storedCreator) return storedCreator
+      const p = new URLSearchParams(window.location.search).get('creator')
+      if (p) { sessionStorage.setItem('yeoskin_creator_slug', p); return p }
+      const s = sessionStorage.getItem('yeoskin_creator_slug')
+      if (s) return s
     }
     return 'yeoskin'
   }
 
-  const handleCheckout = async () => {
-    setIsLoading(true)
+  const checkout = async () => {
+    setLoading(true)
     try {
-      const creatorSlug = getCreatorSlug()
-      const response = await fetch('/api/routines/checkout', {
+      const res = await fetch('/api/routines/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          creator_slug: creatorSlug,
-          variant: selectedVariant,
-          routine_slug: 'routine-hydratation',
-        }),
+        body: JSON.stringify({ creator_slug: getCreator(), variant, routine_slug: 'routine-hydratation' }),
       })
-      const data = await response.json()
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url
-      } else {
-        throw new Error(data.error || 'No checkout URL')
-      }
-    } catch (error) {
-      console.error('Checkout error:', error)
-      alert('Une erreur est survenue. Réessaie.')
+      const data = await res.json()
+      if (data.checkout_url) window.location.href = data.checkout_url
+      else throw new Error(data.error)
+    } catch (e) {
+      console.error(e)
+      alert('Erreur. Réessayez.')
     } finally {
-      setIsLoading(false)
+      setLoading(false)
     }
   }
 
-  const savings = currentOriginalPrices[selectedVariant] - currentPrices[selectedVariant]
+  const price = prices[variant]
+  const original = originalPrices[variant]
+  const savings = original - price
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: brand.cream }}>
+      {/* Google Fonts */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+        .font-display { font-family: 'Playfair Display', Georgia, serif; }
+        .font-body { font-family: 'Inter', -apple-system, sans-serif; }
+      `}</style>
+
       {/* ================================================================== */}
-      {/* ANNOUNCEMENT BAR - Like Kylie */}
+      {/* TOP BAR */}
       {/* ================================================================== */}
-      <div className="bg-[#8B2252] text-white py-3 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
-          <Sparkles className="w-4 h-4" />
-          <span className="font-medium">LIVRAISON OFFERTE</span>
-          <span className="opacity-70">•</span>
-          <span className="opacity-90">30 jours satisfait ou remboursé</span>
-        </div>
+      <div style={{ background: brand.charcoal }} className="py-3 px-4">
+        <p className="text-center text-sm font-body" style={{ color: brand.white }}>
+          <span style={{ color: brand.gold }}>✦</span>
+          {' '}Livraison offerte · Satisfait ou remboursé 30 jours{' '}
+          <span style={{ color: brand.gold }}>✦</span>
+        </p>
       </div>
 
       {/* ================================================================== */}
-      {/* HERO SECTION - World Class */}
+      {/* HERO */}
       {/* ================================================================== */}
-      <section ref={heroRef} className="relative bg-[#FDFBF9]">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="grid lg:grid-cols-2 min-h-[calc(100vh-48px)]">
-            {/* Left - Image */}
-            <div className="relative bg-gradient-to-br from-[#F8E8E8] to-[#FDFBF9] order-2 lg:order-1">
-              <div className="absolute inset-0 flex items-center justify-center p-8 lg:p-16">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.8 }}
-                  className="relative w-full max-w-lg aspect-square"
-                >
-                  {routine?.image_url ? (
-                    <img
-                      src={routine.image_url}
-                      alt={heroTitle}
-                      className="w-full h-full object-cover rounded-3xl shadow-2xl"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-3xl bg-gradient-to-br from-[#F8E8E8] to-white flex items-center justify-center shadow-2xl">
-                      <div className="text-center">
-                        <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-[#8B2252]/10 flex items-center justify-center">
-                          <Sparkles className="w-16 h-16 text-[#8B2252]" />
-                        </div>
-                        <p className="text-[#8B2252] font-medium tracking-widest text-sm">YEOSKIN</p>
+      <section ref={heroRef} style={{ background: brand.cream }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 py-16 lg:py-24 items-center">
+
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="relative order-2 lg:order-1"
+            >
+              <div className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl" style={{ background: brand.sand }}>
+                {routine?.image_url ? (
+                  <img src={routine.image_url} alt="Routine Hydratation" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ background: brand.rose + '30' }}>
+                        <Sparkles className="w-12 h-12" style={{ color: brand.roseDark }} />
                       </div>
+                      <p className="font-display text-2xl" style={{ color: brand.charcoal }}>YEOSKIN</p>
                     </div>
-                  )}
-
-                  {/* Floating badge */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="absolute -bottom-4 -right-4 lg:bottom-8 lg:-right-8 bg-white rounded-2xl p-4 shadow-xl border border-gray-100"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-[#C9A96E] text-[#C9A96E]" />
-                        ))}
-                      </div>
-                      <span className="font-semibold text-[#1A1A1A]">{heroRating}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">{heroReviews.toLocaleString()} avis vérifiés</p>
-                  </motion.div>
-                </motion.div>
-              </div>
-            </div>
-
-            {/* Right - Content */}
-            <div className="flex flex-col justify-center px-6 py-12 lg:px-16 lg:py-24 order-1 lg:order-2">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 bg-[#8B2252]/10 text-[#8B2252] px-4 py-2 rounded-full text-xs font-semibold tracking-widest uppercase mb-6">
-                  <Award className="w-4 h-4" />
-                  BEST-SELLER 2024
-                </div>
-
-                {/* Title - Elegant serif */}
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-serif font-light text-[#1A1A1A] leading-[1.1] mb-6">
-                  {heroTitle}
-                  <span className="block text-[#8B2252] font-normal italic mt-2">en 3 gestes</span>
-                </h1>
-
-                {/* Subtitle */}
-                <p className="text-lg lg:text-xl text-[#6B6B6B] leading-relaxed mb-8 max-w-xl">
-                  La routine K-beauty minimaliste qui transforme votre peau en 4 semaines.
-                  <span className="text-[#1A1A1A] font-medium"> Résultats garantis.</span>
-                </p>
-
-                {/* Trust badges - Minimal */}
-                <div className="flex flex-wrap gap-6 mb-10 text-sm text-[#6B6B6B]">
-                  <span className="flex items-center gap-2">
-                    <Leaf className="w-4 h-4 text-[#8B2252]" />
-                    Vegan
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Heart className="w-4 h-4 text-[#8B2252]" />
-                    Cruelty-free
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-[#8B2252]" />
-                    Testé dermato
-                  </span>
-                </div>
-
-                {/* Price */}
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-3 mb-2">
-                    <span className="text-4xl lg:text-5xl font-light text-[#1A1A1A]">{currentPrices[selectedVariant].toFixed(2)}€</span>
-                    <span className="text-xl text-[#9B9B9B] line-through">{currentOriginalPrices[selectedVariant].toFixed(2)}€</span>
                   </div>
-                  <p className="text-sm text-[#8B2252] font-medium">
-                    Économisez {savings.toFixed(2)}€ ({Math.round((savings / currentOriginalPrices[selectedVariant]) * 100)}%)
-                  </p>
-                </div>
+                )}
+              </div>
 
-                {/* CTA Button - Primary */}
-                <button
-                  onClick={handleCheckout}
-                  disabled={isLoading}
-                  className="group w-full sm:w-auto bg-[#1A1A1A] hover:bg-[#8B2252] text-white font-medium px-12 py-5 rounded-full transition-all duration-300 text-lg flex items-center justify-center gap-3 disabled:opacity-50 mb-6"
-                >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-5 h-5" />
-                      Ajouter au panier
-                      <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {/* Micro-trust */}
-                <div className="flex items-center gap-4 text-sm text-[#9B9B9B]">
-                  <span className="flex items-center gap-1.5">
-                    <Truck className="w-4 h-4" />
-                    Livraison 48h
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <RefreshCw className="w-4 h-4" />
-                    Retours gratuits
-                  </span>
+              {/* Rating badge */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="absolute -bottom-4 -right-4 lg:bottom-8 lg:-right-6 rounded-2xl p-5 shadow-xl"
+                style={{ background: brand.white }}
+              >
+                <div className="flex items-center gap-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4" style={{ fill: brand.gold, color: brand.gold }} />
+                  ))}
                 </div>
+                <p className="text-lg font-semibold font-body" style={{ color: brand.charcoal }}>{heroRating}/5</p>
+                <p className="text-xs font-body" style={{ color: brand.slate }}>{heroReviews.toLocaleString()} avis</p>
               </motion.div>
-            </div>
+
+              {/* Discount badge */}
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="absolute top-6 left-6 px-4 py-2 rounded-full font-body text-sm font-semibold"
+                style={{ background: brand.charcoal, color: brand.white }}
+              >
+                -15% aujourd'hui
+              </motion.div>
+            </motion.div>
+
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="order-1 lg:order-2"
+            >
+              {/* Eyebrow */}
+              <div className="flex items-center gap-2 mb-6">
+                <span className="w-8 h-px" style={{ background: brand.rose }} />
+                <span className="text-xs font-body font-semibold tracking-[0.2em] uppercase" style={{ color: brand.roseDark }}>
+                  Best-seller 2024
+                </span>
+              </div>
+
+              {/* Title */}
+              <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-medium leading-[1.1] mb-6" style={{ color: brand.charcoal }}>
+                Routine
+                <br />
+                <span className="italic" style={{ color: brand.roseDark }}>Hydratation</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-xl font-body font-light leading-relaxed mb-8" style={{ color: brand.slate }}>
+                La routine K-beauty minimaliste qui transforme votre peau en 4 semaines.
+                <span className="font-medium" style={{ color: brand.charcoal }}> 3 produits. Résultats garantis.</span>
+              </p>
+
+              {/* Trust badges */}
+              <div className="flex flex-wrap gap-4 mb-10">
+                {[
+                  { icon: Leaf, text: 'Vegan' },
+                  { icon: Heart, text: 'Cruelty-free' },
+                  { icon: Shield, text: 'Testé cliniquement' },
+                ].map((b, i) => (
+                  <span key={i} className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-body" style={{ background: brand.white, color: brand.graphite, border: `1px solid ${brand.sand}` }}>
+                    <b.icon className="w-4 h-4" style={{ color: brand.roseDark }} />
+                    {b.text}
+                  </span>
+                ))}
+              </div>
+
+              {/* Price */}
+              <div className="p-6 rounded-2xl mb-8" style={{ background: brand.white }}>
+                <div className="flex items-baseline gap-4 mb-2">
+                  <span className="font-display text-5xl" style={{ color: brand.charcoal }}>{price.toFixed(2)}€</span>
+                  <span className="text-xl font-body line-through" style={{ color: brand.silver }}>{original.toFixed(2)}€</span>
+                </div>
+                <p className="text-sm font-body font-medium" style={{ color: brand.roseDark }}>
+                  Économisez {savings.toFixed(2)}€ ({Math.round((savings / original) * 100)}% de réduction)
+                </p>
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={checkout}
+                disabled={loading}
+                className="w-full sm:w-auto group flex items-center justify-center gap-3 px-10 py-5 rounded-full font-body font-medium text-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50"
+                style={{ background: brand.charcoal, color: brand.white }}
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <ShoppingBag className="w-5 h-5" />
+                    Ajouter au panier
+                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </button>
+
+              {/* Micro-trust */}
+              <div className="flex items-center gap-6 mt-6 text-sm font-body" style={{ color: brand.slate }}>
+                <span className="flex items-center gap-2">
+                  <Truck className="w-4 h-4" />
+                  Livraison 48h
+                </span>
+                <span className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4" />
+                  30j remboursé
+                </span>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* ================================================================== */}
-      {/* SOCIAL PROOF BAR */}
+      {/* STATS BAR */}
       {/* ================================================================== */}
-      <section className="bg-[#1A1A1A] py-8 lg:py-12">
+      <section style={{ background: brand.charcoal }} className="py-10 lg:py-14">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {[
-              { value: '15,234', label: 'Routines vendues' },
-              { value: '4.9/5', label: 'Note moyenne' },
-              { value: '94%', label: 'Rachètent' },
-              { value: '2,847', label: 'Avis vérifiés' },
-            ].map((stat, i) => (
+              { val: '15,234', label: 'Routines vendues' },
+              { val: '4.9/5', label: 'Note moyenne' },
+              { val: '94%', label: 'Rachètent' },
+              { val: '2,847', label: 'Avis clients' },
+            ].map((s, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -527,8 +469,8 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <p className="text-2xl lg:text-4xl font-light text-white mb-1">{stat.value}</p>
-                <p className="text-xs lg:text-sm text-gray-400 uppercase tracking-wider">{stat.label}</p>
+                <p className="font-display text-3xl lg:text-4xl mb-1" style={{ color: brand.white }}>{s.val}</p>
+                <p className="text-xs font-body tracking-wider uppercase" style={{ color: brand.silver }}>{s.label}</p>
               </motion.div>
             ))}
           </div>
@@ -536,81 +478,69 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       </section>
 
       {/* ================================================================== */}
-      {/* THE ROUTINE - Products */}
+      {/* PRODUCTS */}
       {/* ================================================================== */}
-      <section id="products" className="py-20 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-20 lg:py-32" style={{ background: brand.white }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-16 lg:mb-24"
           >
-            <p className="text-[#8B2252] font-medium tracking-widest text-sm uppercase mb-4">La Collection</p>
-            <h2 className="text-3xl lg:text-5xl font-serif font-light text-[#1A1A1A] mb-4">
-              Trois produits. <span className="italic text-[#8B2252]">Résultats garantis.</span>
-            </h2>
-            <p className="text-lg text-[#6B6B6B] max-w-2xl mx-auto">
-              Chaque produit a été sélectionné pour son efficacité prouvée cliniquement.
+            <p className="text-sm font-body font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: brand.roseDark }}>
+              La collection
             </p>
+            <h2 className="font-display text-4xl lg:text-6xl mb-4" style={{ color: brand.charcoal }}>
+              Trois étapes.<br />
+              <span className="italic" style={{ color: brand.roseDark }}>Résultats garantis.</span>
+            </h2>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {displayProducts.map((product, i) => (
+            {products.map((p, i) => (
               <motion.article
-                key={product.id}
+                key={p.id}
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
                 className="group"
               >
-                {/* Image */}
-                <div className="relative aspect-[4/5] bg-[#F8E8E8] rounded-2xl overflow-hidden mb-6">
-                  {product.image ? (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
+                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-6" style={{ background: brand.sand }}>
+                  {p.image ? (
+                    <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Droplets className="w-20 h-20 text-[#8B2252]/20" />
+                      <Droplets className="w-16 h-16" style={{ color: brand.rose }} />
                     </div>
                   )}
-
-                  {/* Step badge */}
                   <div className="absolute top-4 left-4 flex gap-2">
-                    <span className="bg-[#1A1A1A] text-white px-4 py-2 rounded-full text-xs font-medium tracking-wider">
-                      ÉTAPE {product.step}
+                    <span className="px-3 py-1.5 rounded-full text-xs font-body font-medium" style={{ background: brand.charcoal, color: brand.white }}>
+                      Étape {p.step}
                     </span>
                   </div>
                 </div>
 
-                {/* Content */}
-                <div>
-                  <p className="text-[#8B2252] text-sm font-medium tracking-wider uppercase mb-2">{product.brand}</p>
-                  <h3 className="text-xl lg:text-2xl font-serif text-[#1A1A1A] mb-3">{product.name}</h3>
-                  <p className="text-[#6B6B6B] text-sm leading-relaxed mb-4">{product.description}</p>
+                <p className="text-xs font-body font-semibold tracking-wider uppercase mb-2" style={{ color: brand.roseDark }}>{p.brand}</p>
+                <h3 className="font-display text-xl lg:text-2xl mb-3" style={{ color: brand.charcoal }}>{p.name}</h3>
+                <p className="text-sm font-body leading-relaxed mb-4" style={{ color: brand.slate }}>{p.description}</p>
 
-                  {/* Ingredients */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {product.ingredients.map((ing, j) => (
-                      <span key={j} className="text-xs px-3 py-1.5 bg-[#F8E8E8] text-[#6B6B6B] rounded-full">
-                        {ing}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex items-center gap-4 text-sm pt-4 border-t border-gray-100">
-                    <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-[#C9A96E] text-[#C9A96E]" />
-                      <span className="font-medium text-[#1A1A1A]">{product.stats.satisfaction}%</span>
-                      <span className="text-[#9B9B9B]">satisfaites</span>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {p.ingredients.map((ing, j) => (
+                    <span key={j} className="text-xs font-body px-3 py-1.5 rounded-full" style={{ background: brand.sand, color: brand.graphite }}>
+                      {ing}
                     </span>
-                    <span className="text-[#9B9B9B]">{product.stats.duration}</span>
-                  </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-4 pt-4 text-sm font-body" style={{ borderTop: `1px solid ${brand.sand}` }}>
+                  <span className="flex items-center gap-1">
+                    <Star className="w-4 h-4" style={{ fill: brand.gold, color: brand.gold }} />
+                    <span style={{ color: brand.charcoal }}>{p.stats.satisfaction}%</span>
+                    <span style={{ color: brand.silver }}>satisfaites</span>
+                  </span>
+                  <span style={{ color: brand.silver }}>{p.stats.duration}</span>
                 </div>
               </motion.article>
             ))}
@@ -621,153 +551,107 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* HOW IT WORKS */}
       {/* ================================================================== */}
-      <section className="py-20 lg:py-32 bg-[#FDFBF9]">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-20 lg:py-32" style={{ background: brand.cream }}>
+        <div className="max-w-5xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="mb-16"
           >
-            <p className="text-[#8B2252] font-medium tracking-widest text-sm uppercase mb-4">Le Rituel</p>
-            <h2 className="text-3xl lg:text-5xl font-serif font-light text-[#1A1A1A]">
-              2 minutes. <span className="italic text-[#8B2252]">Matin & soir.</span>
+            <p className="text-sm font-body font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: brand.roseDark }}>
+              Le rituel
+            </p>
+            <h2 className="font-display text-4xl lg:text-5xl" style={{ color: brand.charcoal }}>
+              2 minutes. <span className="italic" style={{ color: brand.roseDark }}>Matin & soir.</span>
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-12 max-w-4xl mx-auto">
-            {displayProducts.map((product, i) => (
+          <div className="grid md:grid-cols-3 gap-12">
+            {products.map((p, i) => (
               <motion.div
-                key={product.id}
+                key={p.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="text-center"
               >
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[#1A1A1A] text-white flex items-center justify-center text-2xl font-light">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center font-display text-3xl" style={{ background: brand.charcoal, color: brand.white }}>
                   {i + 1}
                 </div>
-                <h3 className="text-lg font-medium text-[#1A1A1A] mb-2">{product.name.split(' ').slice(-2).join(' ')}</h3>
-                <p className="text-sm text-[#6B6B6B]">{product.brand}</p>
-                <p className="text-xs text-[#8B2252] font-medium tracking-wider uppercase mt-2">{product.time}</p>
+                <h3 className="font-display text-xl mb-2" style={{ color: brand.charcoal }}>{p.name.split(' ').slice(-2).join(' ')}</h3>
+                <p className="text-sm font-body mb-1" style={{ color: brand.slate }}>{p.brand}</p>
+                <p className="text-xs font-body font-medium tracking-wider uppercase" style={{ color: brand.roseDark }}>{p.time}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* ================================================================== */}
-      {/* BEFORE / AFTER */}
-      {/* ================================================================== */}
-      {(routine?.before_after_1_before_url || routine?.before_after_2_before_url) && (
-        <section className="py-20 lg:py-32 bg-white">
-          <div className="max-w-7xl mx-auto px-6">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-center mb-16"
-            >
-              <p className="text-[#8B2252] font-medium tracking-widest text-sm uppercase mb-4">Résultats Réels</p>
-              <h2 className="text-3xl lg:text-5xl font-serif font-light text-[#1A1A1A]">
-                Transformations <span className="italic text-[#8B2252]">vérifiées</span>
-              </h2>
-            </motion.div>
-
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {[
-                { name: 'Claire, 26 ans', before: routine?.before_after_1_before_url, after: routine?.before_after_1_after_url },
-                { name: 'Julie, 32 ans', before: routine?.before_after_2_before_url, after: routine?.before_after_2_after_url },
-              ].filter(t => t.before).map((testimonial, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="bg-[#FDFBF9] rounded-2xl p-6"
-                >
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="aspect-square bg-gray-200 rounded-xl overflow-hidden">
-                      {testimonial.before && <img src={testimonial.before} alt="Avant" className="w-full h-full object-cover" />}
-                      <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">Avant</div>
-                    </div>
-                    <div className="aspect-square bg-[#F8E8E8] rounded-xl overflow-hidden">
-                      {testimonial.after && <img src={testimonial.after} alt="Après" className="w-full h-full object-cover" />}
-                      <div className="absolute bottom-2 left-2 bg-[#8B2252] text-white text-xs px-2 py-1 rounded">Après</div>
-                    </div>
-                  </div>
-                  <p className="font-medium text-[#1A1A1A]">{testimonial.name}</p>
-                  <p className="text-sm text-[#6B6B6B]">4 semaines de routine</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ================================================================== */}
       {/* REVIEWS */}
       {/* ================================================================== */}
-      <section className="py-20 lg:py-32 bg-[#FDFBF9]">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="py-20 lg:py-32" style={{ background: brand.white }}>
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <p className="text-[#8B2252] font-medium tracking-widest text-sm uppercase mb-4">Avis Clients</p>
-            <h2 className="text-3xl lg:text-5xl font-serif font-light text-[#1A1A1A] mb-4">
-              Ce qu'elles <span className="italic text-[#8B2252]">en pensent</span>
+            <p className="text-sm font-body font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: brand.roseDark }}>
+              Témoignages
+            </p>
+            <h2 className="font-display text-4xl lg:text-5xl mb-6" style={{ color: brand.charcoal }}>
+              Ce qu'elles <span className="italic" style={{ color: brand.roseDark }}>en pensent</span>
             </h2>
             <div className="flex items-center justify-center gap-2">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-[#C9A96E] text-[#C9A96E]" />
+                  <Star key={i} className="w-5 h-5" style={{ fill: brand.gold, color: brand.gold }} />
                 ))}
               </div>
-              <span className="text-lg font-medium text-[#1A1A1A]">{heroRating}/5</span>
-              <span className="text-[#6B6B6B]">({heroReviews.toLocaleString()} avis)</span>
+              <span className="font-body font-medium" style={{ color: brand.charcoal }}>{heroRating}/5</span>
+              <span className="font-body" style={{ color: brand.slate }}>· {heroReviews.toLocaleString()} avis</span>
             </div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {reviews.slice(0, 3).map((review: any, i: number) => (
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+            {reviews.slice(0, 3).map((r: any, i: number) => (
               <motion.div
-                key={review.id || i}
+                key={r.id || i}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="bg-white rounded-2xl p-6 lg:p-8"
+                className="p-8 rounded-2xl"
+                style={{ background: brand.cream }}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#F8E8E8] flex items-center justify-center text-lg">
-                      {review.avatar}
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl" style={{ background: brand.sand }}>
+                      {r.avatar}
                     </div>
                     <div>
-                      <p className="font-medium text-[#1A1A1A] text-sm">{review.name}</p>
-                      <p className="text-xs text-[#9B9B9B]">{review.skinType || review.skin_type}</p>
+                      <p className="font-body font-medium" style={{ color: brand.charcoal }}>{r.name}</p>
+                      <p className="text-xs font-body" style={{ color: brand.slate }}>{r.skinType || r.skin_type}</p>
                     </div>
                   </div>
-                  {review.verified && (
-                    <span className="flex items-center gap-1 text-xs text-[#8B2252]">
-                      <Check className="w-3 h-3" />
-                      Vérifié
+                  {r.verified && (
+                    <span className="flex items-center gap-1 text-xs font-body" style={{ color: brand.roseDark }}>
+                      <Check className="w-3 h-3" /> Vérifié
                     </span>
                   )}
                 </div>
 
-                <div className="flex gap-0.5 mb-3">
+                <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} className={`w-4 h-4 ${j < review.rating ? 'fill-[#C9A96E] text-[#C9A96E]' : 'text-gray-200'}`} />
+                    <Star key={j} className="w-4 h-4" style={{ fill: j < r.rating ? brand.gold : brand.sand, color: j < r.rating ? brand.gold : brand.sand }} />
                   ))}
                 </div>
 
-                <h4 className="font-medium text-[#1A1A1A] mb-2">{review.title}</h4>
-                <p className="text-sm text-[#6B6B6B] leading-relaxed">{review.content || review.text}</p>
+                <h4 className="font-display text-lg mb-2" style={{ color: brand.charcoal }}>{r.title}</h4>
+                <p className="text-sm font-body leading-relaxed" style={{ color: brand.slate }}>{r.content || r.text}</p>
               </motion.div>
             ))}
           </div>
@@ -775,9 +659,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       </section>
 
       {/* ================================================================== */}
-      {/* UPGRADE - Upsells */}
+      {/* CHOOSE FORMULA */}
       {/* ================================================================== */}
-      <section className="py-20 lg:py-32 bg-white">
+      <section className="py-20 lg:py-32" style={{ background: brand.cream }}>
         <div className="max-w-5xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -785,25 +669,21 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <p className="text-[#8B2252] font-medium tracking-widest text-sm uppercase mb-4">Personnalisez</p>
-            <h2 className="text-3xl lg:text-5xl font-serif font-light text-[#1A1A1A]">
-              Choisissez votre <span className="italic text-[#8B2252]">formule</span>
+            <p className="text-sm font-body font-semibold tracking-[0.2em] uppercase mb-4" style={{ color: brand.roseDark }}>
+              Personnalisez
+            </p>
+            <h2 className="font-display text-4xl lg:text-5xl" style={{ color: brand.charcoal }}>
+              Choisissez votre <span className="italic" style={{ color: brand.roseDark }}>formule</span>
             </h2>
           </motion.div>
 
-          {creatorCode && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center justify-center mb-8"
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-                <Tag className="w-4 h-4 text-green-600" />
-                <span className="text-sm font-medium text-green-700">
-                  Code <strong>{creatorCode}</strong> appliqué
-                </span>
+          {code && (
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-body" style={{ background: '#E8F5E9', color: '#2E7D32', border: '1px solid #A5D6A7' }}>
+                <Tag className="w-4 h-4" />
+                Code <strong>{code}</strong> appliqué
               </div>
-            </motion.div>
+            </div>
           )}
 
           <div className="grid md:grid-cols-3 gap-6">
@@ -812,72 +692,60 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              onClick={() => setSelectedVariant('base')}
-              className={`cursor-pointer rounded-2xl p-6 lg:p-8 transition-all duration-300 ${
-                selectedVariant === 'base'
-                  ? 'bg-[#8B2252] text-white ring-4 ring-[#8B2252]/20'
-                  : 'bg-[#FDFBF9] text-[#1A1A1A] hover:bg-[#F8E8E8]'
-              }`}
+              onClick={() => setVariant('base')}
+              className="cursor-pointer rounded-2xl p-8 transition-all duration-300"
+              style={{
+                background: variant === 'base' ? brand.charcoal : brand.white,
+                color: variant === 'base' ? brand.white : brand.charcoal,
+                boxShadow: variant === 'base' ? '0 25px 50px -12px rgba(0,0,0,0.25)' : 'none',
+              }}
             >
               <div className="text-center">
-                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium tracking-wider mb-4 ${
-                  selectedVariant === 'base' ? 'bg-white/20' : 'bg-[#1A1A1A]/10'
-                }`}>
-                  ESSENTIEL
+                <span className="inline-block px-4 py-1.5 rounded-full text-xs font-body font-medium tracking-wider uppercase mb-6" style={{ background: variant === 'base' ? 'rgba(255,255,255,0.15)' : brand.sand }}>
+                  Essentiel
                 </span>
-                <p className="text-3xl lg:text-4xl font-light mb-2">{currentPrices.base.toFixed(2)}€</p>
-                <p className={`text-sm line-through mb-4 ${selectedVariant === 'base' ? 'text-white/60' : 'text-[#9B9B9B]'}`}>
-                  {currentOriginalPrices.base.toFixed(2)}€
-                </p>
-                <p className={`text-sm ${selectedVariant === 'base' ? 'text-white/80' : 'text-[#6B6B6B]'}`}>
-                  3 produits essentiels
-                </p>
+                <p className="font-display text-4xl mb-2">{prices.base.toFixed(2)}€</p>
+                <p className="text-sm font-body line-through mb-4" style={{ opacity: 0.5 }}>{originalPrices.base.toFixed(2)}€</p>
+                <p className="text-sm font-body" style={{ opacity: 0.7 }}>3 produits essentiels</p>
               </div>
             </motion.div>
 
             {/* Upsells */}
-            {displayUpsells.map((upsell, i) => (
+            {upsells.map((u, i) => (
               <motion.div
-                key={upsell.id}
+                key={u.id}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: (i + 1) * 0.1 }}
-                onClick={() => setSelectedVariant(upsell.id as VariantType)}
-                className={`cursor-pointer rounded-2xl p-6 lg:p-8 transition-all duration-300 relative ${
-                  selectedVariant === upsell.id
-                    ? 'bg-[#8B2252] text-white ring-4 ring-[#8B2252]/20'
-                    : 'bg-[#FDFBF9] text-[#1A1A1A] hover:bg-[#F8E8E8]'
-                }`}
+                onClick={() => setVariant(u.id as VariantType)}
+                className="cursor-pointer rounded-2xl p-8 transition-all duration-300 relative"
+                style={{
+                  background: variant === u.id ? brand.charcoal : brand.white,
+                  color: variant === u.id ? brand.white : brand.charcoal,
+                  boxShadow: variant === u.id ? '0 25px 50px -12px rgba(0,0,0,0.25)' : 'none',
+                }}
               >
                 {i === 1 && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C9A96E] text-white text-xs font-medium px-3 py-1 rounded-full">
-                    MEILLEURE VALEUR
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-body font-semibold" style={{ background: brand.gold, color: brand.white }}>
+                    Meilleure valeur
                   </div>
                 )}
                 <div className="text-center">
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium tracking-wider mb-4 ${
-                    selectedVariant === upsell.id ? 'bg-white/20' : 'bg-[#8B2252]/10 text-[#8B2252]'
-                  }`}>
-                    {upsell.badge}
+                  <span className="inline-block px-4 py-1.5 rounded-full text-xs font-body font-medium tracking-wider uppercase mb-4" style={{ background: variant === u.id ? 'rgba(255,255,255,0.15)' : brand.rose + '30', color: variant === u.id ? brand.white : brand.roseDark }}>
+                    {u.badge}
                   </span>
 
-                  {upsell.image && (
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden bg-white/10">
-                      <img src={upsell.image} alt={upsell.name} className="w-full h-full object-cover" />
+                  {u.image && (
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-xl overflow-hidden">
+                      <img src={u.image} alt={u.name} className="w-full h-full object-cover" />
                     </div>
                   )}
 
-                  <p className={`font-medium text-sm mb-1 ${selectedVariant === upsell.id ? 'text-white' : 'text-[#1A1A1A]'}`}>
-                    {upsell.name}
-                  </p>
-                  <p className={`text-xs mb-3 ${selectedVariant === upsell.id ? 'text-white/70' : 'text-[#6B6B6B]'}`}>
-                    {upsell.benefit}
-                  </p>
-                  <p className="text-3xl lg:text-4xl font-light mb-2">{upsell.price.toFixed(2)}€</p>
-                  <p className={`text-sm line-through ${selectedVariant === upsell.id ? 'text-white/60' : 'text-[#9B9B9B]'}`}>
-                    {upsell.originalPrice.toFixed(2)}€
-                  </p>
+                  <p className="font-body font-medium text-sm mb-1">{u.name}</p>
+                  <p className="text-xs font-body mb-4" style={{ opacity: 0.6 }}>{u.benefit}</p>
+                  <p className="font-display text-4xl mb-2">{u.price.toFixed(2)}€</p>
+                  <p className="text-sm font-body line-through" style={{ opacity: 0.5 }}>{u.originalPrice.toFixed(2)}€</p>
                 </div>
               </motion.div>
             ))}
@@ -891,16 +759,17 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             className="text-center mt-12"
           >
             <button
-              onClick={handleCheckout}
-              disabled={isLoading}
-              className="group bg-[#1A1A1A] hover:bg-[#8B2252] text-white font-medium px-12 py-5 rounded-full transition-all duration-300 text-lg inline-flex items-center gap-3 disabled:opacity-50"
+              onClick={checkout}
+              disabled={loading}
+              className="group inline-flex items-center gap-3 px-12 py-5 rounded-full font-body font-medium text-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50"
+              style={{ background: brand.charcoal, color: brand.white }}
             >
-              {isLoading ? (
+              {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <ShoppingBag className="w-5 h-5" />
-                  Commander • {currentPrices[selectedVariant].toFixed(2)}€
+                  Commander · {price.toFixed(2)}€
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -912,7 +781,7 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FAQ */}
       {/* ================================================================== */}
-      <section className="py-20 lg:py-32 bg-[#FDFBF9]">
+      <section className="py-20 lg:py-32" style={{ background: brand.white }}>
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -920,13 +789,13 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl lg:text-4xl font-serif font-light text-[#1A1A1A]">
-              Questions <span className="italic text-[#8B2252]">fréquentes</span>
+            <h2 className="font-display text-4xl" style={{ color: brand.charcoal }}>
+              Questions <span className="italic" style={{ color: brand.roseDark }}>fréquentes</span>
             </h2>
           </motion.div>
 
           <div className="space-y-4">
-            {faqItems.map((faq: any, i: number) => (
+            {faqItems.map((f: any, i: number) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
@@ -936,11 +805,12 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full text-left p-6 bg-white rounded-xl transition-all hover:shadow-md"
+                  className="w-full text-left p-6 rounded-xl transition-all"
+                  style={{ background: brand.cream }}
                 >
                   <div className="flex items-center justify-between gap-4">
-                    <span className="font-medium text-[#1A1A1A]">{faq.question}</span>
-                    <ChevronDown className={`w-5 h-5 text-[#8B2252] transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                    <span className="font-body font-medium" style={{ color: brand.charcoal }}>{f.q || f.question}</span>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${openFaq === i ? 'rotate-180' : ''}`} style={{ color: brand.roseDark }} />
                   </div>
                   <AnimatePresence>
                     {openFaq === i && (
@@ -948,10 +818,9 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                       >
-                        <p className="pt-4 text-[#6B6B6B] text-sm leading-relaxed">{faq.answer}</p>
+                        <p className="pt-4 text-sm font-body leading-relaxed" style={{ color: brand.slate }}>{f.a || f.answer}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -965,76 +834,71 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
       {/* ================================================================== */}
       {/* FINAL CTA */}
       {/* ================================================================== */}
-      <section className="py-20 lg:py-32 bg-[#8B2252]">
+      <section className="py-20 lg:py-32" style={{ background: brand.rose }}>
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl lg:text-5xl font-serif font-light text-white mb-6">
-              Prête à transformer<br />
+            <h2 className="font-display text-4xl lg:text-5xl mb-6" style={{ color: brand.charcoal }}>
+              Prête à transformer
+              <br />
               <span className="italic">votre peau ?</span>
             </h2>
-            <p className="text-lg text-white/80 mb-10 max-w-2xl mx-auto">
+            <p className="text-lg font-body mb-10" style={{ color: brand.graphite }}>
               Rejoignez plus de 15,000 femmes qui ont adopté cette routine K-beauty.
             </p>
 
             <button
-              onClick={handleCheckout}
-              disabled={isLoading}
-              className="group bg-white hover:bg-[#F8E8E8] text-[#8B2252] font-medium px-12 py-5 rounded-full transition-all duration-300 text-lg inline-flex items-center gap-3 disabled:opacity-50 mb-8"
+              onClick={checkout}
+              disabled={loading}
+              className="group inline-flex items-center gap-3 px-12 py-5 rounded-full font-body font-medium text-lg transition-all duration-300 hover:shadow-xl disabled:opacity-50"
+              style={{ background: brand.charcoal, color: brand.white }}
             >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-[#8B2252]/30 border-t-[#8B2252] rounded-full animate-spin" />
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <ShoppingBag className="w-5 h-5" />
-                  Ajouter au panier • {currentPrices[selectedVariant].toFixed(2)}€
+                  Ajouter au panier · {price.toFixed(2)}€
                 </>
               )}
             </button>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 text-white/70 text-sm">
-              <span className="flex items-center gap-2">
-                <Truck className="w-4 h-4" />
-                Livraison offerte
-              </span>
-              <span className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
-                30j remboursé
-              </span>
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4" />
-                Paiement sécurisé
-              </span>
+            <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm font-body" style={{ color: brand.graphite }}>
+              <span className="flex items-center gap-2"><Truck className="w-4 h-4" /> Livraison offerte</span>
+              <span className="flex items-center gap-2"><RefreshCw className="w-4 h-4" /> 30j remboursé</span>
+              <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> Paiement sécurisé</span>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ================================================================== */}
-      {/* STICKY MOBILE BAR */}
+      {/* STICKY MOBILE */}
       {/* ================================================================== */}
       <AnimatePresence>
-        {showStickyBar && (
+        {sticky && (
           <motion.div
             initial={{ y: 100 }}
             animate={{ y: 0 }}
             exit={{ y: 100 }}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 lg:hidden shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 p-4 z-50 lg:hidden shadow-2xl"
+            style={{ background: brand.white, borderTop: `1px solid ${brand.sand}` }}
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-medium text-[#1A1A1A]">{currentPrices[selectedVariant].toFixed(2)}€</p>
-                <p className="text-sm text-[#9B9B9B] line-through">{currentOriginalPrices[selectedVariant].toFixed(2)}€</p>
+                <p className="font-body font-semibold" style={{ color: brand.charcoal }}>{price.toFixed(2)}€</p>
+                <p className="text-sm font-body line-through" style={{ color: brand.silver }}>{original.toFixed(2)}€</p>
               </div>
               <button
-                onClick={handleCheckout}
-                disabled={isLoading}
-                className="flex-1 bg-[#8B2252] hover:bg-[#6B1A40] text-white font-medium py-4 rounded-full transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                onClick={checkout}
+                disabled={loading}
+                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-full font-body font-medium transition-all disabled:opacity-50"
+                style={{ background: brand.charcoal, color: brand.white }}
               >
-                {isLoading ? (
+                {loading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
@@ -1048,7 +912,6 @@ export default function RoutineHydratationClient({ cms = {}, routine }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Footer spacer */}
       <div className="h-24 lg:hidden" />
     </div>
   )
